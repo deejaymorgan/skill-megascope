@@ -1,0 +1,16 @@
+{
+  "name": "megascope",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Interactive project-scoping engine + Claude Code skill (/megascope).",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-doc.mjs",
+    "build:example": "node scripts/build-doc.mjs examples/paperclips/scoping.data.json examples/paperclips/scoping.html",
+    "test": "node tests/smoke.mjs"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "jsdom": "^24.1.0"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "megascope",
+  "version": "0.1.0",
+  "description": "Interactive project scoping — drive a fuzzy request to an agreed phased plan with a detailed MVP, via clarification, parallel research, and a polished interactive scoping document the user fills in and pastes back. Adds the /megascope skill.",
+  "author": { "name": "Daniel Morgan" },
+  "homepage": "https://github.com/deejaymorgan/skill-megascope",
+  "repository": "https://github.com/deejaymorgan/skill-megascope",
+  "license": "MIT",
+  "keywords": ["scoping", "planning", "requirements", "mvp", "research", "interactive"]
+}

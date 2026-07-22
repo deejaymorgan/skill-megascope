@@ -1,0 +1,64 @@
+{
+  "meta": {
+    "project": "trailmark-cli",
+    "title": "Trailmark — CLI bookmarking tool",
+    "subtitle": "Scoping",
+    "favicon": "🔖",
+    "headline": "Let’s pin down the CLI before we build.",
+    "lede": "A handful of decisions shape the whole tool. Each is pre-set to a **recommended default** with the reasoning; review, override, and flag anything to discuss.",
+    "constraints": [
+      { "label": "Language:", "text": "Rust, single static binary" },
+      "Offline-first — no account required"
+    ],
+    "context": {
+      "note": "Trailmark saves, tags, and re-opens URLs from the terminal. Storage, sync, and the query language are the open questions.",
+      "blocks": [
+        {
+          "heading": "Surfaces",
+          "type": "list",
+          "items": [
+            { "term": "add / open", "desc": "the two commands used constantly" },
+            { "term": "search", "desc": "how you find a saved link again" }
+          ]
+        }
+      ]
+    },
+    "theme": { "accent": "#0E7C66", "neutralBias": "warm" }
+  },
+  "sections": [
+    { "id": "S", "title": "Storage & sync" },
+    { "id": "Q", "title": "Query & UX" }
+  ],
+  "questions": [
+    {
+      "id": "S1", "section": "S", "rec": "a",
+      "question": "Where do bookmarks live?",
+      "why": "A single local file is the simplest thing that works offline and is trivial to back up; a DB is premature at this scale.",
+      "options": [
+        { "key": "a", "label": "One local JSON/TOML file", "detail": "Human-readable, git-friendly, zero setup." },
+        { "key": "b", "label": "Embedded SQLite", "detail": "Scales to huge libraries; adds a dependency." },
+        { "key": "c", "label": "Cloud-backed from day one", "detail": "Needs accounts + network; conflicts with offline-first." }
+      ]
+    },
+    {
+      "id": "S2", "section": "S", "rec": "b",
+      "question": "Sync strategy?",
+      "why": "Punting sync to the user’s existing git/Dropbox keeps v1 tiny and avoids running any server.",
+      "options": [
+        { "key": "a", "label": "Built-in sync server", "detail": "Most seamless; most to build and operate." },
+        { "key": "b", "label": "Bring-your-own folder (git/Dropbox)", "detail": "You already have it; we just write a file." },
+        { "key": "c", "label": "No sync in v1", "detail": "Local only; revisit later." }
+      ]
+    },
+    {
+      "id": "Q1", "section": "Q", "rec": ["tag", "text"], "multi": true,
+      "question": "Which search inputs should v1 support?",
+      "why": "Tag + full-text cover the two ways people actually recall a link; regex is power-user polish that can wait.",
+      "options": [
+        { "key": "tag", "label": "Tag filter", "detail": "trailmark open --tag rust" },
+        { "key": "text", "label": "Full-text over title/URL", "detail": "Fuzzy substring match." },
+        { "key": "regex", "label": "Regex mode", "detail": "Power users; more surface area." }
+      ]
+    }
+  ]
+}

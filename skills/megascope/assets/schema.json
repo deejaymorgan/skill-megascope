@@ -1,0 +1,179 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://megascope/questions.schema.json",
+  "title": "megascope questions-JSON",
+  "description": "Data payload that drives the megascope scoping engine (assets/engine.html). One run generates only this object; it is injected into the engine's <script id=\"scoping-data\"> block. All display text supports a tiny inline markup: **bold**, `mono`, ~accent-highlight~.",
+  "type": "object",
+  "required": ["meta", "sections", "questions"],
+  "additionalProperties": false,
+  "properties": {
+    "meta": {
+      "type": "object",
+      "description": "Project identity, framing, constraints, context, and theme.",
+      "required": ["project", "title"],
+      "additionalProperties": false,
+      "properties": {
+        "project": {
+          "type": "string",
+          "description": "Stable slug. Keys localStorage, the export title fallback, and the download filename.",
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "title": { "type": "string", "description": "Header title + document/export title.", "minLength": 1 },
+        "subtitle": { "type": "string", "description": "Small uppercase label under the title. Default: 'Scoping & planning'." },
+        "favicon": { "type": "string", "description": "One or two emoji for the header mark (and the Artifact favicon). If omitted, a generic mark is drawn." },
+        "eyebrow": { "type": "string", "description": "Small mono label above the headline. Default auto-derives: 'Scoping document · N areas · M decisions'." },
+        "headline": { "type": "string", "description": "Serif intro headline (a short, plain-language sentence)." },
+        "lede": { "type": "string", "description": "1–3 sentence intro paragraph. Supports **bold**." },
+        "legend": { "type": "string", "description": "Overrides the sidebar 'How to read this' note." },
+        "steps": {
+          "type": "array",
+          "description": "The 4-ish process steps shown under the lede. Default provided.",
+          "items": { "type": "string" },
+          "maxItems": 6
+        },
+        "overallNotesTitle": { "type": "string", "description": "Heading for the free-text catch-all box. Default: 'Anything else?'." },
+        "overallNotesHint": { "type": "string", "description": "Sub-copy for the catch-all box." },
+        "closingAsk": { "type": "string", "description": "Final line appended to the copy-for-Claude export (what you want back)." },
+        "constraints": {
+          "type": "array",
+          "description": "Already-decided facts, rendered as check chips. Surfacing them here prevents re-asking.",
+          "items": {
+            "oneOf": [
+              { "type": "string" },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "label": { "type": "string", "description": "Bold lead-in." },
+                  "text": { "type": "string", "description": "Muted continuation." }
+                }
+              }
+            ]
+          }
+        },
+        "context": {
+          "type": "object",
+          "description": "The collapsible project-context panel. All parts optional; the panel hides itself if empty.",
+          "additionalProperties": false,
+          "properties": {
+            "title": { "type": "string", "description": "Summary/accordion label. Default: 'Project context'." },
+            "note": { "type": "string", "description": "One framing paragraph. Supports inline markup." },
+            "cards": {
+              "type": "array",
+              "description": "An auto-fitting card grid — e.g. stages, subsystems, personas, a domain map.",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "title": { "type": "string" },
+                  "body": { "type": "string" },
+                  "foot": { "type": "string", "description": "De-emphasized footer line (e.g. an 'Ends:' / 'Owner:' note)." }
+                }
+              }
+            },
+            "blocks": {
+              "type": "array",
+              "description": "Additional labeled context blocks, rendered in order.",
+              "items": {
+                "type": "object",
+                "required": ["type"],
+                "additionalProperties": false,
+                "properties": {
+                  "heading": { "type": "string", "description": "Uppercase section label above the block." },
+                  "type": { "type": "string", "enum": ["phases", "list", "diagram", "prose"] },
+                  "items": {
+                    "type": "array",
+                    "description": "For 'phases': {key,label,desc}. For 'list': {term,desc}.",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "key": { "type": "string" },
+                        "label": { "type": "string" },
+                        "desc": { "type": "string" },
+                        "term": { "type": "string" }
+                      }
+                    }
+                  },
+                  "lines": {
+                    "type": "array",
+                    "description": "For 'diagram': monospace lines. ~text~ = accent highlight, **text** = bold.",
+                    "items": { "type": "string" }
+                  },
+                  "text": { "type": "string", "description": "For 'prose': a paragraph." }
+                }
+              }
+            }
+          }
+        },
+        "theme": {
+          "type": "object",
+          "description": "Subject-grounded personality. Usually just an accent hex; everything derives from it.",
+          "additionalProperties": false,
+          "properties": {
+            "accent": { "type": "string", "description": "Accent color as #RGB or #RRGGBB. Drives the whole accent family in light + dark.", "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$" },
+            "neutralBias": { "type": "string", "enum": ["warm", "cool", "neutral"], "description": "Subtle temperature nudge for the neutral grounds." },
+            "serif": { "type": "string", "description": "Display font stack (headlines, question titles)." },
+            "sans": { "type": "string", "description": "Body font stack." },
+            "mono": { "type": "string", "description": "Utility/label font stack." }
+          }
+        }
+      }
+    },
+    "sections": {
+      "type": "array",
+      "description": "Ordered decision areas. Question.section references section.id.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "title"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "description": "Short id, shown as the nav tag (e.g. 'A', 'B'). Unique.", "minLength": 1, "maxLength": 6 },
+          "title": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "questions": {
+      "type": "array",
+      "description": "Every decision, pre-set to a recommended default.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "section", "question", "rec", "options"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "description": "Unique id, shown on the card (e.g. 'Q1').", "minLength": 1, "maxLength": 12 },
+          "section": { "type": "string", "description": "Must match a sections[].id. Unknown ids fall into an 'Other' section." },
+          "question": { "type": "string", "description": "The decision, phrased as a short question.", "minLength": 1 },
+          "why": { "type": "string", "description": "One-line rationale for the recommendation and the key tradeoff. Strongly recommended." },
+          "rec": {
+            "description": "The recommended default, pre-selected on load. A single option key for single-select; a key or array of keys for multi-select. Every key must exist in options[].key. May be ANY option, not just the first.",
+            "oneOf": [
+              { "type": "string", "minLength": 1 },
+              { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+            ]
+          },
+          "multi": { "type": "boolean", "description": "If true, options render as checkboxes (multi-select). Default false (single-select radio)." },
+          "options": {
+            "type": "array",
+            "description": "2–5 concrete choices. Order matters (present strongest/first-considered first).",
+            "minItems": 2,
+            "items": {
+              "type": "object",
+              "required": ["key", "label"],
+              "additionalProperties": false,
+              "properties": {
+                "key": { "type": "string", "description": "Short unique-within-question key (e.g. 'a').", "minLength": 1, "maxLength": 12 },
+                "label": { "type": "string", "description": "The option, in a few words.", "minLength": 1 },
+                "detail": { "type": "string", "description": "One line elaborating the option / its consequence." }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "megascope",
+  "owner": { "name": "Daniel Morgan" },
+  "plugins": [
+    {
+      "name": "megascope",
+      "source": "./",
+      "description": "Interactive project scoping — drive a fuzzy request to an agreed phased plan with a detailed MVP, via clarification, parallel research, and a polished interactive scoping document the user fills in and pastes back.",
+      "version": "0.1.0",
+      "author": { "name": "Daniel Morgan" }
+    }
+  ]
+}

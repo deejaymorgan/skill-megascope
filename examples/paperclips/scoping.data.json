@@ -1,0 +1,397 @@
+{
+  "meta": {
+    "project": "universal-paperclips-speedrun-bot",
+    "title": "Universal Paperclips — Speedrun Bot",
+    "subtitle": "Scoping & planning",
+    "favicon": "📎",
+    "headline": "Let’s lock the plan for the bot.",
+    "lede": "Research is done — I dissected the game’s actual source (main.js, projects.js, combat.js) and the community’s speedrun wisdom. Below are the decisions that finalize the build. **Each is pre-filled with my recommended default and the reasoning behind it.** Your job is just to review, override where you have a view, and flag anything you want to talk through.",
+    "steps": [
+      "Review the defaults",
+      "Change & flag what matters",
+      "Copy answers → paste into chat",
+      "I return the phased plan + MVP spec"
+    ],
+    "constraints": [
+      { "label": "Legit play", "text": "read state, act via real controls" },
+      { "label": "In-page TypeScript", "text": "modular by stage" },
+      { "label": "Goal:", "text": "reach the true ending" },
+      { "label": "Offline simulator", "text": "+ validate live" },
+      { "label": "Tweakable", "text": "+ telemetry" }
+    ],
+    "context": {
+      "title": "Project context — the game, the proposed phases, and the architecture",
+      "note": "The game is three stages selected by two flags (`humanFlag`, `spaceFlag`). The run’s timer stop is “Universal Paperclips achieved” (`clips ≥ 3e55`); your chosen goal plays past it into the ending fork.",
+      "cards": [
+        {
+          "title": "Stage 1 · Business",
+          "body": "Make & sell clips → autoclippers, wire economy, price/marketing. Trust → processors/memory → ops → projects; investments & tournaments fund it; quantum computing.",
+          "foot": "**Ends:** buy Release the HypnoDrones (Trust ≥ 100)"
+        },
+        {
+          "title": "Stage 2 · Space",
+          "body": "Consume Earth with drones/factories + power/swarm, then Space Exploration → von Neumann probes (8 trust sliders) that self-replicate, explore, harvest & fight drifters.",
+          "foot": "**Ends:** all matter converted → “achieved”"
+        },
+        {
+          "title": "Stage 3 · Endgame",
+          "body": "Emperor-of-Drift dialogue, the Accept vs Reject choice, then dismantle / prestige restart / heat-death credits.",
+          "foot": "**Ends:** a terminal ending"
+        }
+      ],
+      "blocks": [
+        {
+          "heading": "Proposed build phases",
+          "type": "phases",
+          "items": [
+            { "key": "Phase 0", "desc": "**Foundations** — repo, esbuild bundle, `game.d.ts`, empty 3-layer skeleton, Config type" },
+            { "key": "Phase 1 ⭐", "desc": "**MVP** — Stage-1 opener end-to-end: sim + bot + telemetry reach first Trust milestones & first project, with matching splits" },
+            { "key": "Phase 2", "desc": "**Finish Stage 1** — investments, tournaments, quantum → Release the HypnoDrones" },
+            { "key": "Phase 3", "desc": "**Stage 2a** — Earth conversion: drones, factories, power, swarm → Space Exploration" },
+            { "key": "Phase 4", "desc": "**Stage 2b/3** — probes, drift, combat proxy → “achieved” (true-ending goal met)" },
+            { "key": "Phase 5", "desc": "**Ending fork + optimizer** — play to a terminal ending; full-run Config search" },
+            { "key": "Phase 6", "desc": "**Hardening** — robustness, fidelity audit, userscript packaging, WR target" }
+          ]
+        },
+        {
+          "heading": "Shared-core architecture",
+          "type": "diagram",
+          "lines": [
+            "~Layer 1 — Game-model core~ (pure TS, 100 Hz, seeded RNG) · sim of every mechanic",
+            "~Layer 2 — Strategy~ (one **Config** + rule modules + stage state machine) · **byte-identical offline & live**",
+            "~Layer 3 — Adapters~ · SIM (drives core, headless)  |  LIVE (reads real globals, clicks real controls)",
+            "                     └─ Telemetry (shared)"
+          ]
+        }
+      ]
+    },
+    "theme": {
+      "accent": "#2C6BA6",
+      "neutralBias": "cool"
+    }
+  },
+
+  "sections": [
+    { "id": "A", "title": "Objective & metric" },
+    { "id": "B", "title": "Simulator fidelity & scope" },
+    { "id": "C", "title": "Bot architecture & tweakability" },
+    { "id": "D", "title": "Telemetry" },
+    { "id": "E", "title": "Sim ↔ bot validation" },
+    { "id": "F", "title": "Dev tooling & delivery" },
+    { "id": "G", "title": "Unknowns & spikes" }
+  ],
+
+  "questions": [
+    {
+      "id": "Q1", "section": "A", "rec": "a",
+      "question": "Primary optimization metric?",
+      "why": "The leaderboard moved IGT → RTA because in-game time is browser-speed-gamable; RTA is the honest speedrun metric. (d) is cheap insurance.",
+      "options": [
+        { "key": "a", "label": "Real wall-clock (RTA) to “achieved”", "detail": "Time from run start to “Universal Paperclips achieved” (milestone 14→15). The honest speedrun metric." },
+        { "key": "b", "label": "In-game time (IGT)", "detail": "ticks/100. Simple, but gamable by browser speed." },
+        { "key": "c", "label": "RTA through a chosen ending", "detail": "Keep the clock running past the timer stop, all the way to Accept/Reject." },
+        { "key": "d", "label": "Track both RTA + IGT", "detail": "Record both; optimize for RTA." }
+      ]
+    },
+    {
+      "id": "Q2", "section": "A", "rec": "b",
+      "question": "“True ending” scope — where does the run officially end?",
+      "why": "Your stated goal is “reach the true ending (all 3 stages),” which implies playing past the Any% timer into the ending fork. The optimized-metric window (Q1) can still end at “achieved.”",
+      "options": [
+        { "key": "a", "label": "Stop at “achieved”", "detail": "All matter converted; everything after is optional." },
+        { "key": "b", "label": "Through the full endgame to a terminal ending", "detail": "Reach Accept (project147) or Reject (project148) + its terminal state (prestige restart, or Quantum Temporal Reversion)." },
+        { "key": "c", "label": "Reject → heat-death credits specifically", "detail": "The canonical narrative finish." }
+      ]
+    },
+    {
+      "id": "Q3", "section": "A", "rec": "a",
+      "question": "Is speeding up the game’s own tick rate in scope?",
+      "why": "The sim is an offline model where wall-clock doesn’t matter, so it should run as fast as the CPU allows; tampering with the live clock is the IGT exploit and breaks legit-play RTA.",
+      "options": [
+        { "key": "a", "label": "Sim: yes (headless, as fast as CPU). Live bot: no", "detail": "Live stays 100 Hz nominal, tab foregrounded, no timer tampering." },
+        { "key": "b", "label": "Both may accelerate ticks", "detail": "Treat tick manipulation as legit for the live run too." },
+        { "key": "c", "label": "Neither — both pinned to 100 Hz real-time", "detail": "No acceleration anywhere." }
+      ]
+    },
+    {
+      "id": "Q4", "section": "A", "rec": "a",
+      "question": "Target platform for the live bot?",
+      "why": "The in-page TypeScript + console/userscript delivery is a desktop workflow; mobile is reportedly ~4× faster but a separate build target.",
+      "options": [
+        { "key": "a", "label": "Desktop", "detail": "In-page console/userscript on decisionproblem.com/paperclips/." },
+        { "key": "b", "label": "Mobile", "detail": "Different platform / ruleset." },
+        { "key": "c", "label": "Both", "detail": "Desktop first, mobile as a second target." }
+      ]
+    },
+    {
+      "id": "Q5", "section": "B", "rec": "a",
+      "question": "Overall simulator fidelity target?",
+      "why": "Tuning is only trustworthy if the sim matches the game — the whole point of “validate the bot against the live site.” (c) is the pragmatic fallback given the combat question (Q7).",
+      "options": [
+        { "key": "a", "label": "Tick-exact deterministic core (100 Hz), seeded RNG", "detail": "Reproduce production, ops, trust, demand/sales, wire price, investment, tournaments, drones, probes within float tolerance." },
+        { "key": "b", "label": "Coarse / analytic model", "detail": "Closed-form rates per phase, no per-tick RNG. Fast but approximate." },
+        { "key": "c", "label": "Hybrid: tick-exact Stages 1–2, analytic Stage-3 combat only", "detail": "Exact where it matters, proxy for the boids combat." }
+      ]
+    },
+    {
+      "id": "Q6", "section": "B", "rec": "a",
+      "question": "How to model stochastic subsystems (wire price, sales, investment, tournament grids)?",
+      "why": "(c) both modes is arguably ideal — EV mode makes the tuning search fast and smooth, seeded mode validates fidelity. If forced to one, (a) preserves faithfulness. Switch to (c) if you want both.",
+      "options": [
+        { "key": "a", "label": "Seeded PRNG with the same call sites as source", "detail": "Expose the seed for reproducible runs; faithful to the game." },
+        { "key": "b", "label": "Expected-value / deterministic approximation", "detail": "Replace random gates with their means." },
+        { "key": "c", "label": "Both modes, switchable", "detail": "EV for fast search, seeded for validation." }
+      ]
+    },
+    {
+      "id": "Q7", "section": "B", "rec": "a",
+      "question": "How should combat be modeled?",
+      "why": "The shipped combat is a 60 fps canvas boids sim with per-cell dice; the closed-form formula is dead code. Full boids is expensive and combat is a late, bounded concern.",
+      "options": [
+        { "key": "a", "label": "Analytic proxy", "detail": "Model net probe/drifter attrition per battle from force ratio + probeCombat·0.15 vs 1.75 + OODA, calibrated on a few live battles; accept honor divergence." },
+        { "key": "b", "label": "Faithful boids reproduction", "detail": "Grid, flocking, RNG — exact but heavy and hard to validate." },
+        { "key": "c", "label": "Black box", "detail": "Live bot just reacts (raise Combat when drifters>1M); sim approximates honor/loss with a tunable constant." }
+      ]
+    },
+    {
+      "id": "Q8", "section": "B", "rec": "a",
+      "question": "How faithfully to model background-tab throttling / loop drift?",
+      "why": "Modeling throttle adds noise to tuning; better to keep the sim ideal and measure the live gap.",
+      "options": [
+        { "key": "a", "label": "Sim assumes ideal 100 Hz; live bot measures actual tick rate as telemetry", "detail": "Explains sim-vs-live divergence without polluting tuning." },
+        { "key": "b", "label": "Model a throttling factor in the sim too", "detail": "More realistic, noisier tuning." },
+        { "key": "c", "label": "Ignore entirely", "detail": "" }
+      ]
+    },
+    {
+      "id": "Q9", "section": "B", "rec": "a",
+      "question": "Confirm the “model exactly” vs “approximate” split.",
+      "why": "(a) matches where fidelity actually affects strategy; (c) is a reasonable MVP-scoping compromise (see Q20).",
+      "options": [
+        { "key": "a", "label": "Exact economy/ops/trust/creativity/sales/costs/quantum/investment/tournament/drones/factories/power/probes/drift; approximate boids combat, wire-price RNG timing, swarm-gift micro-timing", "detail": "The split that tracks where fidelity affects strategy." },
+        { "key": "b", "label": "Everything exact, including combat + wire RNG", "detail": "Maximum fidelity, maximum cost." },
+        { "key": "c", "label": "Only Stage 1 exact for MVP; Stages 2–3 approximate initially", "detail": "MVP-scoping compromise." }
+      ]
+    },
+    {
+      "id": "Q10", "section": "C", "rec": "a",
+      "question": "Decision-engine style?",
+      "why": "(a) is the synthesized best practice — modular rules toggle on/off for A/B tuning and map cleanly to phases. (b) is a strong later upgrade for project sequencing.",
+      "options": [
+        { "key": "a", "label": "Ordered rule array per concern + stage state machine, on a shared Config", "detail": "Modular, toggle-able rules; the recommended structure." },
+        { "key": "b", "label": "Scored-priority policy (utility maximization)", "detail": "Score over active projects + resource actions." },
+        { "key": "c", "label": "Monolithic sequential if-loop", "detail": "Simplest, least tunable." }
+      ]
+    },
+    {
+      "id": "Q11", "section": "C", "rec": "a",
+      "question": "Config format & how strategy is parameterized?",
+      "why": "(a) guarantees the sim and live bot run identical parameters — the core validation premise. (c) is a nice add-on for live tweaking.",
+      "options": [
+        { "key": "a", "label": "Single typed Config object; literal defaults, JSON-overridable", "detail": "Same object consumed by sim and live bot." },
+        { "key": "b", "label": "External JSON/YAML file only", "detail": "Loaded at runtime." },
+        { "key": "c", "label": "UI-editable live panel that mutates Config", "detail": "Great addition on top (see Q15)." }
+      ]
+    },
+    {
+      "id": "Q12", "section": "C", "rec": "a",
+      "question": "How are project purchases decided?",
+      "why": "Projects have no callable handler — the bot clicks #projectButtonN. A scored list is flexible and tunable; a fixed sequence is brittle to RNG-driven timing.",
+      "options": [
+        { "key": "a", "label": "Scored priority list over activeProjects", "detail": "Weight × affordability × phase-relevance; buy highest-scoring affordable project each tick. Skip-list = negative weights." },
+        { "key": "b", "label": "Hard-coded ordered sequence per stage", "detail": "Brittle to RNG timing." },
+        { "key": "c", "label": "Buy-everything-affordable (greedy) minus a skip-list", "detail": "Skip AutoTourney, OODA, Glory, late Threnody." }
+      ]
+    },
+    {
+      "id": "Q13", "section": "C", "rec": "a",
+      "question": "How does the bot drive select / slider controls?",
+      "why": "The game polls sliderPos/riskiness/pick from element values every 100 ms, so setting the value is sufficient and legit.",
+      "options": [
+        { "key": "a", "label": "Set element value / selectedIndex; let the 100 ms poll pick it up", "detail": "Matches how the game reads controls." },
+        { "key": "b", "label": "Dispatch synthetic input events", "detail": "Alternative if a control needs an event." },
+        { "key": "c", "label": "Call underlying raise/lowerProbe* handlers for sliders; set .value for selects", "detail": "Clean path for probe sliders (they are +/- handlers)." }
+      ]
+    },
+    {
+      "id": "Q14", "section": "C", "rec": "a",
+      "question": "Use the tournament read-winner exploit?",
+      "why": "It uses only permitted actions (reads state, sets the real control) and is a big yomi multiplier: run the tourney, read the live winner, set the dropdown to it before declareWinner reads it → max beatBoost + podium bonus.",
+      "options": [
+        { "key": "a", "label": "Yes — it’s legit play and materially boosts yomi", "detail": "Reads state, sets the real control." },
+        { "key": "b", "label": "No — pick GREEDY up front, accept the outcome", "detail": "Simpler, more “human.”" },
+        { "key": "c", "label": "Configurable (default on)", "detail": "Toggle it." }
+      ]
+    },
+    {
+      "id": "Q15", "section": "D", "rec": "a",
+      "question": "What live surface does the bot expose?",
+      "why": "(a) is the essential minimum and cheap; (c) is the stretch once the pipeline exists.",
+      "options": [
+        { "key": "a", "label": "In-page overlay div + window.__botTelemetry export", "detail": "Phase, RTA/IGT clock, key rates, last N decisions, next target." },
+        { "key": "b", "label": "Console logging only", "detail": "console.table snapshots." },
+        { "key": "c", "label": "Overlay + live sparkline charts", "detail": "Inline SVG/canvas, no external CDN." }
+      ]
+    },
+    {
+      "id": "Q16", "section": "D", "rec": "a",
+      "question": "What to capture per run?",
+      "why": "(a) bounds memory while keeping the audit trail needed to explain slow runs and diff against the sim. Splits are the speedrun scoreboard.",
+      "options": [
+        { "key": "a", "label": "Throttled ring buffer (1–4 Hz) + milestone splits + decision log", "detail": "Core stocks/rates + split timestamps + (rule, tick, state delta, cost)." },
+        { "key": "b", "label": "Milestone splits only", "detail": "Lightweight." },
+        { "key": "c", "label": "Everything every tick", "detail": "Heavy, exact." }
+      ]
+    },
+    {
+      "id": "Q17", "section": "D", "rec": "a",
+      "question": "Which milestone splits to timestamp?",
+      "why": "(a) is the standard granularity for locating where a run loses time; per-project timestamps come free from the decision log.",
+      "options": [
+        { "key": "a", "label": "Full set", "detail": "first autoclipper, investmentEngineFlag, strategyEngineFlag, first project, Creativity, each Trust milestone, qFlag, 100 Trust / Release, spaceFlag, first probe, battleFlag, swarm online, “achieved,” each endTimer." },
+        { "key": "b", "label": "Just the 3 stage transitions + finish", "detail": "Minimal." },
+        { "key": "c", "label": "Full set + per-project purchase timestamps", "detail": "Maximum granularity." }
+      ]
+    },
+    {
+      "id": "Q18", "section": "D", "rec": "a",
+      "question": "Run comparison / persistence?",
+      "why": "(a) is the classic scoreboard; (c) is the high-value validation loop and should follow soon.",
+      "options": [
+        { "key": "a", "label": "Persist each run to localStorage + downloadable JSON; compare via split table + overlaid curves", "detail": "{config, splits, finalTimeMs, timeline}; delta-vs-best." },
+        { "key": "b", "label": "In-memory only for the session", "detail": "" },
+        { "key": "c", "label": "(a) + automatic live-vs-sim trajectory diff", "detail": "Fidelity check built in." }
+      ]
+    },
+    {
+      "id": "Q19", "section": "E", "rec": "a",
+      "question": "How is the bot validated against the live site?",
+      "why": "(a) is the practical continuous check; (c) is the gold standard once seeded RNG (Q6) exists.",
+      "options": [
+        { "key": "a", "label": "Same Config + same decision code run in sim and in-page; assert splits + trajectories match", "detail": "Investigate divergences (wire starvation, throttle)." },
+        { "key": "b", "label": "Manual spot-checks of a few live runs vs sim", "detail": "" },
+        { "key": "c", "label": "Capture a live run’s telemetry, replay its RNG/decisions in the sim, diff", "detail": "Automated gold standard." }
+      ]
+    },
+    {
+      "id": "Q20", "section": "E", "rec": "a",
+      "question": "MVP stage boundary — smallest end-to-end slice?",
+      "why": "(a) is the true minimum that exercises the full architecture (production, sales, cost curves, trust→ops, one project, telemetry, sim parity) without the heavy investment/tournament/space systems.",
+      "options": [
+        { "key": "a", "label": "Stage 1 only, up to first Trust milestones + first project purchase", "detail": "Proves sim + bot + telemetry + Config on the earliest mechanics." },
+        { "key": "b", "label": "All of Stage 1 through Release the HypnoDrones", "detail": "A fine Phase-2 target." },
+        { "key": "c", "label": "A vertical slice touching all 3 stages shallowly", "detail": "Broad but shallow." }
+      ]
+    },
+    {
+      "id": "Q21", "section": "F", "rec": "a",
+      "question": "Live-bot delivery format?",
+      "why": "(a) covers both distribution and is the recommended path; (c) is a dev-loop convenience layer.",
+      "options": [
+        { "key": "a", "label": "esbuild → single IIFE bundle (console paste + userscript)", "detail": "@match *://*.decisionproblem.com/paperclips/*" },
+        { "key": "b", "label": "Console-paste only", "detail": "" },
+        { "key": "c", "label": "Bookmarklet / loader injecting a locally-served bundle", "detail": "Fast dev iteration." }
+      ]
+    },
+    {
+      "id": "Q22", "section": "F", "rec": "a",
+      "question": "Where does the simulator run?",
+      "why": "(a) enables fast parameter search; sharing the core with the in-page bot (c) is the ideal end-state but Node-first is simpler to start.",
+      "options": [
+        { "key": "a", "label": "Node / headless (TypeScript, shared core)", "detail": "Fast offline sweeps." },
+        { "key": "b", "label": "In-browser worker", "detail": "Runs alongside the page." },
+        { "key": "c", "label": "Both (shared core compiled for Node + browser)", "detail": "Ideal end-state." }
+      ]
+    },
+    {
+      "id": "Q23", "section": "F", "rec": "a",
+      "question": "Shared-core structure between sim and bot?",
+      "why": "(a) maximizes reuse and guarantees the strategy that tunes offline is the code that runs live — the core validation premise.",
+      "options": [
+        { "key": "a", "label": "Three layers: game-model core · strategy/Config · adapters (sim + live)", "detail": "Maximum reuse." },
+        { "key": "b", "label": "Separate codebases with a shared Config schema only", "detail": "Looser coupling." },
+        { "key": "c", "label": "Bot only; sim is a throwaway script", "detail": "Fastest to start, least valuable." }
+      ]
+    },
+    {
+      "id": "Q24", "section": "F", "rec": "a",
+      "question": "Tuning / search method for the simulator?",
+      "why": "(a) is pragmatic — get parity first, then optimize; community priors seed the initial grid.",
+      "options": [
+        { "key": "a", "label": "Manual sweeps + grid search first; add an optimizer later", "detail": "random / CMA-ES / hill-climb once parity holds." },
+        { "key": "b", "label": "Full black-box optimizer from day one", "detail": "Powerful but premature." },
+        { "key": "c", "label": "Hand-tuning only", "detail": "Minimal effort." }
+      ]
+    },
+    {
+      "id": "Q25", "section": "G", "rec": "a",
+      "question": "operations vs standardOps negative-drift quirk.",
+      "why": "Tournaments/projects gate on operations but spend standardOps; a tempOps-funded tournament can push standardOps negative. Faithful sim + conservative bot avoids surprise negative-ops states.",
+      "options": [
+        { "key": "a", "label": "Reproduce faithfully in the sim; bot avoids it (spend only when standardOps ≥ cost)", "detail": "Real game behavior, safe bot." },
+        { "key": "b", "label": "Reproduce and let the bot exploit / ignore it", "detail": "Riskier." },
+        { "key": "c", "label": "Ignore in the sim (approximate ops as one pool)", "detail": "Simpler, less faithful." }
+      ]
+    },
+    {
+      "id": "Q26", "section": "G", "rec": "a",
+      "question": "Combat proxy calibration data.",
+      "why": "Empirical calibration is far more reliable than reverse-engineering the boids stochastics.",
+      "options": [
+        { "key": "a", "label": "Capture 3–5 live battles’ probe/drifter/honor deltas to fit the proxy", "detail": "Before trusting Stage-3 tuning." },
+        { "key": "b", "label": "Derive the proxy purely from the boids code by reasoning", "detail": "No live data." },
+        { "key": "c", "label": "Defer combat tuning; use a conservative fixed combat allocation", "detail": "Punt for now." }
+      ]
+    },
+    {
+      "id": "Q27", "section": "G", "rec": "a",
+      "question": "Optimal tournament pick ranking.",
+      "why": "GREEDY is the reasoned best but unproven vs A100/B100 over random grids; (c) largely moots this if the read-winner exploit is on.",
+      "options": [
+        { "key": "a", "label": "Monte-Carlo the 8 strategies over many random grids in the sim; default GREEDY until proven", "detail": "A cheap, satisfying sim deliverable." },
+        { "key": "b", "label": "Assume GREEDY, don’t verify", "detail": "Fastest." },
+        { "key": "c", "label": "Always use the read-winner exploit (Q14), so pick ranking is moot", "detail": "If the exploit is on." }
+      ]
+    },
+    {
+      "id": "Q28", "section": "G", "rec": "a",
+      "question": "Probe-trust allocation optimum.",
+      "why": "Community heuristics disagree; the replication-vs-drift-vs-combat-vs-exploration trade is unsolved — exactly what the sim is for. (c) is a good live shape whose setpoints the sim tunes.",
+      "options": [
+        { "key": "a", "label": "Treat as a sim optimization; parameterize allocation in Config, seed with Zurd’s heuristic", "detail": "Let offline search find the fastest 3e55 conversion." },
+        { "key": "b", "label": "Hard-code one community heuristic", "detail": "Zurd: Haz5 + Self-Rep + Combat-in-war; or fandom: Haz6 + ≥4 Self-Rep." },
+        { "key": "c", "label": "Dynamic feedback controller", "detail": "Raise Self-Rep while clips surplus, raise Combat while drifters>1M." }
+      ]
+    },
+    {
+      "id": "Q29", "section": "G", "rec": "a",
+      "question": "Reference WR / target time.",
+      "why": "The record is motivational, not a build dependency; verifying it needs a manual browser visit (speedrun.com blocks fetch).",
+      "options": [
+        { "key": "a", "label": "Don’t gate the build on it; set an internal target, verify records live later", "detail": "e.g. beat casual ~1–2 h, then chase ~1h30m desktop." },
+        { "key": "b", "label": "Manually fetch / confirm the current WR before starting", "detail": "Know the target up front." },
+        { "key": "c", "label": "Ignore records entirely; optimize against our own best", "detail": "Self-referential." }
+      ]
+    },
+    {
+      "id": "Q30", "section": "G", "rec": "a",
+      "question": "Swarm-slider (Think ↔ Work) target policy.",
+      "why": "Work maximizes throughput, Think maximizes free processor/memory gifts; a scheduled crossover matches the observed optimal shape and is tunable.",
+      "options": [
+        { "key": "a", "label": "Config-parameterized schedule (Work-heavy consuming Earth, Think-heavy near the end); sim tunes the crossover", "detail": "Range 0–200." },
+        { "key": "b", "label": "Fixed value (community ~150)", "detail": "Simple." },
+        { "key": "c", "label": "Closed-loop on whether ops/memory is the bottleneck", "detail": "Adaptive." }
+      ]
+    },
+    {
+      "id": "Q31", "section": "G", "rec": "a",
+      "question": "Save-management policy for the live bot.",
+      "why": "Autosave is every 25 s; letting it run protects against crashes without interfering.",
+      "options": [
+        { "key": "a", "label": "Let the game autosave; optionally save() after major purchases; never touch savePrestige unless intended", "detail": "Safe default." },
+        { "key": "b", "label": "Disable / ignore saves entirely (fresh run each time)", "detail": "Clean runs." },
+        { "key": "c", "label": "Snapshot state to __botTelemetry independent of the game’s save", "detail": "Orthogonal telemetry." }
+      ]
+    }
+  ]
+}

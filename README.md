@@ -1,0 +1,106 @@
+# megascope
+
+**Interactive project scoping for Claude Code.** Point it at a fuzzy request and it drives the project to an agreed **phased plan with a detailed MVP** — by (1) clarifying up front, (2) researching in parallel, and (3) handing you a **polished, theme-aware interactive scoping document** where every decision is pre-set to a recommended default. You review, override, and flag; click **Copy answers for Claude**; paste back. Claude resolves follow-ups and delivers the plan.
+
+It's general-purpose but build-optimized: strong defaults for technical and software builds (research fan-out, phased plans, a crisp MVP boundary).
+
+## The idea: one engine, data per run
+
+The scoping document is produced by a **data-driven engine** — a single static, self-contained, theme-aware HTML shell ([`skills/megascope/assets/engine.html`](skills/megascope/assets/engine.html)) fed a per-run **questions-JSON**. Each run generates *only the JSON*; the engine is never edited. That's the efficiency win and the thing the skill protects.
+
+The engine renders everything from data — header, intro, constraint chips, a collapsible context panel, sectioned recommendation-first question cards, live counts, sticky nav with scroll-spy, a clean **Copy answers for Claude** export, JSON download, `localStorage` persistence, and full light/dark theming — offline and CSP-safe, so the same file works as a standalone `.html` **and** as a published Artifact.
+
+## What makes it work (preserved by design)
+
+- **Recommendation-first, not a blank form** — every question ships pre-answered with a ★ default and a one-line *why*. You review, not author.
+- **Rationale travels with every question** — the `why` names the tradeoff and often the runner-up condition.
+- **Defaults are earned by research** — concrete, grounded options, not generic filler.
+- **One-click disagreement** — change / note / **flag-for-follow-up** / reviewed per question; a flag means "let's talk," so the round-trip never stalls.
+- **A clean, parseable export** closes the human→Claude loop reliably.
+- **Constraints as chips** — already-decided facts are shown and therefore *not re-asked*.
+- **Tasteful, subject-grounded, theme-aware craft** — personality via `meta.theme`, not by touching the shell.
+
+## Install
+
+megascope is distributed as a Claude Code plugin from this repo, which doubles as a single-plugin marketplace. In Claude Code:
+
+```
+/plugin marketplace add deejaymorgan/skill-megascope
+/plugin install megascope@megascope
+/reload-plugins
+```
+
+This repo is **private**, so anyone installing needs read access to it plus working git auth (e.g. `gh auth login` or an SSH key configured for GitHub). To update later: `/plugin marketplace update megascope`.
+
+Then invoke:
+
+```
+/megascope
+```
+
+…and describe the project you want to scope. The skill ([`skills/megascope/SKILL.md`](skills/megascope/SKILL.md)) also triggers on natural requests like "help me plan X", "turn this idea into a build plan", or "what should the MVP be".
+
+## How a run works
+
+0. **Intake & clarify** — pin the subject/goal/constraints; ask 2–4 high-leverage `AskUserQuestion` clarifications only where they change research direction.
+1. **Research fan-out** — a `Workflow` of parallel researchers → a synthesis pass producing a master dossier, a decision-oriented open-questions list, and a proposed phase plan (auto-scaled to complexity; degrades to parallel agents or inline research).
+2. **Build the doc** — transform the synthesis into the questions-JSON, inject it into the engine, save the HTML, and publish it as an Artifact.
+3. **Round-trip** — you fill it in and paste the export back.
+4. **Follow-up loop** — Claude resolves flagged/ambiguous items.
+5. **Deliver** — a phased build plan + detailed Phase-1/MVP requirements.
+
+## Repo layout
+
+```
+skill-megascope/
+├── .claude-plugin/
+│   ├── plugin.json                    # plugin manifest
+│   └── marketplace.json               # single-plugin marketplace catalog (source: "./")
+├── skills/megascope/
+│   ├── SKILL.md                       # the skill: trigger + the pipeline
+│   ├── assets/
+│   │   ├── engine.html                # the static, data-driven shell (never edited per run)
+│   │   └── schema.json                # questions-JSON JSON Schema
+│   └── references/                    # playbook
+│       ├── engine-data.md             #   the exact data contract
+│       ├── writing-questions.md       #   recommendation-first question doctrine
+│       ├── research-fanout.md         #   workflow patterns, dossier → synthesis
+│       └── theming.md                 #   subject-grounded accent + theme tokens
+├── examples/paperclips/               # one full worked example
+│   ├── request.md                     #   the fuzzy input request
+│   ├── scoping.data.json              #   the generated questions-JSON (the real per-run artifact)
+│   └── scoping.html                   #   engine + injected data (what gets published)
+├── scripts/
+│   ├── build-doc.mjs                  # inject a data.json into the shell → standalone HTML
+│   └── inject.mjs                     # the one injection operation
+├── tests/
+│   ├── smoke.mjs                      # schema-validate + headless render + round-trip assertions
+│   └── fixtures/minimal.data.json     # a tiny second case (incl. a multi-select question)
+├── package.json
+├── LICENSE
+└── README.md
+```
+
+## Build & test
+
+```bash
+npm install            # ajv + jsdom (dev only)
+npm test               # validate schema + render both cases headless + assert invariants
+npm run build:example  # rebuild examples/paperclips/scoping.html from its data
+```
+
+Build any scoping doc from a data file:
+
+```bash
+node scripts/build-doc.mjs path/to/scoping.data.json path/to/scoping.html
+```
+
+The smoke test asserts, for both the paperclips example and the minimal fixture: schema validity, zero render errors, correct card count, **every default pre-selected to its recommendation**, correct live counts, and a clean export round-trip.
+
+## Authoring a questions-JSON
+
+See [`skills/megascope/assets/schema.json`](skills/megascope/assets/schema.json) for the contract, [`references/engine-data.md`](skills/megascope/references/engine-data.md) for how each field renders, and [`references/writing-questions.md`](skills/megascope/references/writing-questions.md) for how to write questions that are worth pre-answering. [`examples/paperclips/scoping.data.json`](examples/paperclips/scoping.data.json) is a complete, real example.
+
+## License
+
+MIT © Daniel Morgan. See [LICENSE](LICENSE).
