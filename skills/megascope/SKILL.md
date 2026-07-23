@@ -18,9 +18,9 @@ The document is produced by a **data-driven engine**: one static HTML shell (`as
 
 ## Operating rules (read first)
 
-- **Paths.** When installed as a plugin, bundled files live under `${CLAUDE_PLUGIN_ROOT}` — engine at `${CLAUDE_PLUGIN_ROOT}/skills/megascope/assets/engine.html`, schema at `.../assets/schema.json`, builder at `${CLAUDE_PLUGIN_ROOT}/scripts/build-doc.mjs`, references under `.../references/`, the worked example under `${CLAUDE_PLUGIN_ROOT}/examples/`. In local repo development they're relative to the repo root.
-- **Never edit the engine shell for a run.** Generate the questions-JSON and inject it into the shell's `<script id="scoping-data">` block: `node "${CLAUDE_PLUGIN_ROOT}/scripts/build-doc.mjs" <data.json> <out.html>`, or inject manually (Read the engine, write a copy with only that block's contents replaced).
-- **Validate every JSON** against the schema before building (`npm test` validates the bundled cases; for a new run, eyeball against `schema.json` and run the builder — it fails loudly on invalid JSON).
+- **Files.** The engine shell, schema, and playbook sit alongside this skill: `assets/engine.html`, `assets/schema.json`, and `references/`. (The worked example and the `build-doc.mjs` helper live in the megascope repo — `examples/paperclips/` and `scripts/` — useful when developing, not needed at run time.)
+- **Never edit the engine shell for a run.** Generate the questions-JSON, then produce the doc by taking `assets/engine.html` and replacing ONLY the contents of its `<script id="scoping-data">` block with your JSON: Read the engine, write the combined result into the target project. (Working in the repo, `node scripts/build-doc.mjs <data.json> <out.html>` does exactly this.)
+- **Validate every JSON** against `assets/schema.json` before building; a malformed block makes the engine fall back to its empty state.
 - **Recommendation-first, always.** Every question ships pre-answered with a `rec` and a one-line `why`. The user's job is to *review*, not to author. A blank-looking question is a bug.
 - **Don't re-ask what's decided.** Constraints the user already fixed become `meta.constraints` chips, not questions.
 - **The engine is untouched, tasteful, and self-contained.** Personality comes from `meta.theme` (usually one accent hex) + the content — not from editing the shell.
@@ -58,9 +58,7 @@ Transform the synthesis into the **questions-JSON** (`assets/schema.json`):
 - Group questions into `sections[]` (digestible areas, ~4–8).
 - Fill `meta`: title/subtitle/favicon, headline, lede, the already-decided `constraints` chips, and a `context` panel (a `note`, `cards` for a domain/stage map, and `blocks` for the proposed phases + an architecture diagram).
 - Pick a **subject-grounded `theme.accent`** (one hex → the whole palette) + optional `neutralBias`/fonts. See `references/theming.md`.
-- Save `<project>.scoping.data.json` and build the HTML:
-  `node "${CLAUDE_PLUGIN_ROOT}/scripts/build-doc.mjs" path/to/scoping.data.json path/to/scoping.html`
-  (Save both into the target project, e.g. `docs/scoping/`.)
+- Save `<project>.scoping.data.json`, then build the HTML by injecting it into `assets/engine.html` — replace the `<script id="scoping-data">` block and write the copy into the target project (e.g. `docs/scoping/`). Repo helper: `node scripts/build-doc.mjs path/to/scoping.data.json path/to/scoping.html`.
 - **Publish as an Artifact.** Load the `artifact-design` skill for calibration (the shell is already tasteful; keep it so). The engine omits `<!doctype>/<html>/<head>/<body>`, so it is Artifact-ready as-is. Pass `favicon` from `meta.favicon`, a stable `title`, and a one-line `description`.
 - Hand the user the link with a one-line instruction: *review the defaults, change/flag/note what matters, then click "Copy answers for Claude" and paste it back here.*
 
@@ -84,9 +82,9 @@ Produce the **phased build plan + detailed Phase-1/MVP requirements**, reflectin
 - **Very small project:** fewer sections/questions is fine; the value is the recommendation-first round-trip, not volume.
 - **Re-scoping after paste-back:** you can regenerate a *follow-up* doc with only the unresolved questions (new `project` slug suffix, e.g. `-followup`, to keep separate localStorage).
 
-## Files (all under `${CLAUDE_PLUGIN_ROOT}` when installed)
-- `skills/megascope/assets/engine.html` — the static, data-driven shell. **Do not edit per run.**
-- `skills/megascope/assets/schema.json` — the questions-JSON schema (validate against this).
-- `skills/megascope/references/{writing-questions,research-fanout,theming,engine-data}.md` — playbook.
-- `examples/paperclips/` — a full worked example (request → `scoping.data.json` → `scoping.html`).
-- `scripts/build-doc.mjs` — inject JSON into the shell → standalone HTML. `tests/smoke.mjs` — render + round-trip test.
+## Files (alongside this skill)
+- `assets/engine.html` — the static, data-driven shell. **Do not edit per run.**
+- `assets/schema.json` — the questions-JSON schema (validate against this).
+- `references/{writing-questions,research-fanout,theming,engine-data}.md` — playbook.
+
+In the megascope repo (development only): `examples/paperclips/` (worked example), `scripts/build-doc.mjs` (injection helper), `tests/smoke.mjs` (render + round-trip test).

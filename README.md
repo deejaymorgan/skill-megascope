@@ -20,25 +20,21 @@ The engine renders everything from data — header, intro, constraint chips, a c
 - **Constraints as chips** — already-decided facts are shown and therefore *not re-asked*.
 - **Tasteful, subject-grounded, theme-aware craft** — personality via `meta.theme`, not by touching the shell.
 
-## Install
+## Setup
 
-megascope is distributed as a Claude Code plugin from this repo, which doubles as a single-plugin marketplace. In Claude Code:
+megascope runs as a personal Claude Code skill. Symlink it into your skills directory:
 
-```
-/plugin marketplace add deejaymorgan/skill-megascope
-/plugin install megascope@megascope
-/reload-plugins
+```bash
+ln -s "$PWD/skills/megascope" ~/.claude/skills/megascope
 ```
 
-This repo is **private**, so anyone installing needs read access to it plus working git auth (e.g. `gh auth login` or an SSH key configured for GitHub). To update later: `/plugin marketplace update megascope`.
-
-Then invoke:
+Skills load at session start, so open a **new** `claude` session, then invoke:
 
 ```
 /megascope
 ```
 
-…and describe the project you want to scope. The skill ([`skills/megascope/SKILL.md`](skills/megascope/SKILL.md)) also triggers on natural requests like "help me plan X", "turn this idea into a build plan", or "what should the MVP be".
+…and describe the project you want to scope. The skill ([`skills/megascope/SKILL.md`](skills/megascope/SKILL.md)) also triggers on natural requests like "help me plan X", "turn this idea into a build plan", or "what should the MVP be". Because it's a symlink, edits to this repo are live on the next invocation.
 
 ## How a run works
 
@@ -53,10 +49,7 @@ Then invoke:
 
 ```
 skill-megascope/
-├── .claude-plugin/
-│   ├── plugin.json                    # plugin manifest
-│   └── marketplace.json               # single-plugin marketplace catalog (source: "./")
-├── skills/megascope/
+├── skills/megascope/                  # the skill (symlink this into ~/.claude/skills/)
 │   ├── SKILL.md                       # the skill: trigger + the pipeline
 │   ├── assets/
 │   │   ├── engine.html                # the static, data-driven shell (never edited per run)
