@@ -7,7 +7,11 @@
   "scripts": {
     "build": "node scripts/build-doc.mjs",
     "build:example": "node scripts/build-doc.mjs examples/paperclips/scoping.data.json examples/paperclips/scoping.html",
-    "test": "node tests/smoke.mjs"
+    "dev": "node scripts/dev.mjs",
+    "test": "node tests/smoke.mjs",
+    "dogfood": "bash scripts/mega.sh dogfood",
+    "restore": "bash scripts/mega.sh restore",
+    "deployed": "bash scripts/mega.sh status"
   },
   "devDependencies": {
     "ajv": "^8.17.1",

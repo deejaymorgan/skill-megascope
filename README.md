@@ -22,7 +22,7 @@ The engine renders everything from data — header, intro, constraint chips, a c
 
 ## Setup
 
-megascope runs as a personal Claude Code skill. Symlink it into your skills directory:
+megascope runs as a personal Claude Code skill: `~/.claude/skills/megascope` is a **symlink** into this repo, so a new session loads whatever the symlink points at. First-time install:
 
 ```bash
 ln -s "$PWD/skills/megascope" ~/.claude/skills/megascope
@@ -34,7 +34,43 @@ Skills load at session start, so open a **new** `claude` session, then invoke:
 /megascope
 ```
 
-…and describe the project you want to scope. The skill ([`skills/megascope/SKILL.md`](skills/megascope/SKILL.md)) also triggers on natural requests like "help me plan X", "turn this idea into a build plan", or "what should the MVP be". Because it's a symlink, edits to this repo are live on the next invocation.
+…and describe the project you want to scope. The skill ([`skills/megascope/SKILL.md`](skills/megascope/SKILL.md)) also triggers on natural requests like "help me plan X", "turn this idea into a build plan", or "what should the MVP be".
+
+## Development workflow
+
+The whole point: **iterate on the skill without touching the version you actually rely on.** Deployed and in-progress live in two separate git worktrees; one command flips which is live, and the known-good version is always one command away.
+
+```
+~/Dev/skill-megascope        prod worktree · always `main`   ← known-good, deployed
+~/Dev/skill-megascope-dev    dev worktree  · branch `dev`    ← your sandbox
+~/.claude/skills/megascope → prod worktree                   (default; flip to dev to dogfood)
+```
+
+**One-time setup** (from the prod checkout):
+
+```bash
+git worktree add ../skill-megascope-dev -b dev    # create the dev sandbox
+( cd ../skill-megascope-dev && npm install )      # its own dev deps (node_modules isn't shared)
+```
+
+Add the `mega` helper so promote / revert / status are one word each (and you can always *see* which version is live):
+
+```bash
+echo 'mega() { bash "$HOME/Dev/skill-megascope/scripts/mega.sh" "$@"; }' >> ~/.zshrc
+```
+
+**The loop:**
+
+| Step | What you do |
+|---|---|
+| **Iterate** | Edit in `~/Dev/skill-megascope-dev` (on `dev` or a feature branch). `npm run dev` for a live engine preview; `npm test` to check the machinery. Deployed `/megascope` is untouched the whole time. |
+| **Dogfood** | `mega dogfood` → open a **new** `claude` session → use `/megascope` for real. The live skill is now your candidate. |
+| **Ship** | Happy? `git -C ~/Dev/skill-megascope merge dev && mega restore`. Known-good now includes your changes. |
+| **Abort** | Not happy? `mega restore`. Deployed snaps back to the known-good instantly; keep iterating in the dev worktree. |
+
+`mega` with no argument (or `mega status`) prints which version is currently deployed. Only **new** sessions pick up a flip — skills load at session start. Equivalent npm scripts exist: `npm run dogfood` / `npm run restore` / `npm run deployed`.
+
+> **Why two worktrees?** A plain symlink makes "dev" and "prod" the same folder, so switching branches to experiment silently changes what your next session runs. Separate checkouts make that impossible: nothing you do in the sandbox reaches the deployed skill until you deliberately `mega dogfood` or merge.
 
 ## How a run works
 
@@ -65,10 +101,13 @@ skill-megascope/
 │   └── scoping.html                   #   engine + injected data (what gets published)
 ├── scripts/
 │   ├── build-doc.mjs                  # inject a data.json into the shell → standalone HTML
-│   └── inject.mjs                     # the one injection operation
+│   ├── inject.mjs                     # the one injection operation
+│   ├── dev.mjs                        # live preview: watch engine + sample data → scratch/preview.html
+│   └── mega.sh                        # flip the deployed skill between the prod/dev worktrees
 ├── tests/
 │   ├── smoke.mjs                      # schema-validate + headless render + round-trip assertions
 │   └── fixtures/minimal.data.json     # a tiny second case (incl. a multi-select question)
+├── CLAUDE.md                          # repo workflow rules for Claude sessions
 ├── package.json
 ├── LICENSE
 └── README.md
@@ -79,6 +118,7 @@ skill-megascope/
 ```bash
 npm install            # ajv + jsdom (dev only)
 npm test               # validate schema + render both cases headless + assert invariants
+npm run dev            # live engine preview — watch + rebuild scratch/preview.html on save
 npm run build:example  # rebuild examples/paperclips/scoping.html from its data
 ```
 
