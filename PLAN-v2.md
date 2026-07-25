@@ -514,11 +514,15 @@ untouched.
 
 Dev worktree only; `main` untouched until step 10. `npm test` is the gate at every step.
 
-1. **Unblock the gate, then delete the example — one commit.**
+1. **Unblock the gate, then retire the example — one commit.**
    `tests/smoke.mjs:36` is `CASES[0]`, loaded by `await readFile` inside the loop at `:46`, so
-   deleting `examples/paperclips/` throws an unhandled rejection **before the minimal fixture runs**
-   — zero of 24 checks execute and the exit path never reports. Same commit: delete the example,
-   point `CASES` at fixtures, fix `scripts/dev.mjs:21` (its default `DATA` is the paperclips file,
+   removing `examples/paperclips/` throws an unhandled rejection **before the minimal fixture runs**
+   — zero of 24 checks execute and the exit path never reports.
+   **Move `examples/paperclips/` to `scratch/`, do not delete it yet.** `scratch/` is gitignored, so
+   it leaves the repo exactly as the brief requires — every reference updated, `rg -n paperclips`
+   empty — while the file stays on disk as the quality reference for authoring the new example and as
+   the only extant corpus for checking the new length limits actually bite. It is deleted for real at
+   step 9. Same commit: point `CASES` at fixtures, fix `scripts/dev.mjs:21` (its default `DATA` is the paperclips file,
    so `npm run dev` dies), `package.json:9` `build:example`, and the docs — `CLAUDE.md`,
    `README.md`, `SKILL.md:21,90`, `research-fanout.md:50`, `theming.md:20`, plus the stale
    `references/engine-data.md:13` (`node tests/build-doc.mjs` → exists nowhere; the real file is
@@ -583,6 +587,8 @@ Dev worktree only; `main` untouched until step 10. `npm test` is the gate at eve
    evidence), `SCOPE.md`, `KICKOFF.md`. Each data file ≤4 KB against paperclips' 26,966 bytes; ship
    no `.html`. Add `tests/docs.mjs`: extract every `node …`/`npm …` command from the shipped markdown
    and assert the target exists — the check that would have caught `engine-data.md:13`.
+   Finally, **delete `scratch/paperclips/` for real** — the reference copy parked at step 1 has done
+   its job once `examples/reading-log/` passes.
    **Gate:** `npm test` green; `rg -n paperclips` empty; `rg -niE "phased|phase-1|\bMVP\b" skills/ README.md`
    returns only MVP-as-a-`deliverable`-option.
 10. **Dogfood, then promote.** `npm run dogfood`, a **new** `claude` session, one real two-round
