@@ -41,17 +41,6 @@ tracked files, not in memory.
 - **Ship:** happy? `git -C ~/Dev/skill-megascope merge dev && npm run restore`. Not happy?
   `npm run restore` — deployed snaps back to known-good instantly.
 
-## Layout
-- **`skills/megascope/`** — the skill itself.
-  - `SKILL.md` — the round loop a run follows.
-  - `assets/` — the engine shell, its schema, and `megascope.mjs` (validate · build · ready).
-  - `references/` — the playbook: rounds, writing questions, research, theming, data format.
-- **`examples/reading-log/`** — one worked two-round scope, from request to kick-off brief.
-- **`scripts/`** — dev helpers: `build-doc.mjs`, `inject.mjs`, `dev.mjs`, `mega.sh`.
-- **`docs/`** — notes on working *on* the repo, as opposed to notes that ship with the skill.
-- **`tests/`** — machinery tests for the engine and schema; run with `npm test`.
-  - `fixtures/` — the data files the tests render. Also the sample data for `npm run dev`.
-
 ## Read
 - **`skills/megascope/references/engine-data.md`**
   - The data format — every field and how it appears on the page.
