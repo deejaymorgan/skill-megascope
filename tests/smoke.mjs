@@ -131,6 +131,44 @@ for (const c of CASES) {
   check(defaultsOk === data.questions.length,
     `every default pre-selected to its ★ recommendation (${defaultsOk}/${data.questions.length})`);
 
+  // --- the four-part shape actually reaches the page ---
+  // The old harness asserted no optional text at all, which is how `why` could
+  // have stopped rendering without a single check going red.
+  const text = (sel) => { const n = doc.querySelector(sel); return n ? n.textContent.trim() : null; };
+  let shapeOk = 0, shapeWhy = '';
+  for (const q of data.questions) {
+    const problems = [];
+    if (text(`#card-${q.id} .q-context`) !== q.context) problems.push('context');
+    const items = [...doc.querySelectorAll(`#card-${q.id} .q-breakdown li`)].map((li) => li.textContent.trim());
+    if (JSON.stringify(items) !== JSON.stringify(q.breakdown)) problems.push(`breakdown (${items.length}/${q.breakdown.length})`);
+    if (text(`#card-${q.id} .q-title`) !== q.question) problems.push('question');
+    if (text(`#card-${q.id} .q-why`) !== q.why) problems.push('why');
+    if (!text(`#card-${q.id} .q-switch`)?.endsWith(q.switchIf)) problems.push('switchIf');
+    // present iff technical — the key is absent, not null, when it is false
+    const ex = doc.querySelector(`#card-${q.id} .q-example`);
+    if (q.technical ? !ex?.textContent.includes(q.example) : ex) problems.push('example');
+    if (!problems.length) shapeOk++;
+    else if (!shapeWhy) shapeWhy = ` — ${q.id} missing ${problems.join(', ')}`;
+  }
+  check(shapeOk === data.questions.length,
+    `context, every breakdown item, question, why and switchIf reach every card (${shapeOk}/${data.questions.length})${shapeWhy}`);
+
+  const technical = data.questions.filter((q) => q.technical).length;
+  check(doc.querySelectorAll('.q-example').length === technical,
+    `.q-example renders on exactly the ${technical} technical question(s), and nowhere else`);
+
+  // --- keyboard + assistive affordances ---
+  check([...doc.querySelectorAll('.opts')].every((o) => {
+    const role = o.getAttribute('role');
+    const label = o.getAttribute('aria-labelledby');
+    return (role === 'radiogroup' || role === 'group') && label && doc.getElementById(label);
+  }), 'every option group is a named radiogroup/group');
+  check(doc.querySelector('.modal-card')?.getAttribute('aria-modal') === 'true', 'the export modal is a real dialog');
+  check([...doc.querySelectorAll('.q')].every((c) => c.querySelector('.rej-toggle') && c.querySelector('.copyq-btn')),
+    'every card carries the reject control and its own copy button');
+  check([...doc.querySelectorAll('.q')].every((c) => c.querySelector('.opt.own')),
+    'every question carries the __own escape, added by the engine and never declared by the data');
+
   check(doc.getElementById('tb-total').textContent === String(data.questions.length), 'total count = N');
   check(doc.getElementById('tb-changed').textContent === '0', 'changed starts at 0');
   check(doc.getElementById('tb-flagged').textContent === '0', 'flagged starts at 0');

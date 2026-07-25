@@ -214,14 +214,33 @@
   .q:hover{box-shadow:var(--shadow);}
   .q[data-state="changed"]{border-left:3px solid var(--accent);padding-left:17px;}
   .q[data-state="flagged"]{border-left:3px solid var(--warn);padding-left:17px;}
-  .q-head{display:flex;align-items:flex-start;gap:12px;}
-  .q-id{font-family:var(--mono);font-size:12px;color:var(--faint);padding-top:3px;flex:none;min-width:26px;}
-  .q-title{font-family:var(--serif);font-size:17.5px;line-height:1.28;font-weight:600;flex:1;text-wrap:pretty;}
+  .q-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:11px;}
+  .q-id{font-family:var(--mono);font-size:12px;color:var(--faint);flex:none;min-width:26px;}
   .q-status{flex:none;font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;padding:4px 8px;border-radius:99px;
     background:var(--hairline);color:var(--faint);white-space:nowrap;}
   .q-status.is-changed{background:var(--accent-tint);color:var(--accent-2);}
   .q-status.is-flagged{background:var(--warn-tint);color:var(--warn-ink);}
-  .q-why{margin:9px 0 14px;padding-left:38px;font-size:13px;color:var(--muted);line-height:1.55;max-width:74ch;}
+
+  /* ---------- the four-part question shape ----------
+     In reading order: why this is on the table, the decision broken down,
+     an example when it is genuinely technical, and only then the question.
+     The old card opened with the question and left the reader to supply the
+     context themselves — which is what made questions long AND thin at once. */
+  .q-context{padding-left:38px;font-size:13.5px;color:var(--muted);line-height:1.6;max-width:74ch;}
+  .q-breakdown{margin:11px 0 0;padding:0 0 0 38px;list-style:none;display:flex;flex-direction:column;gap:7px;}
+  .q-breakdown li{position:relative;padding-left:16px;font-size:13px;color:var(--muted);line-height:1.5;max-width:72ch;}
+  .q-breakdown li::before{content:"";position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:99px;
+    background:var(--accent-line);}
+  .q-example{margin:13px 0 0 38px;padding:10px 13px;border-left:2px solid var(--accent-line);background:var(--accent-tint);
+    border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-size:12.8px;color:var(--muted);line-height:1.55;max-width:72ch;}
+  .q-example .ex-tag{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--accent-2);margin-bottom:4px;}
+  .q-title{font-family:var(--serif);font-size:17.5px;line-height:1.3;font-weight:600;margin:16px 0 0;padding-left:38px;
+    text-wrap:pretty;max-width:46ch;}
+  .q-why{margin:9px 0 0;padding-left:38px;font-size:13px;color:var(--muted);line-height:1.55;max-width:74ch;}
+  .q-switch{margin:7px 0 14px;padding-left:38px;font-size:12.5px;color:var(--faint);line-height:1.5;max-width:74ch;}
+  .q-switch .sw-tag{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--accent-2);margin-right:7px;}
 
   .opts{display:flex;flex-direction:column;gap:8px;padding-left:38px;}
   .opt{position:relative;display:flex;gap:11px;padding:11px 13px;border:1px solid var(--border);border-radius:var(--radius-sm);
@@ -229,6 +248,18 @@
   .opt:hover{border-color:var(--accent-line);background:var(--surface-2);}
   .opt.selected{border-color:var(--accent);background:var(--accent-tint);}
   .opt input{position:absolute;opacity:0;width:1px;height:1px;}
+  /* Option inputs are visually hidden, so the file's single bare :focus-visible
+     rule painted its ring on an invisible 1px box — tabbing through a section
+     showed nothing at all. Draw the ring on the wrapper, and keep a sibling
+     fallback for engines without :has(). */
+  .opt input:focus-visible{outline:none;}
+  .opt:has(:focus-visible){outline:2px solid var(--accent);outline-offset:2px;}
+  .opt input:focus-visible + .marker{box-shadow:0 0 0 3px var(--accent-tint),0 0 0 4px var(--accent);}
+  /* the escape hatch reads as an escape, not as a fifth opinion */
+  .opt.own{border-style:dashed;}
+  .opt.own .opt-label{color:var(--muted);font-weight:500;}
+  .opt.own.selected{border-style:solid;}
+  .opt.own.selected .opt-label{color:var(--ink);font-weight:600;}
   .opt .marker{width:17px;height:17px;border-radius:99px;border:1.5px solid var(--faint);flex:none;margin-top:2px;
     display:grid;place-items:center;transition:border-color .15s;}
   .opt.multi .marker{border-radius:5px;}
@@ -252,11 +283,14 @@
   .foot-btn.on-flag{background:var(--warn-tint);border-color:var(--warn-line);color:var(--warn-ink);}
   .foot-btn.on-rev{background:color-mix(in srgb,var(--ok) 14%,transparent);border-color:color-mix(in srgb,var(--ok) 40%,transparent);color:var(--ok);}
   .foot-btn.has-note{border-color:var(--accent-line);color:var(--accent-2);}
-  .q-note{width:calc(100% - 38px);margin:11px 0 2px 38px;background:var(--surface-2);border:1px solid var(--border);
+  .q-note,.q-other{width:calc(100% - 38px);margin:11px 0 2px 38px;background:var(--surface-2);border:1px solid var(--border);
     border-radius:9px;padding:10px 12px;font-family:var(--sans);font-size:13px;color:var(--ink);resize:vertical;min-height:64px;
     line-height:1.5;}
-  .q-note::placeholder{color:var(--faint);}
-  .q-note[hidden]{display:none;}
+  .q-note::placeholder,.q-other::placeholder{color:var(--faint);}
+  .q-note[hidden],.q-other[hidden]{display:none;}
+  /* the user's own words are the answer, not a footnote to it — the note box
+     stays a separate, quieter thing */
+  .q-other{border-color:var(--accent-line);background:var(--surface);}
 
   /* ---------- global notes ---------- */
   .globalnotes{margin-top:34px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);
@@ -320,7 +354,9 @@
   @media (max-width:560px){
     .site-header-in{padding:11px 15px;} .wrap{padding:0 15px;}
     .hprogress .hbar{width:70px;} .lockup .sub{display:none;}
-    .q-why,.opts,.q-foot{padding-left:0;} .q-note{width:100%;margin-left:0;}
+    .q-context,.q-title,.q-why,.q-switch,.opts,.q-foot{padding-left:0;}
+    .q-breakdown{padding-left:0;} .q-example{margin-left:0;}
+    .q-note,.q-other{width:100%;margin-left:0;}
     .intro h2{font-size:24px;} .actionbar-in{padding:10px 15px;}
     .ab-stat{font-size:11.5px;gap:10px;}
     .phaselist .pr,.deflist .dr{grid-template-columns:1fr;gap:2px;}
@@ -404,9 +440,9 @@
 <div class="toast" id="toast">Copied to clipboard</div>
 
 <div class="modal" id="modal">
-  <div class="modal-card">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1">
     <div class="modal-head">
-      <div style="flex:1"><h3>Your answers</h3><p>Copy this and paste it into the chat.</p></div>
+      <div style="flex:1"><h3 id="modalTitle">Your answers</h3><p>Copy this and paste it into the chat.</p></div>
       <button class="icon-btn" id="modalClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
     </div>
     <pre id="exportText"></pre>
@@ -763,28 +799,41 @@
 
   function card(q){
     var s=state[q.id];
-    var e=el("article","q"); e.id="card-"+q.id; e.dataset.q=q.id;
+    var e=el("article","q"); e.id="card-"+q.id; e.dataset.q=q.id; e.dataset.slot=q.slot;
     var inputType=q.multi?"checkbox":"radio";
     var optsHtml=q.opts.map(function(o){
       var rec=(q.recArr.indexOf(o.key)>-1)?'<span class="rec-tag">★ Recommended</span>':'';
       var detail=o.detail?'<div class="opt-detail">'+fmt(o.detail)+'</div>':'';
-      return '<label class="opt'+(q.multi?' multi':'')+'" data-key="'+esc(o.key)+'">'+
+      return '<label class="opt'+(q.multi?' multi':'')+(o.own?' own':'')+'" data-key="'+esc(o.key)+'">'+
         '<input type="'+inputType+'" name="'+esc(q.id)+'" value="'+esc(o.key)+'">'+
         '<span class="marker" aria-hidden="true"></span>'+
         '<span class="opt-body"><span class="opt-label">'+fmt(o.label)+rec+'</span>'+detail+'</span>'+
       '</label>';
     }).join("");
+    // Reading order is the shape: context → breakdown → example (only when the
+    // question is genuinely technical) → the question → why → the runner-up
+    // condition. The question comes late on purpose; by the time it arrives the
+    // reader already has everything needed to answer it.
+    var titleId="qt-"+q.id;
     e.innerHTML=
       '<div class="q-head"><span class="q-id">'+esc(q.id)+'</span>'+
-        '<h3 class="q-title">'+fmt(q.question)+'</h3>'+
         '<span class="q-status"></span></div>'+
+      '<p class="q-context">'+fmt(q.context)+'</p>'+
+      (q.breakdown.length?'<ul class="q-breakdown">'+q.breakdown.map(function(b){
+        return '<li>'+fmt(b)+'</li>';}).join("")+'</ul>':'')+
+      (q.example?'<div class="q-example"><span class="ex-tag">For example</span>'+fmt(q.example)+'</div>':'')+
+      '<h3 class="q-title" id="'+titleId+'">'+fmt(q.question)+'</h3>'+
       (q.why?'<p class="q-why">'+fmt(q.why)+'</p>':'')+
-      '<div class="opts">'+optsHtml+'</div>'+
+      (q.switchIf?'<p class="q-switch"><span class="sw-tag">Switch if</span>'+fmt(q.switchIf)+'</p>':'')+
+      '<div class="opts" role="'+(q.multi?"group":"radiogroup")+'" aria-labelledby="'+titleId+'">'+optsHtml+'</div>'+
       '<div class="q-foot">'+
         '<button class="foot-btn note-toggle" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg><span class="ft-label">Add note</span></button>'+
         '<button class="foot-btn flag-toggle" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V4s-1 1-4 1-5-2-8-2-4 1-4 1Z"/><path d="M4 22v-7"/></svg><span class="ft-label">Flag for follow-up</span></button>'+
+        '<button class="foot-btn rej-toggle" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M9.2 9.4a2.9 2.9 0 0 1 5.6 1c0 1.9-2.8 2.4-2.8 2.4M12 17h.01"/></svg><span class="ft-label">This doesn’t make sense</span></button>'+
+        '<button class="foot-btn copyq-btn" type="button" title="Copy this question on its own"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><span class="ft-label">Copy this question</span></button>'+
         '<button class="foot-btn rev-toggle" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span class="ft-label">Reviewed</span></button>'+
       '</div>'+
+      '<textarea class="q-other" placeholder="Answer in your own words — this replaces the options above…"'+(s.otherText?'':' hidden')+'>'+esc(s.otherText)+'</textarea>'+
       '<textarea class="q-note" placeholder="Clarify, add constraints, or note why you chose differently…"'+(s.note?'':' hidden')+'>'+esc(s.note)+'</textarea>';
     // set inputs
     var inputs=e.querySelectorAll('input');
@@ -940,9 +989,20 @@
       catch(e){toast("Press Ctrl/Cmd+C to copy");}document.body.removeChild(ta);}
   }
 
-  var modal=$("modal");
-  function openModal(){var t=buildExport();$("exportText").textContent=t;modal.classList.add("show");copyText(t,"Copied — paste into chat");}
-  function closeModal(){modal.classList.remove("show");}
+  var modal=$("modal"), modalReturn=null;
+  function openModal(){
+    var t=buildExport();$("exportText").textContent=t;modal.classList.add("show");
+    modalReturn=document.activeElement;
+    var card=modal.querySelector(".modal-card"); if(card&&card.focus)card.focus();
+    copyText(t,"Copied — paste into chat");
+  }
+  function closeModal(){
+    modal.classList.remove("show");
+    // send focus back where it came from, or the keyboard user is stranded at
+    // the top of the document
+    if(modalReturn&&modalReturn.focus)modalReturn.focus();
+    modalReturn=null;
+  }
   $("copyBtn").addEventListener("click",openModal);
   $("modalCopyBtn").addEventListener("click",function(){copyText($("exportText").textContent,"Copied to clipboard");});
   $("modalClose").addEventListener("click",closeModal);
