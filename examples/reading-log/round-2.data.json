@@ -1,0 +1,295 @@
+{
+  "formatVersion": 2,
+  "meta": {
+    "project": "reading-log",
+    "round": {
+      "n": 2,
+      "of": 2,
+      "revision": 1,
+      "label": "Where the line is, and what counts as working",
+      "prev": "round-1.data.json",
+      "prevAnswers": "round-1.answers.md"
+    },
+    "title": "Reading log",
+    "subtitle": "Round 2 of 2",
+    "favicon": "📚",
+    "headline": "Three things left, and one I got wrong.",
+    "lede": "Last round settled it: a **habit you keep**, title only to start, handed back as a one-page plan that also says what not to build. My offline question did not make sense — it is back below in plainer words, along with the abandoned-books problem you raised.",
+    "steps": [
+      "Read where the scope stands",
+      "Answer, change or reject each one",
+      "Copy answers → paste into chat"
+    ],
+    "closingAsk": "Update the scope from these answers, then tell me what is still open.",
+    "scope": [
+      {
+        "slot": "goal",
+        "label": "What we're trying to achieve",
+        "state": "settled",
+        "text": "A log you keep up: title only, logged in a tap or two, and it works in a tunnel.",
+        "reopened": null,
+        "evidence": [
+          "r1:Q1",
+          "r1:Q2",
+          "r2:Q6"
+        ]
+      },
+      {
+        "slot": "deliverable",
+        "label": "What we hand over",
+        "state": "settled",
+        "text": "A one-page build plan, readable on the train, that says what to build and what not to build.",
+        "kind": "new-project-plan",
+        "evidence": [
+          "r1:Q4",
+          "r1:Q5"
+        ]
+      },
+      {
+        "slot": "boundary",
+        "label": "What's in and what's out",
+        "state": "settled",
+        "text": "Finished and abandoned books both go in. Entries can gain fields later. Still nothing social.",
+        "reopened": null,
+        "evidence": [
+          "r2:Q7",
+          "r2:Q8"
+        ]
+      },
+      {
+        "slot": "verification",
+        "label": "How we know it's done",
+        "state": "settled",
+        "text": "Three taps or fewer to log a book, checked on day one, then still in use a month later.",
+        "reopened": null,
+        "evidence": [
+          "r2:Q9",
+          "r2:Q10"
+        ]
+      },
+      {
+        "slot": "constraints",
+        "label": "Fixed facts we work inside",
+        "state": "settled",
+        "text": "Phone, on the train, under six taps to log a book. No account, no feed, nobody else ever sees it.",
+        "evidence": [
+          "r1:Q1",
+          "r1:notes"
+        ]
+      }
+    ],
+    "glossary": {},
+    "research": {
+      "mode": "light",
+      "trigger": [
+        "Q3 was rejected — the offline question was asked in terms that meant nothing to the reader.",
+        "Q2 changed to title only, which invalidates the assumed test for done.",
+        "The overall notes raised abandoned books, which nothing in round 1 covered."
+      ]
+    },
+    "constraints": [
+      {
+        "label": "Phone:",
+        "text": "this happens on the train, not at a desk"
+      },
+      "Faster than six taps, or it has already failed",
+      "No account, no feed, no friends",
+      {
+        "label": "Settled:",
+        "text": "a one-page plan that also says what not to build"
+      }
+    ],
+    "context": {
+      "title": "What changed since last time",
+      "note": "You cut the fields down to title only and asked whether you could add more later without losing anything. You can — but only if the answer to the first question below is the one I recommend.",
+      "blocks": [
+        {
+          "heading": "Where this stands",
+          "type": "list",
+          "items": [
+            {
+              "term": "agreed",
+              "desc": "a habit, title only, a one-page plan with an explicit not-building list"
+            },
+            {
+              "term": "open",
+              "desc": "the train problem, abandoned books, and what counts as working"
+            }
+          ]
+        }
+      ]
+    },
+    "theme": {
+      "accent": "#8A5A3B",
+      "neutralBias": "warm"
+    }
+  },
+  "sections": [
+    {
+      "id": "T",
+      "title": "The train problem"
+    },
+    {
+      "id": "W",
+      "title": "What the log holds"
+    },
+    {
+      "id": "D",
+      "title": "Knowing it works"
+    }
+  ],
+  "questions": [
+    {
+      "id": "Q6",
+      "section": "T",
+      "slot": "goal",
+      "context": "I asked this badly last time. Here it is in plainer terms: you are in a tunnel, you finish a book, you tap save. What should happen?",
+      "breakdown": [
+        "It saves on the phone straight away, and you never see a difference.",
+        "It waits for signal, so you see an error and have to remember to come back."
+      ],
+      "technical": true,
+      "example": "Notes on your phone works the first way — you type on a plane and it appears on your laptop later, without you doing anything.",
+      "question": "In a tunnel, what happens when you tap save?",
+      "why": "Saving on the phone first is how every app that survives a commute works, and the difference in build effort is about an afternoon.",
+      "switchIf": "Choose the second if your line has signal end to end and you would rather have this working sooner.",
+      "rec": "a",
+      "multi": false,
+      "options": [
+        {
+          "key": "a",
+          "label": "It saves, and you carry on",
+          "detail": "Written to the phone; syncs later if it needs to."
+        },
+        {
+          "key": "b",
+          "label": "It tells you to try later",
+          "detail": "Simpler to build, and it fails where you read."
+        }
+      ]
+    },
+    {
+      "id": "Q7",
+      "section": "W",
+      "slot": "boundary",
+      "context": "You said abandoning happens more than finishing. That makes it a real part of the log, not an edge case, and it changes what the log means.",
+      "breakdown": [
+        "Only finished books: the list stays a list of achievements.",
+        "Finished and abandoned: more honest, and the list becomes a record of your reading rather than your wins."
+      ],
+      "technical": false,
+      "question": "Should abandoned books go in the log?",
+      "why": "You raised it unprompted, which usually means it matters, and a log that quietly omits most of your reading will feel wrong within a month.",
+      "switchIf": "Keep finished-only if what you want from this in a year is a list you feel good about.",
+      "rec": "b",
+      "multi": false,
+      "options": [
+        {
+          "key": "a",
+          "label": "Finished books only",
+          "detail": "One kind of entry; nothing to decide."
+        },
+        {
+          "key": "b",
+          "label": "Finished and abandoned",
+          "detail": "One extra tap, and a truer record."
+        },
+        {
+          "key": "c",
+          "label": "Track progress too",
+          "detail": "Page counts and updates; back to six taps."
+        }
+      ]
+    },
+    {
+      "id": "Q8",
+      "section": "W",
+      "slot": "boundary",
+      "context": "You asked whether you can start with the title alone and add more later without losing what is already there. That depends on one decision, made now.",
+      "breakdown": [
+        "Room left for more: entries can gain fields later and old ones stay readable.",
+        "Title only, fixed: simplest now, and adding a field later means rewriting the lot."
+      ],
+      "technical": true,
+      "example": "If each entry is saved as a little labelled record rather than one line of text, adding a rating next year leaves every old entry exactly as it was.",
+      "question": "Should entries be able to gain fields later?",
+      "why": "It costs nothing today and it is the difference between adding a field in an evening and migrating a year of entries by hand.",
+      "switchIf": "Take the fixed version if you are fairly sure the title is all you will ever want.",
+      "rec": "a",
+      "multi": false,
+      "options": [
+        {
+          "key": "a",
+          "label": "Leave room to grow",
+          "detail": "Add fields later; old entries still work."
+        },
+        {
+          "key": "b",
+          "label": "Fix it at the title",
+          "detail": "Simplest now, painful to change later."
+        }
+      ]
+    },
+    {
+      "id": "Q9",
+      "section": "D",
+      "slot": "verification",
+      "context": "You cut the fields to title only, so the test I assumed no longer measures anything. What would tell you this worked?",
+      "breakdown": [
+        "A tap count: measurable today, and it is the bar Goodreads failed.",
+        "Still using it in a month: the thing you actually care about, but you cannot check it now."
+      ],
+      "technical": false,
+      "question": "What would tell you this worked?",
+      "why": "The tap count is the only one you can check the day it is built, and it is the exact thing that made you quit twice before.",
+      "switchIf": "Choose the month if you would rather judge this on the habit than on the mechanics.",
+      "rec": "a",
+      "multi": false,
+      "options": [
+        {
+          "key": "a",
+          "label": "Three taps or fewer",
+          "detail": "Checkable the day it is finished."
+        },
+        {
+          "key": "b",
+          "label": "Still using it in a month",
+          "detail": "The real test, but you wait for it."
+        },
+        {
+          "key": "c",
+          "label": "Both, in that order",
+          "detail": "Taps now, the habit as the honest one."
+        }
+      ]
+    },
+    {
+      "id": "Q10",
+      "section": "D",
+      "slot": "verification",
+      "context": "There is one failure worth naming now: the log is on your phone, and phones get lost. What happens then decides how much trust this thing deserves.",
+      "breakdown": [
+        "A copy somewhere else: the log survives the phone, at the cost of some setup.",
+        "Phone only: nothing to set up, and losing the phone loses everything."
+      ],
+      "technical": false,
+      "question": "What happens if you lose the phone?",
+      "why": "A year of reading is worth more than the ten minutes of setup, and knowing it is safe is part of what makes a habit stick.",
+      "switchIf": "Stay phone-only if you would rather not think about it until the log is worth protecting.",
+      "rec": "a",
+      "multi": false,
+      "options": [
+        {
+          "key": "a",
+          "label": "A copy somewhere else",
+          "detail": "Survives the phone; a little setup once."
+        },
+        {
+          "key": "b",
+          "label": "Phone only for now",
+          "detail": "Nothing to set up; nothing to fall back on."
+        }
+      ]
+    }
+  ]
+}

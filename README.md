@@ -1,8 +1,8 @@
 # megascope
 
-**Interactive project scoping for Claude Code.** Point it at a fuzzy request and it drives the project to an agreed **phased plan with a detailed MVP** — by (1) clarifying up front, (2) researching in parallel, and (3) handing you a **polished, theme-aware interactive scoping document** where every decision is pre-set to a recommended default. You review, override, and flag; click **Copy answers for Claude**; paste back. Claude resolves follow-ups and delivers the plan.
+**Interactive project scoping for Claude Code.** Point it at a fuzzy request and it drives the project to an **agreed, checkable scope** — then to a kick-off brief a fresh agent session can execute. It works in **short rounds**: each one is a polished, theme-aware interactive document where every decision is pre-set to a recommended default. You review, override, reject and flag; click **Copy answers for Claude**; paste back. The next round is written from your answers.
 
-It's general-purpose but build-optimized: strong defaults for technical and software builds (research fan-out, phased plans, a crisp MVP boundary).
+What gets handed over is itself a scoping decision — a build plan, a feature spec, an experiment, or something else. The skill infers it, and asks if the goal doesn't make it obvious.
 
 ## The idea: one engine, data per run
 
@@ -15,8 +15,10 @@ The engine renders everything from data — header, intro, constraint chips, a c
 - **Recommendation-first, not a blank form** — every question ships pre-answered with a ★ default and a one-line *why*. You review, not author.
 - **Rationale travels with every question** — the `why` names the tradeoff and often the runner-up condition.
 - **Defaults are earned by research** — concrete, grounded options, not generic filler.
-- **One-click disagreement** — change / note / **flag-for-follow-up** / reviewed per question; a flag means "let's talk," so the round-trip never stalls.
-- **A clean, parseable export** closes the human→Claude loop reliably.
+- **Nobody gets boxed in** — every question also offers *in my own words* and *this doesn't make sense*, added by the engine so a run can't forget them. A rejection opens a dialogue; it never counts as an answer.
+- **A flag is a bookmark, not an objection** — copy a question out on its own, ask about it elsewhere, come back. The answer still stands and the round doesn't wait.
+- **A clean, parseable export** closes the human→Claude loop — and is parsed back by the tool, so a later round's claims are checked against what you actually said.
+- **Readiness is a check, not a self-report** — five scope slots, each settled only on evidence that resolves. The loop terminates on a tool refusal.
 - **Constraints as chips** — already-decided facts are shown and therefore *not re-asked*.
 - **Tasteful, subject-grounded, theme-aware craft** — personality via `meta.theme`, not by touching the shell.
 
@@ -34,7 +36,7 @@ Skills load at session start, so open a **new** `claude` session, then invoke:
 /megascope
 ```
 
-…and describe the project you want to scope. The skill ([`skills/megascope/SKILL.md`](skills/megascope/SKILL.md)) also triggers on natural requests like "help me plan X", "turn this idea into a build plan", or "what should the MVP be".
+…and describe the project you want to scope. The skill ([`skills/megascope/SKILL.md`](skills/megascope/SKILL.md)) also triggers on natural requests like "help me plan X", "turn this idea into a build plan", or "what should the first version be".
 
 ## Development workflow
 
@@ -74,37 +76,44 @@ echo 'mega() { bash "$HOME/Dev/skill-megascope/scripts/mega.sh" "$@"; }' >> ~/.z
 
 ## How a run works
 
-0. **Intake & clarify** — pin the subject/goal/constraints; ask 2–4 high-leverage `AskUserQuestion` clarifications only where they change research direction.
-1. **Research fan-out** — a `Workflow` of parallel researchers → a synthesis pass producing a master dossier, a decision-oriented open-questions list, and a proposed phase plan (auto-scaled to complexity; degrades to parallel agents or inline research).
-2. **Build the doc** — transform the synthesis into the questions-JSON, inject it into the engine, save the HTML, and publish it as an Artifact.
-3. **Round-trip** — you fill it in and paste the export back.
-4. **Follow-up loop** — Claude resolves flagged/ambiguous items.
-5. **Deliver** — a phased build plan + detailed Phase-1/MVP requirements.
+0. **Intake** — pin the subject, the goal, and the facts already fixed; 2–4 `AskUserQuestion` clarifications only where the answer changes what gets researched.
+1. **Round 1** — the goal and what kind of work this is. Research is capped light here on purpose: a first round must not make you wait.
+2. **Round-trip** — you fill it in and paste the export back. It's saved verbatim; later rounds are checked against it.
+3. **Round N** — written from your answers, scoping the next layer. Research is sized off what the last paste-back actually opened. `build` refuses a round that advances nothing, asks about something settled, or leaves an open slot untargeted.
+4. **Close** — when every slot is settled, `build` refuses and `ready` checks the six conditions. Then a scope summary you approve, and a **kick-off brief** a fresh session can act on with no other context.
 
 ## Repo layout
 
 ```
 skill-megascope/
 ├── skills/megascope/                  # the skill (symlink this into ~/.claude/skills/)
-│   ├── SKILL.md                       # the skill: trigger + the pipeline
+│   ├── SKILL.md                       # the skill: trigger + the round loop
 │   ├── assets/
 │   │   ├── engine.html                # the static, data-driven shell (never edited per run)
+│   │   ├── megascope.mjs              # validate · build · ready — zero deps, ships with the skill
 │   │   └── schema.json                # questions-JSON JSON Schema
 │   └── references/                    # playbook
+│       ├── rounds.md                  #   the five slots, round sizing, the close
 │       ├── engine-data.md             #   the exact data contract
-│       ├── writing-questions.md       #   recommendation-first question doctrine
-│       ├── research-fanout.md         #   workflow patterns, dossier → synthesis
+│       ├── writing-questions.md       #   what the schema can't enforce
+│       ├── research-fanout.md         #   per-round research patterns
 │       └── theming.md                 #   subject-grounded accent + theme tokens
+├── examples/reading-log/              # one worked two-round scope, request → kick-off brief
 ├── scripts/
 │   ├── build-doc.mjs                  # inject a data.json into the shell → standalone HTML
 │   ├── inject.mjs                     # the one injection operation
 │   ├── dev.mjs                        # live preview: watch engine + sample data → scratch/preview.html
 │   └── mega.sh                        # flip the deployed skill between the prod/dev worktrees
 ├── tests/
-│   ├── smoke.mjs                      # schema-validate + headless render + round-trip assertions
+│   ├── schema.mjs                     # the schema compiles, and stays inside the walker's vocabulary
+│   ├── validate.mjs                   # the invalid corpus + walker-vs-ajv differential
+│   ├── ready.mjs                      # the close: R1–R6, one failure per condition
+│   ├── smoke.mjs                      # headless render, export contract, round isolation
+│   ├── docs.mjs                       # every documented command resolves
 │   └── fixtures/
-│       ├── rich.data.json             #   exercises every part of the format (also `npm run dev`'s sample)
-│       └── minimal.data.json          #   a tiny second case (incl. a multi-select question)
+│       ├── scope/                     #   a valid two-round scope, on disk as a run leaves it
+│       ├── answers/                   #   paste-backs a valid scope can't contain
+│       └── mutations.mjs              #   one single mutation per guarantee
 ├── CLAUDE.md                          # repo workflow rules for Claude sessions
 ├── package.json
 ├── LICENSE
@@ -115,21 +124,23 @@ skill-megascope/
 
 ```bash
 npm install            # ajv + jsdom (dev only)
-npm test               # validate schema + render both cases headless + assert invariants
+npm test               # schema + invalid corpus + readiness + headless render + docs
 npm run dev            # live engine preview — watch + rebuild scratch/preview.html on save
 ```
 
-Build any scoping doc from a data file:
+Build any round from its data file — this is what a run actually calls, and it **refuses to write**
+an invalid round:
 
 ```bash
-node scripts/build-doc.mjs path/to/scoping.data.json path/to/scoping.html
+node skills/megascope/assets/megascope.mjs build path/to/round-1.data.json path/to/round-1.html
+node skills/megascope/assets/megascope.mjs ready docs/scoping/my-project/
 ```
 
-The smoke test asserts, for every fixture under `tests/fixtures/`: schema validity, zero render errors, correct card count, **every default pre-selected to its recommendation**, correct live counts, and a clean export round-trip.
+The suite covers the machinery, not Claude's judgment — that's what dogfooding is for. It asserts: the schema stays inside the vocabulary its walker implements; ~56 single-mutation invalid files each fail on their *intended* keyword or check id; the shipped walker agrees with ajv case by case; the six readiness conditions each fail for their own reason; the engine renders, isolates rounds by storage key, and writes an export the tool can parse back; and every command in the docs resolves.
 
 ## Authoring a questions-JSON
 
-See [`skills/megascope/assets/schema.json`](skills/megascope/assets/schema.json) for the contract, [`references/engine-data.md`](skills/megascope/references/engine-data.md) for how each field renders, and [`references/writing-questions.md`](skills/megascope/references/writing-questions.md) for how to write questions that are worth pre-answering. [`tests/fixtures/rich.data.json`](tests/fixtures/rich.data.json) is a complete example that exercises every part of the format.
+[`references/engine-data.md`](skills/megascope/references/engine-data.md) is the field-by-field contract, [`references/rounds.md`](skills/megascope/references/rounds.md) covers the five slots and the close, and [`references/writing-questions.md`](skills/megascope/references/writing-questions.md) covers what the schema can't enforce. [`examples/reading-log/`](examples/reading-log/) is a complete worked scope, from the user's original request to the kick-off brief.
 
 ## License
 

@@ -501,7 +501,15 @@ export function semanticChecks(data, opts = {}) {
     for (const ref of slot.evidence || []) {
       const [, kStr, target] = /^r([0-9]+):(.+)$/.exec(ref) || [];
       const k = Number(kStr);
-      if (k >= round.n) {
+      if (k > round.n) {
+        fail('S13', `slot "${slot.slot}" cites ${ref}, which is a round that has not happened`);
+        continue;
+      }
+      if (k === round.n && !(dir && existsSync(resolve(dir, `round-${k}.answers.md`)))) {
+        // Citing your own round is legal only once its answers exist on disk.
+        // That is the close: after the final paste-back, this round's scope is
+        // updated in place to record what those answers settled. Before then it
+        // would be a round marking its own homework.
         fail('S13', `slot "${slot.slot}" cites ${ref}, but round ${round.n} has not collected its own answers yet`);
         continue;
       }
@@ -724,15 +732,18 @@ export function ready(dir) {
   // R5 · nothing is still rejected
   const latestAnswersPath = resolve(dir, `round-${latestN}.answers.md`);
   let r5 = null;
-  if (!existsSync(latestAnswersPath)) r5 = `round ${latestN} has no saved paste-back yet`;
-  else {
+  if (!existsSync(latestAnswersPath)) {
+    // not applicable rather than failed — a missing paste-back is R6's to
+    // report, and duplicating it here would bury R6 behind a worse message
+    rows.push({ id: 'R5', ok: true, detail: `round ${latestN} has no paste-back yet — see R6` });
+  } else {
     const rejected = [...parseAnswers(readFileSync(latestAnswersPath, 'utf8')).answers.values()]
       .filter((a) => a.state === 'REJECTED');
     if (rejected.length) {
       r5 = `${rejected.map((a) => a.id).join(', ')} still rejected — re-teach it, or settle the slot by assumption and say so`;
     }
+    note('R5', !r5, r5 || `round ${latestN}'s answers carry no rejections`);
   }
-  note('R5', !r5, r5 || `round ${latestN}'s answers carry no rejections`);
 
   // R6 · every round was actually answered
   const unanswered = roundNums.filter((n) => !existsSync(resolve(dir, `round-${n}.answers.md`)));

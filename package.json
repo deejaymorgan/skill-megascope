@@ -7,7 +7,7 @@
   "scripts": {
     "build": "node scripts/build-doc.mjs",
     "dev": "node scripts/dev.mjs",
-    "test": "node tests/schema.mjs && node tests/validate.mjs && node tests/smoke.mjs",
+    "test": "node tests/schema.mjs && node tests/validate.mjs && node tests/ready.mjs && node tests/smoke.mjs && node tests/docs.mjs",
     "dogfood": "bash scripts/mega.sh dogfood",
     "restore": "bash scripts/mega.sh restore",
     "deployed": "bash scripts/mega.sh status"

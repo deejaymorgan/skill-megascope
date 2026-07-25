@@ -1,90 +1,160 @@
 ---
 name: megascope
 description: >-
-  Drive a fuzzy project request to an agreed phased plan with a detailed MVP, via
-  upfront clarification, parallel research, and a polished interactive HTML scoping
-  document the user fills in and pastes back. Use when the user wants to scope, plan,
-  or spec a non-trivial project — "scope this", "help me plan X", "turn this idea
-  into a build plan", "what should the MVP be", "let's figure out requirements before
-  building". Especially strong for technical/software builds (research fan-out, phased
-  plans, MVP boundary), but works for any substantial project.
+  Drive a fuzzy project request to an agreed, checkable scope through short
+  rounds of questions, then produce a kick-off brief a fresh agent can execute.
+  Each round is a polished interactive HTML document the user fills in and
+  pastes back. Use when the user wants to scope, plan, or spec a non-trivial
+  project — "scope this", "help me plan X", "turn this idea into a build plan",
+  "what should the first version be", "let's figure out requirements before
+  building". Especially strong for technical and software work, but the
+  deliverable is itself a scoping decision, not a fixed output.
 ---
 
-# megascope — interactive project scoping
+# megascope — scoping in rounds
 
-Turn a vague request into a **phased build plan with a detailed Phase-1/MVP** by (1) clarifying up front, (2) researching in parallel, and (3) handing the user a **polished, theme-aware interactive scoping document** where every decision is pre-set to a recommended default. The user reviews/overrides/flags, clicks **Copy answers for Claude**, pastes back; you resolve follow-ups and deliver the plan.
+Take a vague request to an agreed scope, one layer at a time, then hand over a
+brief a fresh session can act on with no other context.
 
-The document is produced by a **data-driven engine**: one static HTML shell (`assets/engine.html`) fed a per-run **questions-JSON**. Each run generates *only the JSON* — never bespoke HTML. That is the core efficiency win and the thing to protect.
+**Round 1 establishes the goal and what kind of work this is. Each later round takes
+what is settled and scopes the next layer.** Small jobs need one round; large ones a
+few. Scale to the job and say which you chose.
 
-## Operating rules (read first)
+The document is produced by a **data-driven engine**: one static shell (`assets/engine.html`)
+fed a per-round questions-JSON. You generate *only the JSON*. Never bespoke HTML, never an
+edited shell. That is the core efficiency win and the thing to protect.
 
-- **Files.** The engine shell, schema, and playbook sit alongside this skill: `assets/engine.html`, `assets/schema.json`, and `references/`. (The worked example and the `build-doc.mjs` helper live in the megascope repo — `examples/` and `scripts/` — useful when developing, not needed at run time.)
-- **Never edit the engine shell for a run.** Generate the questions-JSON, then produce the doc by taking `assets/engine.html` and replacing ONLY the contents of its `<script id="scoping-data">` block with your JSON: Read the engine, write the combined result into the target project. (Working in the repo, `node scripts/build-doc.mjs <data.json> <out.html>` does exactly this.)
-- **Validate every JSON** against `assets/schema.json` before building; a malformed block makes the engine fall back to its empty state.
-- **Recommendation-first, always.** Every question ships pre-answered with a `rec` and a one-line `why`. The user's job is to *review*, not to author. A blank-looking question is a bug.
-- **Don't re-ask what's decided.** Constraints the user already fixed become `meta.constraints` chips, not questions.
-- **The engine is untouched, tasteful, and self-contained.** Personality comes from `meta.theme` (usually one accent hex) + the content — not from editing the shell.
+## Operating rules
 
-## The pipeline
+- **One command does the build.** `node assets/megascope.mjs build <round-N.data.json> <out.html>`
+  validates and then injects. It **refuses to write** an invalid round, so a broken document
+  cannot reach the user. Do not read the engine and splice the data block yourself.
+- **Never edit the shell.** Personality arrives only through `meta.theme` — usually one accent
+  hex. If you find yourself wanting to change `engine.html`, the answer is in the data.
+- **The engine adds the escapes; the data must not.** Every question automatically gets
+  *In my own words*, *This doesn't make sense*, a flag, a note and its own copy button. They
+  are a parse contract, not styling. Do not try to declare or restyle them.
+- **Don't re-ask what's decided.** Facts the user already fixed become `meta.constraints` chips.
+- **Recommendation-first, always.** Every question ships pre-answered with a `rec`, a `why` and a
+  `switchIf`. The user reviews; they do not author. A blank-looking question is a bug.
 
-### 0 · Intake & clarify
-Read the request. Pin the **subject, goal, audience, and the single job** of the scoping doc. List the facts already decided (these become constraints, not questions).
+## The scope is five slots
 
-If the request is underspecified in ways that would **change the research direction**, ask **2–4 high-leverage clarifications** with `AskUserQuestion` — multiple choice, recommended option first, always a free-text escape. Good clarifiers resolve forks like: platform/target, the metric of success, hard constraints (stack, timeline, budget), or scope ceiling. Skip clarifiers that don't change what you'd research or recommend — pick a sensible default and note it instead.
+Everything is tracked in `meta.scope`: **goal · deliverable · boundary · verification · constraints.**
+Each is `settled` or `open`, carries plain-language `text`, and cites the answers that earned it.
+A round asks about open slots and nothing else — `build` enforces exact cover.
 
-### 1 · Research fan-out
-Scale research to complexity:
+`deliverable` also carries a `kind`: `new-project-plan`, `codebase-feature`, `experiment`, or
+`other`. **Do not assume the output is a build plan.** Infer it from the goal; if the goal does
+not make it obvious, round 1 asks.
 
-| Complexity | Approach |
-|---|---|
-| Trivial / well-understood | Skip fan-out; draft questions directly from what you know. |
-| Moderate | 3–5 parallel researchers, each a facet; one synthesis pass. |
-| Complex / unfamiliar codebase or domain | 8–12+ researchers across code, domain, prior art, constraints, risks; a dedicated synthesis agent. |
+See `references/rounds.md` for the slots, round sizing, and the close.
 
-Prefer a **`Workflow`** (invoking this skill is your opt-in to orchestrate) with a **pipeline**: parallel dossier-writers → a synthesis stage. If `Workflow` is unavailable, **degrade gracefully** to a batch of parallel `Agent` calls (or, for small jobs, research inline yourself).
+## The loop
 
-Each researcher writes a **dossier** grounded in real sources (cite `file:line` for code; tag community/inference claims; resolve contradictions against ground truth). The synthesis stage consolidates them into three artifacts — the same shape as the gold-standard reference:
+### 0 · Intake
+Read the request. Name the subject, the goal as you understand it, and the facts already fixed.
+Ask **2–4** `AskUserQuestion` clarifications only where the answer changes what you would research.
+Pick a working directory: `docs/scoping/<project>/`.
 
-1. **Master dossier** — deduplicated canonical facts, contradictions resolved.
-2. **Open questions** — each a decision with **2–4 concrete options, a ★ recommended default, and a one-line rationale**. This *is* the raw material for the questions-JSON.
-3. **Proposed phase plan** — phases ordered so each proves architecture before scaling, with a Phase-1/MVP boundary.
+### 1 · Research, sized to the round
+Round 1 is capped at `research.mode` `none` or `light` (≤3 parallel readers, no dossier) — it must
+not make the user wait. Later rounds size research off what the previous paste-back actually opened,
+and record that in `research.trigger[]`. A question marked `technical: true` must carry an `example`
+**and** cannot exist with `research.mode: "none"`. See `references/research-fanout.md`.
 
-See `references/research-fanout.md` for workflow patterns and the dossier/synthesis format.
+### 2 · Write the round
+Write `docs/scoping/<project>/round-<n>.data.json`. Follow `references/writing-questions.md`
+for what the schema cannot enforce, and `references/engine-data.md` for the format.
 
-### 2 · Build the scoping doc
-Transform the synthesis into the **questions-JSON** (`assets/schema.json`):
+Hard limits worth knowing before you start: **8 questions, 4 sections, 4 options** per round;
+option labels ≤7 words; `why` ≤200 characters. The caps are the pressure that makes rounds real —
+if a round will not fit, that is the signal to split it, not to compress the writing.
 
-- Map open-questions → `questions[]` (`id`, `section`, `question`, `why`, `rec`, `options[]`). Follow `references/writing-questions.md` — concrete options, the runner-up condition in the `why`, `rec` may be any option.
-- Group questions into `sections[]` (digestible areas, ~4–8).
-- Fill `meta`: title/subtitle/favicon, headline, lede, the already-decided `constraints` chips, and a `context` panel (a `note`, `cards` for a domain/stage map, and `blocks` for the proposed phases + an architecture diagram).
-- Pick a **subject-grounded `theme.accent`** (one hex → the whole palette) + optional `neutralBias`/fonts. See `references/theming.md`.
-- Save `<project>.scoping.data.json`, then build the HTML by injecting it into `assets/engine.html` — replace the `<script id="scoping-data">` block and write the copy into the target project (e.g. `docs/scoping/`). Repo helper: `node scripts/build-doc.mjs path/to/scoping.data.json path/to/scoping.html`.
-- **Publish as an Artifact.** Load the `artifact-design` skill for calibration (the shell is already tasteful; keep it so). The engine omits `<!doctype>/<html>/<head>/<body>`, so it is Artifact-ready as-is. Pass `favicon` from `meta.favicon`, a stable `title`, and a one-line `description`.
-- Hand the user the link with a one-line instruction: *review the defaults, change/flag/note what matters, then click "Copy answers for Claude" and paste it back here.*
+```bash
+node assets/megascope.mjs build docs/scoping/<project>/round-1.data.json docs/scoping/<project>/round-1.html
+```
 
-`references/engine-data.md` is the exact data contract (how each field renders, the inline markup, the injection point).
+Then **publish it as an Artifact**. Load the `artifact-design` skill for calibration — the shell is
+already tasteful, so keep it so. The engine omits `<!doctype>/<html>/<head>/<body>`, so it is
+Artifact-ready as-is. Pass `meta.favicon` as the favicon and a stable title.
 
-### 3 · Round-trip
-The user reviews in the doc and pastes the **Copy answers for Claude** export back into chat. It is clean, parseable markdown: a summary line, per-section `- Qid [CHANGED|default · ⚑ FOLLOW-UP] KEY: label (rec was …)` lines, `note:` lines, an overall-notes block, and a closing ask.
+Hand it over in one line: *review the defaults, change or reject anything that doesn't fit, then
+click "Copy answers for Claude" and paste it back.*
 
-### 4 · Follow-up loop
-Parse the export. Then:
-- Confirm the **CHANGED** choices (note anything they imply for the plan).
-- For every **⚑ FOLLOW-UP** and any ambiguous note, ask **targeted** follow-ups — in chat for a few, or a small follow-up scoping doc if there are many. Resolve the overall-notes / new questions too.
-- Iterate until nothing is open.
+### 3 · Read the paste-back
+**Save it verbatim first**, as `round-<n>.answers.md`. Later rounds are checked against it — no
+saved paste-back, no next round.
 
-### 5 · Deliver the plan
-Produce the **phased build plan + detailed Phase-1/MVP requirements**, reflecting the chosen options — in the style of a `PHASE-PLAN.md`: an architecture-at-a-glance, phase-by-phase goals with exit criteria, a detailed MVP checklist, an explicit *out-of-MVP* list, and sequencing/risk notes. Save it into the project.
+Check line 2's `scope-id:` matches the round you sent. If it doesn't, stop and ask; do not merge.
+No `scope-id:` line at all means a pre-v2 export.
 
-## Degradation & edge cases
-- **No `Workflow`:** use parallel `Agent` calls; for tiny projects, research inline and skip fan-out.
-- **User wants to skip research:** go straight to a questions-JSON from your own knowledge — still recommendation-first.
-- **Very small project:** fewer sections/questions is fine; the value is the recommendation-first round-trip, not volume.
-- **Re-scoping after paste-back:** you can regenerate a *follow-up* doc with only the unresolved questions (new `project` slug suffix, e.g. `-followup`, to keep separate localStorage).
+Then, per answer:
 
-## Files (alongside this skill)
-- `assets/engine.html` — the static, data-driven shell. **Do not edit per run.**
-- `assets/schema.json` — the questions-JSON schema (validate against this).
-- `references/{writing-questions,research-fanout,theming,engine-data}.md` — playbook.
+| Tag | What it means | What you do |
+|---|---|---|
+| `DEFAULT` | took the recommendation | nothing — silent |
+| `CHANGED` | picked something else | confirm in one line |
+| `OWN` | answered in their own words | the `own words:` text **supersedes every option**. Reflect it back in one sentence. If it opens a decision this round didn't contain, add it to the next round rather than arguing |
+| `REJECTED` | "this doesn't make sense to me" | **never counts as evidence, and never carries the default forward as if answered** |
+| `FLAGGED` | the user's own bookmark | **the answer stands.** Answer it briefly; do not hold the round open |
 
-In the megascope repo (development only): `examples/` (worked example), `scripts/build-doc.mjs` (injection helper), `tests/smoke.mjs` (render + round-trip test).
+**On a rejection, open a dialogue.** Restate the decision in simpler words, give one everyday
+example and one analogy, confirm they follow, then re-ask — in chat for one or two, in the next
+round for several. **Rejected twice means the question is wrong, not the user.** Settle the slot with
+`assumed: true` and a written `assumption`, say so out loud, and it surfaces in its own section of
+the kick-off brief.
+
+### 4 · Next round, or the close
+Update the five slots from what came back. Then either:
+
+- **Something is still open** → write `round-<n+1>.data.json` with `prev` and `prevAnswers` pointing
+  at the round just finished, and go to step 2. `build` refuses a round that advances nothing,
+  asks about a settled slot, or leaves an open slot untargeted.
+- **Everything settled** → `build` refuses with *"the scope is complete — produce the kick-off
+  prompt, not another round."* That refusal is the signal to close.
+
+### 5 · Close
+Update the final round's data file in place: set the slots its answers settled, with `evidence`
+citing that round. Do not bump `revision` — the questions didn't change, the scope did. Then:
+
+```bash
+node assets/megascope.mjs ready docs/scoping/<project>/
+```
+
+Exit 0 means ready. Exit 1 names the first unmet condition and its slot — **that message is the
+spec for what to do next.** Do not hand-wave past it.
+
+When ready, present the scope summary: one short paragraph per slot, using each slot's `text`
+**verbatim**, so the user reads back exactly what was recorded — plus a section for anything
+settled by assumption.
+
+- **They approve** → write `SCOPE.md` and `KICKOFF.md`.
+- **They question it** → make it simpler, give one concrete example and one analogy, patch that
+  slot's `text`, and re-present. Only when a slot genuinely regresses do you set it back to `open`
+  with a `reopened` reason and run another round.
+
+The **kick-off brief** is the deliverable: a self-contained document a fresh agent session can act
+on with nothing else — what to build, what is already decided, what is out of scope, how to verify
+it is done, and what was assumed rather than agreed. `references/rounds.md` has its shape.
+
+## Files
+
+- `assets/engine.html` — the static shell. **Never edited per run.**
+- `assets/megascope.mjs` — `validate` · `build` · `ready`. Zero dependencies.
+- `assets/schema.json` — the machine-checkable contract.
+- `references/rounds.md` — the five slots, round sizing, the close, the kick-off brief.
+- `references/writing-questions.md` — what makes a question worth pre-answering.
+- `references/research-fanout.md` — per-round research patterns.
+- `references/engine-data.md` — every field, and how it renders.
+- `references/theming.md` — choosing an accent that belongs to the subject.
+
+## Edge cases
+
+- **A one-round job.** Fine — set `round.of` to 1. The value is the recommendation-first round-trip,
+  not the number of rounds.
+- **Beyond four rounds.** Doctrine stops at 4. If the scope still isn't closed, stop writing rounds:
+  finish it in conversation and settle what's left with `assumed: true` and written assumptions.
+- **No `Workflow`.** Use parallel `Agent` calls; for a small job, research inline.
+- **The user wants to skip research.** Go straight to a round from what you know — still
+  recommendation-first, and mark the questions `technical: false`.

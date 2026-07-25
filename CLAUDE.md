@@ -29,7 +29,9 @@ tracked files, not in memory.
 3. **`npm test` is the gate** before promoting — run it from the dev worktree; it must pass. It covers
    the machinery (engine + schema) only, not Claude's judgment (that's what dogfooding is for).
 4. **Keep `engine.html` data-less and never edited per run.** Personality comes from the questions-JSON
-   `meta.theme`, never the shell. Validate every data file against `skills/megascope/assets/schema.json`.
+   `meta.theme`, never the shell. Validate every data file with
+   `node skills/megascope/assets/megascope.mjs validate <file>` — it checks the schema *and* the
+   cross-references the schema cannot express.
 
 ## The loop
 - **Iterate:** edit in the dev worktree → `npm run dev` (live engine preview) and `npm test`. Deployed
@@ -41,9 +43,10 @@ tracked files, not in memory.
 
 ## Layout
 - **`skills/megascope/`** — the skill itself.
-  - `SKILL.md` — the pipeline a run follows.
-  - `assets/` — the engine shell and its schema; see **Read** / **Don't read** below.
-  - `references/` — the playbook: writing questions, research, theming, data format.
+  - `SKILL.md` — the round loop a run follows.
+  - `assets/` — the engine shell, its schema, and `megascope.mjs` (validate · build · ready).
+  - `references/` — the playbook: rounds, writing questions, research, theming, data format.
+- **`examples/reading-log/`** — one worked two-round scope, from request to kick-off brief.
 - **`scripts/`** — dev helpers: `build-doc.mjs`, `inject.mjs`, `dev.mjs`, `mega.sh`.
 - **`docs/`** — notes on working *on* the repo, as opposed to notes that ship with the skill.
 - **`tests/`** — machinery tests for the engine and schema; run with `npm test`.
@@ -53,9 +56,12 @@ tracked files, not in memory.
 - **`skills/megascope/references/engine-data.md`**
   - The data format — every field and how it appears on the page.
   - Start here for anything about the questions-JSON.
-- **`tests/fixtures/rich.data.json`**
-  - A complete example data file, exercising every part of the format.
-  - Read it to see the shape and quality to aim for.
+- **`skills/megascope/references/rounds.md`**
+  - The five scope slots, how a round is sized, and how the loop terminates.
+  - Read it before changing anything about rounds, readiness, or the close.
+- **`examples/reading-log/round-1.data.json`**
+  - A complete example data file.
+  - Read it to see the shape and quality to aim for; its siblings show the whole loop.
 - **`skills/megascope/assets/engine.html`**
   - The page that renders the document.
   - Read only the part you need: the code is in the `<script>` at the bottom, and the long styling

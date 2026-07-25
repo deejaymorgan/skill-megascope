@@ -1,0 +1,197 @@
+{
+  "formatVersion": 2,
+  "meta": {
+    "project": "reading-log",
+    "round": {
+      "n": 1,
+      "of": 2,
+      "revision": 1,
+      "label": "What this is for, and what you want back",
+      "prev": null,
+      "prevAnswers": null
+    },
+    "title": "Reading log",
+    "subtitle": "Round 1 of 2",
+    "favicon": "📚",
+    "headline": "Before you build anything — what is this for?",
+    "lede": "You bounced off Goodreads twice, which tells me more about what you **don't** want than what you do. Five questions to pin down the job and what you want handed back. The next round gets specific.",
+    "closingAsk": "Update the scope from these answers, then tell me what is still open.",
+    "scope": [
+      {
+        "slot": "goal",
+        "label": "What we're trying to achieve",
+        "state": "open",
+        "text": "Not agreed yet. Something between a private record and a habit you actually keep up.",
+        "evidence": []
+      },
+      {
+        "slot": "deliverable",
+        "label": "What we hand over",
+        "state": "open",
+        "text": "Not agreed yet. You can write code, so this could be a plan, a first cut, or a quick trial.",
+        "evidence": []
+      },
+      {
+        "slot": "boundary",
+        "label": "What's in and what's out",
+        "state": "settled",
+        "text": "Assumed for now: you are the only person who ever sees this. Nothing social, nothing shared.",
+        "assumed": true,
+        "assumption": "You bounced off Goodreads over the social side twice, so I am treating that as out until told otherwise.",
+        "evidence": []
+      },
+      {
+        "slot": "verification",
+        "label": "How we know it's done",
+        "state": "settled",
+        "text": "Assumed for now: it works if you log three books in a row without going back to a notes app.",
+        "assumed": true,
+        "assumption": "Sticking with it is the only outcome that matters here, so I am assuming that is the test.",
+        "evidence": []
+      },
+      {
+        "slot": "constraints",
+        "label": "Fixed facts we work inside",
+        "state": "settled",
+        "text": "It has to work on the train home, on a phone, and logging a book must beat six taps.",
+        "assumed": true,
+        "assumption": "Both come straight from your message; I am treating them as fixed rather than as preferences.",
+        "evidence": []
+      }
+    ],
+    "glossary": {},
+    "research": { "mode": "light" },
+    "constraints": [
+      { "label": "Phone:", "text": "this happens on the train, not at a desk" },
+      "Faster than six taps, or it has already failed",
+      "No account, no feed, no friends"
+    ],
+    "context": {
+      "title": "What I took from your message",
+      "note": "Two failed attempts at Goodreads is the most useful thing you told me. It rules out a whole shape of product, which is why none of the questions below ask about sharing.",
+      "blocks": [
+        {
+          "heading": "Where this happens",
+          "type": "list",
+          "items": [
+            { "term": "the train home", "desc": "where you finish books, and where signal comes and goes" },
+            { "term": "six taps", "desc": "the bar Goodreads failed to clear, so it is the one to beat" }
+          ]
+        }
+      ]
+    },
+    "theme": { "accent": "#8A5A3B", "neutralBias": "warm" }
+  },
+  "sections": [
+    { "id": "G", "title": "What it's for" },
+    { "id": "H", "title": "What you want back" }
+  ],
+  "questions": [
+    {
+      "id": "Q1",
+      "section": "G",
+      "slot": "goal",
+      "context": "You said you want to track books, but tracking is not a goal on its own. What you want to be able to do later decides almost everything else.",
+      "breakdown": [
+        "A record to look back on: what matters is that nothing is ever lost.",
+        "A habit to keep up: what matters is that logging is so quick you never skip it."
+      ],
+      "technical": false,
+      "question": "What is the log actually for?",
+      "why": "You have bounced off two apps already, so the thing that has been failing is the habit, not the storage.",
+      "switchIf": "Pick the record if you have years of reading elsewhere that you want to bring in and keep.",
+      "rec": "b",
+      "multi": false,
+      "options": [
+        { "key": "a", "label": "A permanent record", "detail": "Complete and lasting; slower to add to." },
+        { "key": "b", "label": "A habit you keep", "detail": "Fast enough that you never skip a book." },
+        { "key": "c", "label": "Something to share", "detail": "Ruled out by both Goodreads attempts." }
+      ]
+    },
+    {
+      "id": "Q2",
+      "section": "G",
+      "slot": "goal",
+      "context": "Goodreads took six taps partly because it asked for a lot. What you capture per book is the difference between two seconds and thirty.",
+      "breakdown": [
+        "Title alone: almost instant, and you will fill in the rest never.",
+        "A few fields: still quick, and enough to be worth re-reading later."
+      ],
+      "technical": false,
+      "question": "What do you want to capture per book?",
+      "why": "Title plus a date plus one line of what you thought is the most you can type on a train and still do it every time.",
+      "switchIf": "Go with title alone if you know you will resent typing anything at all on a phone.",
+      "rec": "b",
+      "multi": false,
+      "options": [
+        { "key": "a", "label": "Just the title", "detail": "One field, nothing to think about." },
+        { "key": "b", "label": "Title, date, one line", "detail": "Enough to enjoy re-reading in a year." },
+        { "key": "c", "label": "Full details and a rating", "detail": "This is roughly what you already quit twice." }
+      ]
+    },
+    {
+      "id": "Q3",
+      "section": "G",
+      "slot": "goal",
+      "context": "The train is the hard part. Underground stretches and bad signal are exactly when you have just finished something and want to log it.",
+      "breakdown": [
+        "Works with no signal: you can log anywhere and it catches up later.",
+        "Needs signal: less to build, and dead on the part of the journey that matters."
+      ],
+      "technical": true,
+      "example": "The app saves to the phone the moment you tap save, and quietly copies it up whenever a connection comes back.",
+      "question": "Should it work with no signal?",
+      "why": "The one moment this has to work is the moment you are least likely to have a connection, and the extra work is small.",
+      "switchIf": "Skip it if your commute has signal the whole way and you would rather have something working sooner.",
+      "rec": "a",
+      "multi": false,
+      "options": [
+        { "key": "a", "label": "Works with no signal", "detail": "Log anything, anywhere; it catches up later." },
+        { "key": "b", "label": "Needs a connection", "detail": "Simpler to build, useless in a tunnel." }
+      ]
+    },
+    {
+      "id": "Q4",
+      "section": "H",
+      "slot": "deliverable",
+      "context": "You can write code, so what you need from me is not necessarily code. The three answers below take very different amounts of your evenings.",
+      "breakdown": [
+        "A plan: you build it at your own pace, with the decisions already made.",
+        "A first working cut: faster to something real, less room to change your mind."
+      ],
+      "technical": false,
+      "question": "What should I hand you at the end?",
+      "why": "You said you have not decided what to build, which is a thinking problem rather than a typing one, and you can clearly do the typing.",
+      "switchIf": "Ask for the working cut if you would rather have something on your phone this week than understood.",
+      "rec": "a",
+      "multi": false,
+      "options": [
+        { "key": "a", "label": "A short build plan", "detail": "Decisions made, ordered steps, nothing more." },
+        { "key": "b", "label": "A first working cut", "detail": "Something you can log a book into this week." },
+        { "key": "c", "label": "A quick trial first", "detail": "One rough version to test the habit, then decide." }
+      ]
+    },
+    {
+      "id": "Q5",
+      "section": "H",
+      "slot": "deliverable",
+      "context": "Whatever I hand back can carry extras. Choosing now stops me guessing and stops the plan sprawling into things you would skip.",
+      "breakdown": [
+        "The data shape: worth it if you might move the log somewhere else one day.",
+        "A screen sketch: worth it if the six-taps problem is really a layout problem."
+      ],
+      "technical": false,
+      "question": "Which of these would you actually use?",
+      "why": "The tap count is a screen-design problem more than a storage one, so the sketch earns its place and the rest can wait.",
+      "switchIf": "Add the data shape too if you suspect you will want this on a laptop eventually.",
+      "rec": ["screen"],
+      "multi": true,
+      "options": [
+        { "key": "screen", "label": "A sketch of the logging screen", "detail": "Where every tap goes, and why." },
+        { "key": "data", "label": "The shape of the saved data", "detail": "So the log outlives whatever you build." },
+        { "key": "stack", "label": "A suggested stack", "detail": "Opinionated picks with reasons." },
+        { "key": "import", "label": "A way in from Goodreads", "detail": "Only useful if you want the old data." }
+      ]
+    }
+  ]
+}
