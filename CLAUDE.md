@@ -12,9 +12,18 @@ invariants that follow from that, and first-time setup.
 - **Dev — `~/Dev/skill-megascope-dev`:** branch `dev` (or a feature branch off it). The sandbox.
   **Do all skill iteration here.** Check `pwd` to know which worktree you're in.
 
+One git repo, two directories — the dev worktree's `.git` is a pointer file into the prod checkout's
+`.git`, so history, branches and `origin` are shared. But Claude Code keys its project state (memory,
+session history) to the **directory path**, so the two checkouts are two separate Claude Code
+projects. Nothing carries between them except what is committed. That is why working notes belong in
+tracked files, not in memory.
+
 ## Rules
-1. **Iterate in the dev worktree.** Never edit the skill on `main` expecting to experiment — `main` is
-   what live sessions run.
+1. **Open the session in the dev worktree, and iterate there.** Never edit the skill on `main`
+   expecting to experiment — `main` is what live sessions run. Prod is a directory that scripts
+   touch, not one to sit in: `scripts/mega.sh` uses `$HOME`-absolute paths and `git -C` takes a
+   path, so promoting and restoring both work from a dev session. **Never switch branches** — each
+   branch is bound to its own directory, and git will refuse.
 2. **Never repoint the deployed symlink by hand.** Use `bash scripts/mega.sh {dogfood|restore|status}`
    (or `npm run dogfood|restore|deployed`). `mega status` shows which version is live.
 3. **`npm test` is the gate** before promoting — run it from the dev worktree; it must pass. It covers
@@ -36,6 +45,7 @@ invariants that follow from that, and first-time setup.
   - `assets/` — the engine shell and its schema; see **Read** / **Don't read** below.
   - `references/` — the playbook: writing questions, research, theming, data format.
 - **`scripts/`** — dev helpers: `build-doc.mjs`, `inject.mjs`, `dev.mjs`, `mega.sh`.
+- **`docs/`** — notes on working *on* the repo, as opposed to notes that ship with the skill.
 - **`tests/`** — machinery tests for the engine and schema; run with `npm test`.
 - **`examples/paperclips/`** — one worked example, from input request to finished document.
 
@@ -50,6 +60,10 @@ invariants that follow from that, and first-time setup.
   - The page that renders the document.
   - Read only the part you need: the code is in the `<script>` at the bottom, and the long styling
     block above it rarely changes. Search it rather than reading top to bottom.
+- **`docs/testing-the-engine.md`**
+  - How to check the engine in a real browser, and what only a browser can tell you.
+  - Read it **before** opening any built document: over `file://` the page's JS never runs, so the
+    engine looks broken when it isn't.
 
 ## Don't read
 - **`examples/paperclips/scoping.html`**
