@@ -1,0 +1,215 @@
+{
+  "formatVersion": 2,
+  "meta": {
+    "project": "orchard-weather-station",
+    "round": {
+      "n": 1,
+      "of": 3,
+      "revision": 1,
+      "label": "What the station is for",
+      "prev": null,
+      "prevAnswers": null
+    },
+    "title": "Orchard — a garden weather station",
+    "subtitle": "Round 1 of 3",
+    "favicon": "🌦",
+    "headline": "First, what is this thing actually for?",
+    "lede": "You have described a weather station twice and a frost alarm once. Those are different projects. Five questions settle which one we are building and what you want handed back — then the next round gets specific.",
+    "steps": ["Review the defaults", "Change or reject what does not fit", "Copy answers → paste into chat"],
+    "closingAsk": "Update the scope from these answers, then tell me what is still open.",
+    "scope": [
+      {
+        "slot": "goal",
+        "label": "What we're trying to achieve",
+        "state": "open",
+        "text": "Not agreed yet. This round asks whether the station is a frost alarm or a weather record.",
+        "evidence": []
+      },
+      {
+        "slot": "deliverable",
+        "label": "What we hand over",
+        "state": "open",
+        "text": "Not agreed yet. This round asks whether you want a plan, a working thing, or a quick trial.",
+        "evidence": []
+      },
+      {
+        "slot": "boundary",
+        "label": "What's in and what's out",
+        "state": "settled",
+        "text": "Assumed for now: one station in one orchard, no second site and no sharing with anyone else.",
+        "assumed": true,
+        "assumption": "Nothing you have said suggests a second site, so I am assuming one station until the goal is agreed.",
+        "evidence": []
+      },
+      {
+        "slot": "verification",
+        "label": "How we know it's done",
+        "state": "settled",
+        "text": "Assumed for now: it is done when it survives one cold night and tells you something you acted on.",
+        "assumed": true,
+        "assumption": "A real cold night is the only honest test, so I am assuming that until you tell me otherwise.",
+        "evidence": []
+      },
+      {
+        "slot": "constraints",
+        "label": "Fixed facts we work inside",
+        "state": "settled",
+        "text": "Mains power in the shed, twelve metres from the mast. No cloud account — the data stays at home.",
+        "assumed": true,
+        "assumption": "Taken from your first message; I am treating both as fixed until you say they are negotiable.",
+        "evidence": []
+      }
+    ],
+    "glossary": {},
+    "research": { "mode": "light" },
+    "constraints": [
+      { "label": "Power:", "text": "mains socket in the shed, 12 m from the mast" },
+      "No cloud account — the data stays on the home network"
+    ],
+    "context": {
+      "title": "Site context",
+      "note": "The orchard runs down a `north-facing` slope. Cold air pools at the bottom, which is the whole reason you raised this.",
+      "cards": [
+        { "title": "Mast", "body": "A 3 m pole at the high corner, clear of the hedge.", "foot": "Ends: **the sensors**" },
+        { "title": "Shed", "body": "Houses the mains supply and whatever does the recording.", "foot": "Ends: **the record**" }
+      ],
+      "blocks": [
+        {
+          "heading": "Vocabulary",
+          "type": "list",
+          "items": [
+            { "term": "frost pocket", "desc": "cold air pooling at the low end of a slope" },
+            { "term": "dew point", "desc": "the temperature at which the air gives up its moisture" }
+          ]
+        },
+        {
+          "heading": "Shape",
+          "type": "diagram",
+          "lines": [
+            "  mast ──▶ shed ──▶ ~the record~",
+            "                └──▶ **the warning**"
+          ]
+        },
+        {
+          "heading": "Note",
+          "type": "prose",
+          "text": "Nothing here has to survive a power cut for more than an hour."
+        }
+      ]
+    },
+    "theme": { "accent": "#4A6E3A", "neutralBias": "warm" }
+  },
+  "sections": [
+    { "id": "P", "title": "What it's for" },
+    { "id": "W", "title": "What you want back" }
+  ],
+  "questions": [
+    {
+      "id": "Q1",
+      "section": "P",
+      "slot": "goal",
+      "context": "You mentioned frost twice and wind once. Which one the station is really for decides what goes up the mast first, and how soon it is useful.",
+      "breakdown": [
+        "Frost only: fewer sensors, and one number to get right.",
+        "Everything: a fuller picture, but nothing is finished for weeks."
+      ],
+      "technical": false,
+      "question": "What is the station mainly for?",
+      "why": "Frost is the one that costs you fruit, and it needs the fewest sensors to answer honestly.",
+      "switchIf": "Choose the general record if you want the data more than you want to be woken up.",
+      "rec": "a",
+      "multi": false,
+      "options": [
+        { "key": "a", "label": "Frost warning", "detail": "One job done properly: tell you the night before." },
+        { "key": "b", "label": "A general weather record", "detail": "Everything logged, nothing acted on automatically." },
+        { "key": "c", "label": "Both from the start", "detail": "Twice the mounting and twice the debugging up front." }
+      ]
+    },
+    {
+      "id": "Q2",
+      "section": "P",
+      "slot": "goal",
+      "context": "A warning is only worth building if it reaches someone who can act on it while there is still time to act.",
+      "breakdown": [
+        "Just you: simplest, and you already check your phone.",
+        "You and whoever is on the land: more useful, more to set up."
+      ],
+      "technical": false,
+      "question": "Who needs to act on a frost warning?",
+      "why": "Sending to one person is a setting; sending to several is an account system, which is a different project.",
+      "switchIf": "Choose the shared version if someone else is usually the one out there at dawn.",
+      "rec": "a",
+      "multi": false,
+      "options": [
+        { "key": "a", "label": "Just you", "detail": "One phone, one number, nothing to administer." },
+        { "key": "b", "label": "You and one other person", "detail": "Two destinations, still no accounts needed." },
+        { "key": "c", "label": "Anyone who subscribes", "detail": "Needs sign-ups, and someone to run them." }
+      ]
+    },
+    {
+      "id": "Q3",
+      "section": "P",
+      "slot": "goal",
+      "context": "Lighting candles or covering blossom takes time. How far ahead the warning has to arrive changes what the station has to be able to do.",
+      "breakdown": [
+        "It is cold now: simple to build, and often too late to help.",
+        "It will be cold by dawn: needs a forecast rule, not just a reading."
+      ],
+      "technical": true,
+      "example": "A dew point reading at 9 p.m. plus a clear sky tells you roughly where the temperature will land by 4 a.m.",
+      "question": "How much warning do you need?",
+      "why": "A few hours is the difference between knowing and doing, and the maths for it is well established.",
+      "switchIf": "Choose the live reading if you are up at that hour anyway and would rather trust your own eyes.",
+      "rec": "b",
+      "multi": false,
+      "options": [
+        { "key": "a", "label": "Tell me when it is freezing", "detail": "A plain threshold on the current reading." },
+        { "key": "b", "label": "Warn me a few hours ahead", "detail": "A dew point rule, checked each evening." },
+        { "key": "c", "label": "A full overnight forecast", "detail": "Needs outside data and a lot more tuning." }
+      ]
+    },
+    {
+      "id": "Q4",
+      "section": "W",
+      "slot": "deliverable",
+      "context": "You have not said whether you want something to read or something to run, and the two take very different amounts of your time.",
+      "breakdown": [
+        "A plan: you build it, at your own pace, with the decisions made.",
+        "A working version: faster to something real, less room to change your mind."
+      ],
+      "technical": false,
+      "question": "What should I hand you at the end of this?",
+      "why": "You have the shed, the mast and the weekends, so a plan you can follow is worth more than code you did not write.",
+      "switchIf": "Choose the working version if you would rather have something running this month than understood.",
+      "rec": "a",
+      "multi": false,
+      "options": [
+        { "key": "a", "label": "A build plan", "detail": "Ordered steps, parts list, and what to do first." },
+        { "key": "b", "label": "A working first version", "detail": "Something that records a reading by the weekend." },
+        { "key": "c", "label": "A quick trial first", "detail": "One sensor on the windowsill to see if it holds up." }
+      ]
+    },
+    {
+      "id": "Q5",
+      "section": "W",
+      "slot": "deliverable",
+      "context": "Whatever I hand back can include some extras. Picking them now stops me guessing and stops the plan sprawling.",
+      "breakdown": [
+        "Parts list: useful if you are buying, noise if you already have the kit.",
+        "Wiring notes: worth it only if you are doing the wiring yourself."
+      ],
+      "technical": false,
+      "question": "Which of these would you actually use?",
+      "why": "You said you have most of the parts already, so the wiring notes earn their place and the shopping list mostly does not.",
+      "switchIf": "Add the parts list too if you would rather order everything in one go and be done with it.",
+      "rec": ["wiring", "test"],
+      "multi": true,
+      "options": [
+        { "key": "wiring", "label": "Wiring notes", "detail": "What connects to what, and which end is which." },
+        { "key": "test", "label": "A test for cold night one", "detail": "How to tell whether it actually worked." },
+        { "key": "parts", "label": "A parts list", "detail": "Everything to buy, with rough prices." },
+        { "key": "budget", "label": "A running cost estimate", "detail": "What it costs to leave switched on all year." }
+      ]
+    }
+  ]
+}

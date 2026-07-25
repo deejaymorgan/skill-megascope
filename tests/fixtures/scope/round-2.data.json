@@ -1,0 +1,189 @@
+{
+  "formatVersion": 2,
+  "meta": {
+    "project": "orchard-weather-station",
+    "round": {
+      "n": 2,
+      "of": 3,
+      "revision": 1,
+      "label": "Where the line is, and what counts as done",
+      "prev": "round-1.data.json",
+      "prevAnswers": "round-1.answers.md"
+    },
+    "title": "Orchard — a garden weather station",
+    "subtitle": "Round 2 of 3",
+    "favicon": "🌦",
+    "headline": "Two things left to draw a line around.",
+    "lede": "Last round settled it: a **frost warning** for you alone, handed over as a build plan. This round draws the edges — how much of the orchard it covers, and how you will know it worked.",
+    "steps": ["Read where the scope stands", "Answer or reject each question", "Copy answers → paste into chat"],
+    "closingAsk": "Update the scope from these answers, then tell me what is still open.",
+    "scope": [
+      {
+        "slot": "goal",
+        "label": "What we're trying to achieve",
+        "state": "settled",
+        "text": "Warn you when it is freezing in the orchard, on your phone, in time to do something about it.",
+        "evidence": ["r1:Q1", "r1:Q2", "r1:Q3"]
+      },
+      {
+        "slot": "deliverable",
+        "label": "What we hand over",
+        "state": "settled",
+        "text": "A build plan you follow yourself: ordered steps, a parts list, and a test for the first cold night.",
+        "kind": "new-project-plan",
+        "evidence": ["r1:Q4", "r1:Q5"]
+      },
+      {
+        "slot": "boundary",
+        "label": "What's in and what's out",
+        "state": "open",
+        "text": "One station was assumed last round. Now that frost is the goal, the low corner may need its own reading.",
+        "reopened": "Frost pools at the bottom of the slope, so one mast may not answer the question we just agreed on.",
+        "evidence": []
+      },
+      {
+        "slot": "verification",
+        "label": "How we know it's done",
+        "state": "open",
+        "text": "Surviving one cold night was assumed. A warning that fires and one that is right are not the same thing.",
+        "reopened": "You changed the warning to a live reading, which changes entirely what a correct warning looks like.",
+        "evidence": []
+      },
+      {
+        "slot": "constraints",
+        "label": "Fixed facts we work inside",
+        "state": "settled",
+        "text": "Mains power in the shed, twelve metres from the mast. No cloud account. You are the only person alerted.",
+        "evidence": ["r1:notes", "r1:Q2"]
+      }
+    ],
+    "glossary": {
+      "CSV": "a plain text table that any spreadsheet or text editor can open"
+    },
+    "research": {
+      "mode": "deep",
+      "trigger": [
+        "Boundary reopened: frost pools downslope, so one mast may not cover the orchard.",
+        "Q3 was changed to a live reading, which changes what a correct warning means.",
+        "Overall notes asked what happens when a sensor stops sending."
+      ],
+      "sources": [
+        "Met Office guidance on radiation frost and cold air drainage",
+        "Field notes from two orchard growers on candle timing",
+        "Sensor datasheets for the two candidate temperature probes"
+      ]
+    },
+    "constraints": [
+      { "label": "Power:", "text": "mains socket in the shed, 12 m from the mast" },
+      "No cloud account — the data stays on the home network",
+      "You are the only person alerted"
+    ],
+    "context": {
+      "title": "Where this stands",
+      "note": "The goal is fixed and narrow: a live freezing warning, to your phone. Everything below is about how far it reaches and how you check it.",
+      "blocks": [
+        {
+          "heading": "Vocabulary",
+          "type": "list",
+          "items": [
+            { "term": "frost pocket", "desc": "cold air pooling at the low end of a slope" },
+            { "term": "false alarm", "desc": "a warning that fired on a night nothing froze" }
+          ]
+        }
+      ]
+    },
+    "theme": { "accent": "#4A6E3A", "neutralBias": "warm" }
+  },
+  "sections": [
+    { "id": "B", "title": "How far it reaches" },
+    { "id": "V", "title": "Knowing it worked" }
+  ],
+  "questions": [
+    {
+      "id": "Q6",
+      "section": "B",
+      "slot": "boundary",
+      "context": "Cold air runs downhill and pools at the bottom of your slope. The mast is at the top, which is the warmest corner of the orchard.",
+      "breakdown": [
+        "One reading at the top: cheapest, but it will miss the cold nights.",
+        "A second reading at the bottom: more to mount, and it tells the truth."
+      ],
+      "technical": false,
+      "question": "Should the low corner get its own reading?",
+      "why": "The mast sits in the warmest spot, so a station up there would quietly under-report exactly the nights you built it for.",
+      "switchIf": "Stay with one reading if you would rather get something working and add the second next winter.",
+      "rec": "b",
+      "multi": false,
+      "options": [
+        { "key": "a", "label": "One reading at the mast", "detail": "Simplest, but blind to the frost pocket." },
+        { "key": "b", "label": "Add one at the low corner", "detail": "Two readings; warn on whichever is colder." },
+        { "key": "c", "label": "A reading every fifty metres", "detail": "A real sensor network, and a real project." }
+      ]
+    },
+    {
+      "id": "Q7",
+      "section": "B",
+      "slot": "boundary",
+      "context": "Keeping every reading forever is easy to say and slow to regret. What you keep decides how much of this is storage work.",
+      "breakdown": [
+        "This season only: nothing to manage, and no history to look back on.",
+        "Keep everything: you can compare years, and you own a growing pile of files."
+      ],
+      "technical": true,
+      "example": "One file per day at a reading a minute is about fifty kilobytes — a decade of that still fits on the smallest memory card you can buy.",
+      "question": "How far back should the record go?",
+      "why": "Storage is free at this size and comparing two springs is the first thing you will want, so keeping it all costs nothing real.",
+      "switchIf": "Keep only this season if you would rather never think about backups or old files at all.",
+      "rec": "b",
+      "multi": false,
+      "options": [
+        { "key": "a", "label": "This season only", "detail": "Wipe and start again each spring." },
+        { "key": "b", "label": "Keep everything", "detail": "One CSV file per day, kept indefinitely." },
+        { "key": "c", "label": "Keep a daily summary", "detail": "Minimum and maximum only; the detail is dropped." }
+      ]
+    },
+    {
+      "id": "Q8",
+      "section": "V",
+      "slot": "verification",
+      "context": "You changed the warning to fire on a live reading. That makes it simple to build and it makes being wrong much easier to spot.",
+      "breakdown": [
+        "Against your own eyes: you check the grass in the morning.",
+        "Against a second thermometer: slower to set up, and it settles arguments."
+      ],
+      "technical": true,
+      "example": "A cheap glass minimum thermometer left in the orchard overnight records the coldest point, which you read the next morning.",
+      "question": "What do we check the warning against?",
+      "why": "A second thermometer costs a few pounds and turns a hunch about the sensor into something you can actually show.",
+      "switchIf": "Go with your own eyes if you would rather not buy anything and are happy judging it by the frost on the grass.",
+      "rec": "b",
+      "multi": false,
+      "options": [
+        { "key": "a", "label": "Frost on the grass", "detail": "Free, immediate, and hard to argue with." },
+        { "key": "b", "label": "A minimum thermometer", "detail": "Read each morning; settles the argument." },
+        { "key": "c", "label": "The nearest weather station", "detail": "Miles away and on different ground." }
+      ]
+    },
+    {
+      "id": "Q9",
+      "section": "V",
+      "slot": "verification",
+      "context": "You raised this yourself in the notes. A station that has quietly stopped sending looks exactly like a station reporting no frost.",
+      "breakdown": [
+        "Say nothing: silence is indistinguishable from a mild night.",
+        "Warn on silence: one more alert, and you find out before the frost does."
+      ],
+      "technical": false,
+      "question": "What should happen when a sensor goes quiet?",
+      "why": "Silent failure is the one way this station lets you down without ever looking broken, and a nightly check costs almost nothing.",
+      "switchIf": "Leave it silent if you would rather check the shed display yourself than get another notification.",
+      "rec": "a",
+      "multi": false,
+      "options": [
+        { "key": "a", "label": "Warn me the same evening", "detail": "One message if nothing arrived in an hour." },
+        { "key": "b", "label": "Show it on the display only", "detail": "Visible if you look; silent if you do not." },
+        { "key": "c", "label": "Do nothing", "detail": "You find out on the morning it mattered." }
+      ]
+    }
+  ]
+}

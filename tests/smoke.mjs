@@ -33,8 +33,8 @@ const ajv = new Ajv({ allErrors: true, strict: false });
 const validate = ajv.compile(schema);
 
 const CASES = [
-  { name: 'rich (fixture)',    path: resolve(ROOT, 'tests/fixtures/rich.data.json') },
-  { name: 'minimal (fixture)', path: resolve(ROOT, 'tests/fixtures/minimal.data.json') },
+  { name: 'round 1 (fixture)', path: resolve(ROOT, 'tests/fixtures/scope/round-1.data.json') },
+  { name: 'round 2 (fixture)', path: resolve(ROOT, 'tests/fixtures/scope/round-2.data.json') },
 ];
 
 const recKeys = (q) => (Array.isArray(q.rec) ? q.rec.slice() : [q.rec]);

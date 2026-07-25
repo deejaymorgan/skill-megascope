@@ -2,7 +2,7 @@
 // dev.mjs — live engine preview. Watches the engine shell + a sample dataset and
 // rebuilds scratch/preview.html on every save. Zero deps (node built-ins).
 //
-//   npm run dev                 # uses tests/fixtures/rich.data.json as sample data
+//   npm run dev                 # uses tests/fixtures/scope/round-1.data.json as sample data
 //   node scripts/dev.mjs <data.json>
 //
 // Open the printed file in your browser; refresh after a save to see changes.
@@ -18,7 +18,7 @@ import { injectData } from './inject.mjs';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
 const ENGINE = resolve(ROOT, 'skills/megascope/assets/engine.html');
-const DATA = resolve(ROOT, process.argv[2] || 'tests/fixtures/rich.data.json');
+const DATA = resolve(ROOT, process.argv[2] || 'tests/fixtures/scope/round-1.data.json');
 const OUT = resolve(ROOT, 'scratch/preview.html');
 
 let building = false, again = false;

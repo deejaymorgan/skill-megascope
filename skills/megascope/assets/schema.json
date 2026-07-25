@@ -1,178 +1,416 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://megascope/questions.schema.json",
-  "title": "megascope questions-JSON",
-  "description": "Data payload that drives the megascope scoping engine (assets/engine.html). One run generates only this object; it is injected into the engine's <script id=\"scoping-data\"> block. All display text supports a tiny inline markup: **bold**, `mono`, ~accent-highlight~.",
+  "title": "megascope questions-JSON (v2)",
+  "description": "Data payload for ONE ROUND of a megascope scope. It drives assets/engine.html: a run generates only this object, injected into the engine's <script id=\"scoping-data\"> block. Structural guarantees live here; cross-file and cross-field guarantees (S1-S15, R1-R6) live in assets/megascope.mjs, which interprets THIS file as its structural pass. Keyword vocabulary is deliberately closed — see megascope.mjs KEYWORDS. All display text supports a tiny inline markup: **bold**, `mono`, ~accent-highlight~.",
+
   "type": "object",
-  "required": ["meta", "sections", "questions"],
+  "required": ["formatVersion", "meta", "sections", "questions"],
   "additionalProperties": false,
+
   "properties": {
+    "formatVersion": {
+      "description": "Pins the contract. The engine refuses anything that is not exactly 2, loudly, instead of rendering a blank document.",
+      "const": 2
+    },
+
     "meta": {
       "type": "object",
-      "description": "Project identity, framing, constraints, context, and theme.",
-      "required": ["project", "title"],
+      "description": "Round identity, the running scope panel, framing, constraints, context, and theme.",
+      "required": ["project", "round", "title", "scope", "glossary"],
       "additionalProperties": false,
+
       "properties": {
         "project": {
           "type": "string",
-          "description": "Stable slug. Keys localStorage, the export title fallback, and the download filename.",
-          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "description": "STABLE across every round of a scope. The round never enters this string — the engine derives the storage slug from meta.round, so a per-round suffix is not merely discouraged but unrepresentable.",
           "minLength": 1,
-          "maxLength": 80
+          "maxLength": 60,
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "not": { "pattern": "-r[0-9]+(-v[0-9]+)?$" }
         },
-        "title": { "type": "string", "description": "Header title + document/export title.", "minLength": 1 },
-        "subtitle": { "type": "string", "description": "Small uppercase label under the title. Default: 'Scoping & planning'." },
-        "favicon": { "type": "string", "description": "One or two emoji for the header mark (and the Artifact favicon). If omitted, a generic mark is drawn." },
-        "eyebrow": { "type": "string", "description": "Small mono label above the headline. Default auto-derives: 'Scoping document · N areas · M decisions'." },
-        "headline": { "type": "string", "description": "Serif intro headline (a short, plain-language sentence)." },
-        "lede": { "type": "string", "description": "1–3 sentence intro paragraph. Supports **bold**." },
-        "legend": { "type": "string", "description": "Overrides the sidebar 'How to read this' note." },
+
+        "round": {
+          "type": "object",
+          "description": "Which round this file is, and what it is checked against.",
+          "required": ["n", "of", "revision", "label", "prev", "prevAnswers"],
+          "additionalProperties": false,
+          "properties": {
+            "n": { "type": "integer", "description": "This round's number. Enters the localStorage slug.", "minimum": 1, "maximum": 6 },
+            "of": { "type": "integer", "description": "Rounds planned. Doctrine stops at 4; the schema does not make an honest fifth round illegal.", "minimum": 1, "maximum": 6 },
+            "revision": { "type": "integer", "description": "Bump when REPUBLISHING the same n with edited questions. Enters the slug, so a rewritten round cannot rehydrate its own first draft.", "minimum": 1, "maximum": 9, "default": 1 },
+            "label": { "type": "string", "description": "This round's subject, in plain language.", "minLength": 3, "maxLength": 60 },
+            "prev": { "type": ["string", "null"], "description": "Relative path to the previous round's data file. Required when n>1, null otherwise.", "maxLength": 120 },
+            "prevAnswers": { "type": ["string", "null"], "description": "Relative path to the previous round's VERBATIM paste-back. The validator parses it. No answers file, no next round.", "maxLength": 120 }
+          },
+          "if": { "required": ["n"], "properties": { "n": { "minimum": 2 } } },
+          "then": {
+            "properties": {
+              "prev": { "type": "string", "minLength": 1 },
+              "prevAnswers": { "type": "string", "minLength": 1 }
+            }
+          },
+          "else": {
+            "properties": {
+              "prev": { "type": "null" },
+              "prevAnswers": { "type": "null" }
+            }
+          }
+        },
+
+        "title": { "type": "string", "description": "Header title, document title, and export title.", "minLength": 1, "maxLength": 80 },
+        "subtitle": { "type": "string", "description": "Small uppercase label under the title. Default: 'Round n of m'.", "minLength": 1, "maxLength": 60 },
+        "favicon": { "type": "string", "description": "One or two emoji for the header mark (and the Artifact favicon).", "minLength": 1, "maxLength": 4 },
+        "eyebrow": { "type": "string", "description": "Small mono label above the headline. Default auto-derives from the round and the counts.", "minLength": 3, "maxLength": 80 },
+        "headline": { "type": "string", "description": "Serif intro headline: a short, plain-language sentence.", "minLength": 10, "maxLength": 90 },
+        "lede": { "type": "string", "description": "1-3 sentence intro. Say what the previous round settled and what this one is for.", "minLength": 30, "maxLength": 400 },
+        "legend": { "type": "string", "description": "Overrides the sidebar 'How to read this' note.", "minLength": 20, "maxLength": 300 },
         "steps": {
           "type": "array",
-          "description": "The 4-ish process steps shown under the lede. Default provided.",
-          "items": { "type": "string" },
-          "maxItems": 6
+          "description": "The numbered process steps under the lede. Default provided, and deliverable-neutral.",
+          "minItems": 3,
+          "maxItems": 6,
+          "items": { "type": "string", "minLength": 5, "maxLength": 60 }
         },
-        "overallNotesTitle": { "type": "string", "description": "Heading for the free-text catch-all box. Default: 'Anything else?'." },
-        "overallNotesHint": { "type": "string", "description": "Sub-copy for the catch-all box." },
-        "closingAsk": { "type": "string", "description": "Final line appended to the copy-for-Claude export (what you want back)." },
+        "overallNotesTitle": { "type": "string", "description": "Heading for the free-text catch-all box.", "minLength": 3, "maxLength": 60 },
+        "overallNotesHint": { "type": "string", "description": "Sub-copy for the catch-all box.", "minLength": 10, "maxLength": 200 },
+        "closingAsk": { "type": "string", "description": "Final line of the export. Deliverable-neutral: ask for a scope update, not a phase plan.", "minLength": 20, "maxLength": 300 },
+
+        "scope": {
+          "type": "array",
+          "description": "The running scope panel, the readiness checklist, and what every question must point at — one array, three jobs. Exactly the five slots, in the order listed by the 'slot' enum (checked as S5).",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": { "$ref": "#/definitions/scopeSlot" }
+        },
+
+        "glossary": {
+          "type": "object",
+          "description": "Term -> plain-language gloss. Every identifier-shaped token in display text must have an entry (S14), and every entry must be used (S14). May be {} when the round uses no jargon at all.",
+          "maxProperties": 10,
+          "propertyNames": { "pattern": "^[A-Za-z][A-Za-z0-9_.·-]{1,31}$" },
+          "additionalProperties": { "type": "string", "minLength": 15, "maxLength": 140 }
+        },
+
+        "research": {
+          "type": "object",
+          "description": "What was researched for THIS round. Round 1 is capped light by the meta-level rule below; a technical question cannot exist unresearched (S15).",
+          "required": ["mode"],
+          "additionalProperties": false,
+          "properties": {
+            "mode": { "enum": ["none", "light", "deep"], "description": "'light' = up to 3 parallel readers, no synthesis agent, no dossier. 'deep' = a sized fan-out with a dossier." },
+            "trigger": {
+              "type": "array",
+              "description": "The specific things in the PREVIOUS export that opened this round: an open slot, a REJECTED id, an OWN answer, a note. Required from round 2 on.",
+              "minItems": 1,
+              "maxItems": 8,
+              "items": { "type": "string", "minLength": 15, "maxLength": 200 }
+            },
+            "sources": {
+              "type": "array",
+              "description": "What the research actually read. Required (min 3) when mode is 'deep'.",
+              "maxItems": 24,
+              "items": { "type": "string", "minLength": 5, "maxLength": 200 }
+            }
+          },
+          "if": { "required": ["mode"], "properties": { "mode": { "const": "deep" } } },
+          "then": { "required": ["sources"], "properties": { "sources": { "minItems": 3 } } }
+        },
+
         "constraints": {
           "type": "array",
           "description": "Already-decided facts, rendered as check chips. Surfacing them here prevents re-asking.",
+          "maxItems": 10,
           "items": {
             "oneOf": [
-              { "type": "string" },
+              { "type": "string", "minLength": 3, "maxLength": 120 },
               {
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
-                  "label": { "type": "string", "description": "Bold lead-in." },
-                  "text": { "type": "string", "description": "Muted continuation." }
+                  "label": { "type": "string", "description": "Bold lead-in.", "minLength": 1, "maxLength": 40 },
+                  "text": { "type": "string", "description": "Muted continuation.", "minLength": 3, "maxLength": 120 }
                 }
               }
             ]
           }
         },
+
         "context": {
           "type": "object",
           "description": "The collapsible project-context panel. All parts optional; the panel hides itself if empty.",
           "additionalProperties": false,
           "properties": {
-            "title": { "type": "string", "description": "Summary/accordion label. Default: 'Project context'." },
-            "note": { "type": "string", "description": "One framing paragraph. Supports inline markup." },
+            "title": { "type": "string", "minLength": 3, "maxLength": 60 },
+            "note": { "type": "string", "description": "One framing paragraph.", "minLength": 20, "maxLength": 500 },
             "cards": {
               "type": "array",
               "description": "An auto-fitting card grid — e.g. stages, subsystems, personas, a domain map.",
+              "maxItems": 8,
               "items": {
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
-                  "title": { "type": "string" },
-                  "body": { "type": "string" },
-                  "foot": { "type": "string", "description": "De-emphasized footer line (e.g. an 'Ends:' / 'Owner:' note)." }
+                  "title": { "type": "string", "minLength": 1, "maxLength": 40 },
+                  "body": { "type": "string", "minLength": 10, "maxLength": 240 },
+                  "foot": { "type": "string", "description": "De-emphasized footer line.", "minLength": 3, "maxLength": 120 }
                 }
               }
             },
             "blocks": {
               "type": "array",
-              "description": "Additional labeled context blocks, rendered in order.",
+              "description": "Additional labeled context blocks, rendered in order. The 'phases' type is gone — the phased plan is no longer the fixed output.",
+              "maxItems": 6,
               "items": {
                 "type": "object",
                 "required": ["type"],
                 "additionalProperties": false,
                 "properties": {
-                  "heading": { "type": "string", "description": "Uppercase section label above the block." },
-                  "type": { "type": "string", "enum": ["phases", "list", "diagram", "prose"] },
+                  "heading": { "type": "string", "minLength": 3, "maxLength": 60 },
+                  "type": { "enum": ["list", "diagram", "prose"] },
                   "items": {
                     "type": "array",
-                    "description": "For 'phases': {key,label,desc}. For 'list': {term,desc}.",
+                    "description": "For 'list': {term, desc}.",
+                    "maxItems": 12,
                     "items": {
                       "type": "object",
                       "additionalProperties": false,
                       "properties": {
-                        "key": { "type": "string" },
-                        "label": { "type": "string" },
-                        "desc": { "type": "string" },
-                        "term": { "type": "string" }
+                        "term": { "type": "string", "minLength": 1, "maxLength": 40 },
+                        "desc": { "type": "string", "minLength": 5, "maxLength": 200 }
                       }
                     }
                   },
                   "lines": {
                     "type": "array",
                     "description": "For 'diagram': monospace lines. ~text~ = accent highlight, **text** = bold.",
-                    "items": { "type": "string" }
+                    "maxItems": 16,
+                    "items": { "type": "string", "maxLength": 120 }
                   },
-                  "text": { "type": "string", "description": "For 'prose': a paragraph." }
+                  "text": { "type": "string", "description": "For 'prose': a paragraph.", "minLength": 20, "maxLength": 500 }
                 }
               }
             }
           }
         },
+
         "theme": {
           "type": "object",
-          "description": "Subject-grounded personality. Usually just an accent hex; everything derives from it.",
+          "description": "Subject-grounded personality — THE ONLY SOURCE OF PERSONALITY. Usually just an accent hex; everything derives from it. The engine is never edited per run.",
           "additionalProperties": false,
           "properties": {
             "accent": { "type": "string", "description": "Accent color as #RGB or #RRGGBB. Drives the whole accent family in light + dark.", "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$" },
-            "neutralBias": { "type": "string", "enum": ["warm", "cool", "neutral"], "description": "Subtle temperature nudge for the neutral grounds." },
-            "serif": { "type": "string", "description": "Display font stack (headlines, question titles)." },
-            "sans": { "type": "string", "description": "Body font stack." },
-            "mono": { "type": "string", "description": "Utility/label font stack." }
+            "neutralBias": { "enum": ["warm", "cool", "neutral"], "description": "Subtle temperature nudge for the neutral grounds." },
+            "serif": { "type": "string", "description": "Display font stack (headlines, question titles).", "minLength": 3, "maxLength": 200 },
+            "sans": { "type": "string", "description": "Body font stack.", "minLength": 3, "maxLength": 200 },
+            "mono": { "type": "string", "description": "Utility/label font stack.", "minLength": 3, "maxLength": 200 }
           }
         }
-      }
+      },
+
+      "allOf": [
+        {
+          "description": "Round 1 must not make the user wait — that is the point of splitting rounds.",
+          "if": { "required": ["round"], "properties": { "round": { "required": ["n"], "properties": { "n": { "const": 1 } } } } },
+          "then": { "properties": { "research": { "properties": { "mode": { "enum": ["none", "light"] } } } } }
+        },
+        {
+          "description": "From round 2 on, research must name what in the previous export opened this round.",
+          "if": { "required": ["round"], "properties": { "round": { "required": ["n"], "properties": { "n": { "minimum": 2 } } } } },
+          "then": { "properties": { "research": { "required": ["trigger"] } } }
+        }
+      ]
     },
+
     "sections": {
       "type": "array",
-      "description": "Ordered decision areas. Question.section references section.id.",
+      "description": "Ordered decision areas within this round. questions[].section references sections[].id.",
       "minItems": 1,
+      "maxItems": 4,
       "items": {
         "type": "object",
         "required": ["id", "title"],
         "additionalProperties": false,
         "properties": {
-          "id": { "type": "string", "description": "Short id, shown as the nav tag (e.g. 'A', 'B'). Unique.", "minLength": 1, "maxLength": 6 },
-          "title": { "type": "string", "minLength": 1 }
+          "id": {
+            "type": "string",
+            "description": "Short id, shown as the nav tag and as the export heading (e.g. 'A'). Unique (S2). No underscore — '__other' is the engine's reserved orphan bucket.",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9-]{0,5}$"
+          },
+          "title": { "type": "string", "minLength": 3, "maxLength": 60 }
         }
       }
     },
+
     "questions": {
       "type": "array",
-      "description": "Every decision, pre-set to a recommended default.",
+      "description": "This round's decisions, each pre-set to a recommended default. The cap is the pressure that makes rounds real.",
       "minItems": 1,
-      "items": {
-        "type": "object",
-        "required": ["id", "section", "question", "rec", "options"],
-        "additionalProperties": false,
-        "properties": {
-          "id": { "type": "string", "description": "Unique id, shown on the card (e.g. 'Q1').", "minLength": 1, "maxLength": 12 },
-          "section": { "type": "string", "description": "Must match a sections[].id. Unknown ids fall into an 'Other' section." },
-          "question": { "type": "string", "description": "The decision, phrased as a short question.", "minLength": 1 },
-          "why": { "type": "string", "description": "One-line rationale for the recommendation and the key tradeoff. Strongly recommended." },
-          "rec": {
-            "description": "The recommended default, pre-selected on load. A single option key for single-select; a key or array of keys for multi-select. Every key must exist in options[].key. May be ANY option, not just the first.",
-            "oneOf": [
-              { "type": "string", "minLength": 1 },
-              { "type": "array", "items": { "type": "string" }, "minItems": 1 }
-            ]
-          },
-          "multi": { "type": "boolean", "description": "If true, options render as checkboxes (multi-select). Default false (single-select radio)." },
-          "options": {
-            "type": "array",
-            "description": "2–5 concrete choices. Order matters (present strongest/first-considered first).",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "required": ["key", "label"],
-              "additionalProperties": false,
-              "properties": {
-                "key": { "type": "string", "description": "Short unique-within-question key (e.g. 'a').", "minLength": 1, "maxLength": 12 },
-                "label": { "type": "string", "description": "The option, in a few words.", "minLength": 1 },
-                "detail": { "type": "string", "description": "One line elaborating the option / its consequence." }
-              }
-            }
-          }
+      "maxItems": 8,
+      "items": { "$ref": "#/definitions/question" }
+    }
+  },
+
+  "definitions": {
+    "scopeSlot": {
+      "type": "object",
+      "description": "One of the five scope slots, as it stands at THIS round.",
+      "required": ["slot", "label", "state", "text", "evidence"],
+      "additionalProperties": false,
+      "properties": {
+        "slot": { "enum": ["goal", "deliverable", "boundary", "verification", "constraints"] },
+        "label": { "type": "string", "description": "Display only — how this slot is named to the user.", "minLength": 3, "maxLength": 40 },
+        "state": { "enum": ["settled", "open"] },
+        "text": {
+          "type": "string",
+          "description": "Where this slot stands, in plain language. The floor matters: without it, \"text\":\"ok\" legally terminates the whole loop.",
+          "minLength": 25,
+          "maxLength": 240
+        },
+        "evidence": {
+          "type": "array",
+          "description": "Which answers earned this. Grammar: r<n>:<qid> or r<n>:notes. Resolved against the saved paste-back (S10/R3) — a ref to a REJECTED or absent question fails. 'chat' is not legal.",
+          "maxItems": 12,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^r[1-6]:(notes|[A-Z][A-Za-z0-9]{0,5})$" }
+        },
+        "kind": {
+          "description": "What kind of work this is — the deliverable is data, not doctrine. Deliverable slot only; required there once settled.",
+          "type": ["string", "null"],
+          "enum": ["new-project-plan", "codebase-feature", "experiment", "other", null]
+        },
+        "kindOther": { "type": ["string", "null"], "description": "Required when kind is 'other'.", "minLength": 20, "maxLength": 120 },
+        "assumed": {
+          "type": "boolean",
+          "description": "The only honest way to settle a slot with no user answer. When true, 'assumption' is required and evidence may be empty.",
+          "default": false
+        },
+        "assumption": { "type": ["string", "null"], "description": "What was assumed and why. Surfaces in its own section of the kick-off brief.", "minLength": 30, "maxLength": 200 },
+        "reopened": { "type": ["string", "null"], "description": "Why this slot regressed settled -> open versus the previous round (S9).", "minLength": 10, "maxLength": 120 }
+      },
+      "allOf": [
+        {
+          "description": "A settled deliverable must say what kind of work this is.",
+          "if": { "required": ["slot", "state"], "properties": { "slot": { "const": "deliverable" }, "state": { "const": "settled" } } },
+          "then": { "required": ["kind"], "properties": { "kind": { "enum": ["new-project-plan", "codebase-feature", "experiment", "other"] } } }
+        },
+        {
+          "description": "kind/kindOther belong to the deliverable slot alone.",
+          "if": { "required": ["slot"], "properties": { "slot": { "not": { "const": "deliverable" } } } },
+          "then": { "properties": { "kind": { "type": "null" }, "kindOther": { "type": "null" } } }
+        },
+        {
+          "description": "'other' has to say what it is; anything else must not carry a kindOther.",
+          "if": { "required": ["kind"], "properties": { "kind": { "const": "other" } } },
+          "then": { "required": ["kindOther"], "properties": { "kindOther": { "type": "string", "minLength": 20, "maxLength": 120 } } },
+          "else": { "properties": { "kindOther": { "type": "null" } } }
+        },
+        {
+          "description": "An assumption must be written down, and only an assumed slot may carry one.",
+          "if": { "required": ["assumed"], "properties": { "assumed": { "const": true } } },
+          "then": { "required": ["assumption"], "properties": { "assumption": { "type": "string", "minLength": 30, "maxLength": 200 } } },
+          "else": { "properties": { "assumption": { "type": "null" } } }
+        },
+        {
+          "description": "A slot settled on the user's answers must cite at least one.",
+          "if": { "required": ["state"], "properties": { "state": { "const": "settled" }, "assumed": { "not": { "const": true } } } },
+          "then": { "properties": { "evidence": { "minItems": 1 } } }
         }
+      ]
+    },
+
+    "question": {
+      "type": "object",
+      "description": "One decision. The four-part shape — context, breakdown, (example), question — is required by the format, not left to judgment each run.",
+      "required": ["id", "section", "slot", "context", "breakdown", "technical", "question", "why", "switchIf", "rec", "options"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "description": "Unique within the round (S1). Appears on the card, in the export, and in evidence refs.", "pattern": "^[A-Z][A-Za-z0-9]{0,5}$" },
+        "section": { "type": "string", "description": "Must reference a sections[].id (S3).", "pattern": "^[A-Za-z0-9][A-Za-z0-9-]{0,5}$" },
+        "slot": {
+          "description": "Which scope slot this question feeds. Must name a slot whose state is 'open' (S6); every open slot must be named by at least one question (S7). Together: exact cover.",
+          "enum": ["goal", "deliverable", "boundary", "verification", "constraints"]
+        },
+
+        "context": { "type": "string", "description": "Why this is on the table, in the reader's own terms. Renders first on the card.", "minLength": 40, "maxLength": 240 },
+        "breakdown": {
+          "type": "array",
+          "description": "The decision broken down as simply as possible. An ARRAY, not a paragraph — decomposition is a forcing function a prose field cannot be.",
+          "minItems": 2,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 20, "maxLength": 140 }
+        },
+        "technical": {
+          "type": "boolean",
+          "description": "The if/then hinge: true requires 'example' and research (S15); false forbids the 'example' key entirely."
+        },
+        "example": {
+          "type": "string",
+          "description": "A concrete, everyday illustration. Present if and only if technical is true. With options[].detail, the only fields where identifier-shaped tokens are allowed.",
+          "minLength": 25,
+          "maxLength": 200
+        },
+        "question": {
+          "type": "string",
+          "description": "The decision, stated plainly. No word cap — the fault this format fixes is long option labels, not long questions.",
+          "minLength": 12,
+          "maxLength": 100,
+          "pattern": "\\?$"
+        },
+        "why": { "type": "string", "description": "Why the recommendation wins, and what it costs.", "minLength": 30, "maxLength": 200 },
+        "switchIf": { "type": "string", "description": "The runner-up condition — the sentence that lets a user override intelligently.", "minLength": 20, "maxLength": 140 },
+
+        "rec": {
+          "description": "The recommended default, pre-selected on load. Every key must exist in options (S4). May be ANY option, not just the first.",
+          "oneOf": [
+            { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,7}$" },
+            { "type": "array", "minItems": 1, "maxItems": 4, "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,7}$" } }
+          ]
+        },
+        "multi": { "type": "boolean", "description": "If true, options render as checkboxes. Default false (single-select radio)." },
+        "options": {
+          "type": "array",
+          "description": "2-4 concrete choices. Order matters: put the natural anchor first, recommend whichever is actually best.",
+          "minItems": 2,
+          "maxItems": 4,
+          "items": { "$ref": "#/definitions/option" }
+        }
+      },
+      "allOf": [
+        {
+          "description": "A technical question must carry its example; a non-technical one must not carry the key at all.",
+          "if": { "required": ["technical"], "properties": { "technical": { "const": true } } },
+          "then": { "required": ["example"] },
+          "else": { "not": { "required": ["example"] } }
+        },
+        {
+          "description": "A single-select question's rec is one key, not a list.",
+          "if": { "required": ["multi"], "properties": { "multi": { "const": true } } },
+          "else": { "properties": { "rec": { "type": "string" } } }
+        }
+      ]
+    },
+
+    "option": {
+      "type": "object",
+      "required": ["key", "label", "detail"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Short, unique within the question (S4). A leading underscore is banned — '__own' is the engine's reserved key.",
+          "pattern": "^[a-z0-9][a-z0-9-]{0,7}$"
+        },
+        "label": {
+          "type": "string",
+          "description": "The option in a few words. Max 7 single-spaced words, 48 chars, and none of / ; | [ ] — the export's delimiters must stay unforgeable by author text.",
+          "minLength": 3,
+          "maxLength": 48,
+          "pattern": "^\\S+(?: \\S+){0,6}$",
+          "not": { "pattern": "[/;|\\[\\]]" }
+        },
+        "detail": { "type": "string", "description": "One line elaborating the option and its consequence.", "minLength": 15, "maxLength": 140 }
       }
     }
   }
