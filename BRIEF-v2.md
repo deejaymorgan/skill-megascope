@@ -1,5 +1,39 @@
 # megascope — progressive scoping
 
+> ## Status — read this before the brief
+>
+> This is the **requirements record**, written before any design existed. Everything below is still
+> the authority on *what* to build and *why*. It is **no longer the prompt**, and four of its
+> instructions have been overtaken. Where this block and the body disagree, this block wins.
+>
+> **The design phase is done.** [`PLAN-v2.md`](PLAN-v2.md) is the agreed design. The schema is
+> **agreed** — do not re-propose it, and do not re-open the three decisions recorded in the plan's
+> *Decisions taken* table.
+>
+> Superseded below:
+>
+> 1. **"Start by — proposing a plan … don't start editing until the schema is agreed."** Done. Work
+>    the plan's §6 *Build order* instead.
+> 2. **"Open questions the plan must answer."** All three are answered in the plan's §3 — research
+>    runs per round, one questions-JSON per round, and readiness is checked against five scope slots
+>    which are themselves checked against the previous round's saved paste-back.
+> 3. **"delete `examples/paperclips/` entirely."** Amended: **move it to `scratch/` at step 1, delete
+>    it for real at step 9.** `scratch/` is gitignored, so the end state this brief asks for is
+>    unchanged — every reference updated, `rg -n paperclips` empty — but the file stays on disk while
+>    the replacement example is authored, and as the only corpus for checking the new length limits
+>    bite.
+> 4. **The `pwd` preamble's "I'll restart the session in the dev worktree."** A leftover from the
+>    conversation that produced this file. The checks are still worth running; `CLAUDE.md` rule 1 now
+>    carries the same rule permanently.
+>
+> **Division of authority:** this brief wins on **requirements** — the engine stays data-less, the
+> format guarantees structure, the user is never boxed in. The plan wins on **sequencing and
+> mechanism** — field names, limits, check ids, build order.
+>
+> Two factual corrections to the body: `SKILL.md` is a **six**-step pipeline (0–5), not five. And
+> there is a **fifth** paperclips reference not listed under *Example and tests* — `README.md:131`,
+> which describes the smoke test as covering "both the paperclips example and the minimal fixture."
+
 ## Before anything else
 
 This work happens in the dev worktree, never on `main`. Confirm where you are:

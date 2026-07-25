@@ -4,7 +4,13 @@ Status: **schema agreed 2026-07-25.** Nothing in `skills/`, `scripts/`, `tests/`
 been edited yet.
 
 Requirements live in [`BRIEF-v2.md`](BRIEF-v2.md) — read that first for *why*, then this for *what to
-type*. Where the two disagree, the brief wins and this file is wrong.
+type*. Read its **Status** block; four of its instructions are superseded.
+
+**Division of authority.** The brief wins on **requirements** — the engine stays data-less, the format
+guarantees structure, the user is never boxed in. If this file contradicts one of those, this file is
+wrong. This file wins on **sequencing and mechanism** — field names, limits, check ids, build order,
+and the amendment that parks `examples/paperclips/` in `scratch/` at step 1 rather than deleting it
+outright.
 
 Evidence base: full read of the dev worktree at `49f771b`, plus three independently-authored
 candidate designs, an adversarial verdict on each, and verification of every load-bearing claim
