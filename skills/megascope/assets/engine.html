@@ -300,6 +300,11 @@
   .empty h2{font-family:var(--serif);font-size:22px;color:var(--ink);margin-bottom:10px;}
   .empty code{font-family:var(--mono);font-size:12.5px;background:var(--surface-2);border:1px solid var(--hairline);
     padding:2px 6px;border-radius:6px;}
+  /* a wrong-vintage or unparseable payload is a failure, not a resting state */
+  .empty.bad{border:1px solid var(--warn-line);background:var(--warn-tint);border-radius:var(--radius);
+    padding:22px;text-align:left;}
+  .empty.bad h2{color:var(--warn-ink);}
+  .empty.bad code{background:color-mix(in srgb,var(--warn-tint) 60%,#ffffff);border-color:var(--warn-line);}
 
   /* ---------- responsive ---------- */
   @media (max-width:940px){
@@ -417,31 +422,57 @@
   "use strict";
 
   // ---------- load & normalize data ----------
-  var DATA={};
+  // FORMAT_VERSION is a gate, not a label. Before it existed, a malformed
+  // payload was swallowed here and fell through to the friendly empty state —
+  // so a broken run produced a blank document that looked deliberate.
+  var FORMAT_VERSION=2;
+  var DATA={}, RAW="", PARSE_OK=true;
   try{
-    var raw=document.getElementById("scoping-data").textContent;
-    DATA=JSON.parse(raw)||{};
-  }catch(e){ DATA={}; }
+    RAW=(document.getElementById("scoping-data").textContent||"").trim();
+    DATA=JSON.parse(RAW)||{};
+  }catch(e){ PARSE_OK=false; DATA={}; }
+  var HAS_PAYLOAD=RAW!==""&&RAW!=="{}";
+
   var META=DATA.meta||{};
   var SECTIONS=Array.isArray(DATA.sections)?DATA.sections:[];
+
+  // The two escapes the engine adds to every question, so a run cannot forget
+  // them — and cannot restyle them into something the export parser will not
+  // read. They are a parse contract, which is why they are not themeable.
+  var OWN_KEY="__own";
+
   var QUESTIONS=(Array.isArray(DATA.questions)?DATA.questions:[]).map(normalizeQ);
 
   function normalizeQ(q){
-    var opts=(q.options||q.opts||[]).map(function(o){
-      if(Array.isArray(o))return{key:o[0],label:o[1],detail:o[2]||""};
+    var opts=(q.options||[]).map(function(o){
       return{key:o.key,label:o.label,detail:o.detail||""};
     });
-    var rec=q.rec;
-    if(rec==null && opts.length)rec=opts[0].key;
-    var recArr=Array.isArray(rec)?rec.slice():[rec];
+    // appended, never prepended: the author's own options keep their order,
+    // and the reserved key cannot collide (a leading "_" is pattern-banned).
+    opts.push({key:OWN_KEY,label:"In my own words",own:true,
+      detail:"Say it your way instead. What you write replaces every option above."});
+    var recArr=Array.isArray(q.rec)?q.rec.slice():[q.rec];
     return{
-      id:q.id, sec:q.section||q.sec, question:q.question||q.q||"",
-      why:q.why||"", rec:rec, recArr:recArr, multi:!!q.multi, opts:opts
+      id:q.id, sec:q.section, slot:q.slot||"",
+      context:q.context||"", breakdown:Array.isArray(q.breakdown)?q.breakdown:[],
+      technical:!!q.technical, example:q.example||"",
+      question:q.question||"", why:q.why||"", switchIf:q.switchIf||"",
+      rec:q.rec, recArr:recArr, multi:!!q.multi, opts:opts
     };
   }
 
+  // The round never enters meta.project — it is schema-forbidden from doing so.
+  // The storage key is DERIVED, so round 2 cannot silently rehydrate round 1's
+  // answers by someone forgetting a "-followup" suffix. `revision` closes the
+  // second case: republishing an edited round under the same number.
   var PROJECT=(META.project||"megascope-project").toString();
-  var STORE=PROJECT+"-scoping-v1", THEME_KEY=PROJECT+"-scoping-theme";
+  var ROUND=META.round||{};
+  var RN=ROUND.n||1, ROF=ROUND.of||RN, RV=ROUND.revision||1;
+  var SLUG=PROJECT+"-r"+RN+(RV>1?"-v"+RV:"");
+  var STORE=SLUG+"-scoping-v1";
+  // Theme stays project-wide: light or dark is a person's preference, and it
+  // should carry from one round to the next.
+  var THEME_KEY=PROJECT+"-scoping-theme";
   var TOTAL=QUESTIONS.length;
 
   // ---------- helpers ----------
@@ -461,17 +492,41 @@
   function recLabelText(q){return q.recArr.map(function(k){return k.toUpperCase()+": "+optLabel(q,k);}).join(" | ");}
   function setEq(a,b){if(a.length!==b.length)return false;var s={};a.forEach(function(k){s[k]=1;});for(var i=0;i<b.length;i++){if(!s[b[i]])return false;}return true;}
 
-  // ---------- empty state (raw shell opened with no data) ----------
-  if(!TOTAL){
+  // ---------- format gate & empty state ----------
+  // Three outcomes, deliberately distinguishable. The raw shell is a friendly
+  // nothing-loaded note; a payload that is broken or of the wrong vintage is a
+  // LOUD failure. Silently rendering an empty document for the second case is
+  // the bug this replaces: it looked exactly like the first.
+  function halt(cls,title,body){
     var wrap=$("appWrap"); if(wrap)wrap.remove();
     var ab=$("actionbar"); if(ab)ab.remove();
-    var host=el("div","empty",
-      '<h2>No scoping data loaded</h2>'+
+    document.body.appendChild(el("div","empty"+(cls?" "+cls:""),'<h2>'+title+'</h2>'+body));
+    document.title="megascope · scoping engine";
+  }
+  if(!PARSE_OK){
+    halt("bad","This document’s data block is not valid JSON",
+      '<p>The <code>&lt;script id="scoping-data"&gt;</code> block could not be parsed, so nothing can be '+
+      'rendered. Rebuild it with <code>megascope.mjs build</code>, which validates before it writes.</p>');
+    return;
+  }
+  if(!HAS_PAYLOAD){
+    halt("",'No scoping data loaded',
       '<p>This is the megascope engine shell. Populate the '+
       '<code>&lt;script id="scoping-data"&gt;</code> block with a questions-JSON payload '+
       '(see <code>assets/schema.json</code>) to render a scoping document.</p>');
-    document.body.appendChild(host);
-    document.title="megascope · scoping engine";
+    return;
+  }
+  if(DATA.formatVersion!==FORMAT_VERSION){
+    halt("bad","This engine needs version "+FORMAT_VERSION+" data",
+      '<p>The data block declares <code>formatVersion: '+esc(String(DATA.formatVersion===undefined?"(none)":DATA.formatVersion))+
+      '</code>. This shell only renders version '+FORMAT_VERSION+'. Rebuild the document from a v'+FORMAT_VERSION+
+      ' questions-JSON with <code>megascope.mjs build</code>.</p>');
+    return;
+  }
+  if(!TOTAL){
+    halt("bad","This round has no questions",
+      '<p>The payload parsed and is version '+FORMAT_VERSION+', but <code>questions</code> is empty, so there is '+
+      'nothing to answer.</p>');
     return;
   }
 
@@ -638,7 +693,12 @@
   //  STATE
   // ============================================================
   var state={};
-  function blank(){var o={__notes:""};QUESTIONS.forEach(function(q){o[q.id]={choice:q.multi?q.recArr.slice():q.recArr[0],note:"",flag:false,rev:false};});return o;}
+  // otherText and rej must appear in BOTH blank() and load()'s whitelist.
+  // Missing from either, the user's own words and their rejection are dropped
+  // on the next reload — silently, and only for the two controls that exist
+  // precisely so nobody gets boxed in.
+  function blank(){var o={__notes:""};QUESTIONS.forEach(function(q){
+    o[q.id]={choice:q.multi?q.recArr.slice():q.recArr[0],note:"",otherText:"",flag:false,rej:false,rev:false};});return o;}
   function load(){
     try{
       var raw=localStorage.getItem(STORE);if(!raw)return blank();
@@ -648,7 +708,8 @@
         if(p[q.id]){var s=p[q.id];
           o[q.id]={
             choice:coerceChoice(q,s.choice),
-            note:s.note||"",flag:!!s.flag,rev:!!s.rev
+            note:s.note||"",otherText:s.otherText||"",
+            flag:!!s.flag,rej:!!s.rej,rev:!!s.rev
           };}
       });
       return o;
@@ -816,8 +877,10 @@
     }
   });
 
-  // global notes
-  var gn=$("globalNotes"); gn.value=state.__notes||"";
+  // global notes — the value is restored in INIT, AFTER state=load(). Setting
+  // it here read the empty pre-load state, so overall notes never survived a
+  // reload; the round-isolation test is what finally noticed.
+  var gn=$("globalNotes");
   gn.addEventListener("input",function(){state.__notes=gn.value;save();});
 
   // toolbar
@@ -888,12 +951,13 @@
   document.addEventListener("keydown",function(e){if(e.key==="Escape"&&modal.classList.contains("show"))closeModal();});
 
   $("downloadBtn").addEventListener("click",function(){
-    var payload={meta:{project:PROJECT,kind:"scoping-answers",version:1,total:TOTAL},answers:{},notes:state.__notes||""};
+    var payload={meta:{project:PROJECT,round:RN,of:ROF,revision:RV,kind:"scoping-answers",version:FORMAT_VERSION,total:TOTAL},
+      answers:{},notes:state.__notes||""};
     QUESTIONS.forEach(function(q){var s=state[q.id];
       payload.answers[q.id]={section:q.sec,choice:s.choice,changed:isChanged(q),rec:q.rec,flag:s.flag,reviewed:s.rev,note:s.note,
         label:q.multi?(s.choice||[]).map(function(k){return optLabel(q,k);}):optLabel(q,s.choice)};});
     var blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
-    var a=el("a");a.href=URL.createObjectURL(blob);a.download=PROJECT+"-scoping-answers.json";
+    var a=el("a");a.href=URL.createObjectURL(blob);a.download=SLUG+"-scoping-answers.json";
     document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
     toast("Downloaded JSON");
   });
@@ -929,6 +993,7 @@
   applyThemeTokens();
   renderChrome();
   state=load();
+  gn.value=state.__notes||"";
   renderNav();
   renderSections();
   initSpy();

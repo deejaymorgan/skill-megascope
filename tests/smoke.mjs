@@ -38,6 +38,53 @@ const CASES = [
 ];
 
 const recKeys = (q) => (Array.isArray(q.rec) ? q.rec.slice() : [q.rec]);
+
+/** Render a built document headlessly, optionally against a pre-seeded localStorage. */
+function render(html, seed) {
+  const errors = [];
+  const vc = new VirtualConsole();
+  vc.on('jsdomError', (e) => {
+    const m = (e && (e.message || String(e))) || '';
+    // jsdom's CSS parser can't handle modern syntax (color-mix, backdrop-filter) —
+    // that's a jsdom limitation, not a page bug (real browsers parse it cleanly).
+    if (/Could not parse CSS stylesheet/i.test(m)) return;
+    errors.push('jsdomError: ' + m);
+  });
+  vc.on('error', (...a) => errors.push('console.error: ' + a.join(' ')));
+
+  const dom = new JSDOM(html, {
+    runScripts: 'dangerously',
+    pretendToBeVisual: true,
+    virtualConsole: vc,
+    // Both rounds share an origin on purpose — that is the whole point of the
+    // isolation test below. Different origins would isolate them for free and
+    // prove nothing about the storage key.
+    url: 'http://localhost/',
+    beforeParse(window) {
+      window.IntersectionObserver = class {
+        observe() {} unobserve() {} disconnect() {} takeRecords() { return []; }
+      };
+      if (!window.matchMedia) {
+        window.matchMedia = (q) => ({
+          matches: false, media: q,
+          addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {}, onchange: null,
+        });
+      }
+      try {
+        Object.defineProperty(window.navigator, 'clipboard', {
+          configurable: true, value: { writeText: () => Promise.resolve() },
+        });
+      } catch { /* ignore */ }
+      for (const [k, v] of Object.entries(seed || {})) window.localStorage.setItem(k, v);
+    },
+  });
+  const { window } = dom;
+  return {
+    dom, window, doc: window.document, errors,
+    fire: (el, t) => el.dispatchEvent(new window.Event(t, { bubbles: true })),
+    keys: () => Object.keys({ ...window.localStorage }),
+  };
+}
 const CLOSING_DEFAULT =
   'Please turn these into a phased build plan with detailed Phase-1 (MVP) requirements, and follow up on anything I flagged.';
 
@@ -66,43 +113,7 @@ for (const c of CASES) {
   check(secRef, 'every question.section references a known section');
 
   // --- 3. headless render ---
-  const html = injectData(engine, data);
-  const errors = [];
-  const vc = new VirtualConsole();
-  vc.on('jsdomError', (e) => {
-    const m = (e && (e.message || String(e))) || '';
-    // jsdom's CSS parser can't handle modern syntax (color-mix, backdrop-filter) —
-    // that's a jsdom limitation, not a page bug (real browsers parse it cleanly).
-    if (/Could not parse CSS stylesheet/i.test(m)) return;
-    errors.push('jsdomError: ' + m);
-  });
-  vc.on('error', (...a) => errors.push('console.error: ' + a.join(' ')));
-
-  const dom = new JSDOM(html, {
-    runScripts: 'dangerously',
-    pretendToBeVisual: true,
-    virtualConsole: vc,
-    url: 'http://localhost/',
-    beforeParse(window) {
-      window.IntersectionObserver = class {
-        observe() {} unobserve() {} disconnect() {} takeRecords() { return []; }
-      };
-      if (!window.matchMedia) {
-        window.matchMedia = (q) => ({
-          matches: false, media: q,
-          addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {}, onchange: null,
-        });
-      }
-      try {
-        Object.defineProperty(window.navigator, 'clipboard', {
-          configurable: true, value: { writeText: () => Promise.resolve() },
-        });
-      } catch { /* ignore */ }
-    },
-  });
-  const { window } = dom;
-  const doc = window.document;
-  const fire = (el, t) => el.dispatchEvent(new window.Event(t, { bubbles: true }));
+  const { window, doc, errors, fire } = render(injectData(engine, data));
 
   check(errors.length === 0, 'zero script/console errors' + (errors.length ? ` — ${errors[0]}` : ''));
 
@@ -154,6 +165,71 @@ for (const c of CASES) {
 
   window.close();
 }
+
+// ══ round isolation ═══════════════════════════════════════════════════════
+// The named bug: rounds of one project share an origin and a project slug, so
+// round 2 silently rehydrated round 1's answers, and coerceChoice quietly
+// dropped the keys that no longer existed. Both rounds render at the SAME
+// origin here on purpose — different origins would isolate them for free and
+// prove nothing about the storage key.
+console.log('\n▶ round isolation (shared origin, derived storage key)');
+
+const r1Data = JSON.parse(await readFile(CASES[0].path, 'utf8'));
+const r2Data = JSON.parse(await readFile(CASES[1].path, 'utf8'));
+const R1_KEY = 'orchard-weather-station-r1-scoping-v1';
+const R2_KEY = 'orchard-weather-station-r2-scoping-v1';
+
+const a = render(injectData(engine, r1Data));
+const q1alt = r1Data.questions[0].options.find((o) => o.key !== r1Data.questions[0].rec).key;
+const inpA = a.doc.querySelector(`#card-Q1 .opt[data-key="${q1alt}"] input`);
+inpA.checked = true; a.fire(inpA, 'change');
+
+check(a.keys().includes(R1_KEY), `round 1 writes to ${R1_KEY}`);
+check(!a.keys().includes('orchard-weather-station-scoping-v1'),
+  'the bare project slug is no longer a storage key — the round is always in it');
+
+// Hostile seed: round 1's store, forged to also carry an answer for a round-2
+// question id. If round 2 read the wrong key, this is what would leak through.
+const forged = JSON.stringify({
+  __notes: 'notes from the round before',
+  Q6: { choice: 'a', note: '', otherText: '', flag: false, rej: false, rev: true },
+});
+const b = render(injectData(engine, r2Data), { [R1_KEY]: forged });
+const q6checked = [...b.doc.querySelectorAll('#card-Q6 input')].filter((i) => i.checked).map((i) => i.value);
+check(JSON.stringify(q6checked) === JSON.stringify(['b']),
+  `round 2 shows its own recommendation, not round 1's stored answer (got ${q6checked.join(',') || 'nothing'})`);
+check(b.doc.getElementById('globalNotes').value === '',
+  'overall notes do not leak across rounds either');
+check(b.keys().includes(R2_KEY), `round 2 writes to ${R2_KEY}`);
+
+// The counterfactual. Without it, the assertions above would also pass if
+// persistence were simply broken.
+const c = render(injectData(engine, r2Data), { [R2_KEY]: forged });
+const q6restored = [...c.doc.querySelectorAll('#card-Q6 input')].filter((i) => i.checked).map((i) => i.value);
+check(JSON.stringify(q6restored) === JSON.stringify(['a']),
+  'seeded under its OWN key, round 2 does restore it — the isolation is the key, not broken persistence');
+check(c.doc.getElementById('globalNotes').value === 'notes from the round before',
+  'and its own notes come back');
+
+// ══ the format gate ═══════════════════════════════════════════════════════
+// Before this, a malformed payload was swallowed and fell through to the
+// friendly empty state, so a broken run produced a blank document that looked
+// deliberate. Each outcome must now be distinguishable.
+console.log('\n▶ format gate');
+
+const rawShell = render(engine);
+check(!!rawShell.doc.querySelector('.empty') && !rawShell.doc.querySelector('.empty.bad'),
+  'the raw shell still shows the friendly nothing-loaded note');
+
+const v1 = structuredClone(r1Data); v1.formatVersion = 1;
+const gateV1 = render(injectData(engine, v1));
+check(!!gateV1.doc.querySelector('.empty.bad'), 'a v1 payload is refused loudly, not rendered blank');
+check(/formatVersion/.test(gateV1.doc.querySelector('.empty.bad').textContent),
+  'and the refusal names the version it found');
+check(gateV1.doc.querySelectorAll('.q').length === 0, 'nothing renders behind the refusal');
+
+const broken = render(engine.replace('id="scoping-data">{}', 'id="scoping-data">{not json'));
+check(!!broken.doc.querySelector('.empty.bad'), 'an unparseable data block is refused loudly too');
 
 console.log(`\n${failures ? `✗ ${failures} check(s) failed` : '✓ all checks passed'}\n`);
 process.exit(failures ? 1 : 0);
