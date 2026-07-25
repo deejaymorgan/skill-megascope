@@ -10,7 +10,7 @@ The shell ships with an empty data block:
 <script type="application/json" id="scoping-data">{}</script>
 ```
 
-A run replaces **only that block's contents** with its JSON. Use `node tests/build-doc.mjs <data.json> <out.html>`, or do it by hand. Everything else in `engine.html` is byte-identical every run. Opened with the empty `{}` (or invalid JSON), the shell shows a friendly "no data loaded" state instead of erroring.
+A run replaces **only that block's contents** with its JSON. Use `node scripts/build-doc.mjs <data.json> <out.html>`, or do it by hand. Everything else in `engine.html` is byte-identical every run. Opened with the empty `{}` (or invalid JSON), the shell shows a friendly "no data loaded" state instead of erroring.
 
 The page has no `<!doctype>/<html>/<head>/<body>` wrapper, so the same file works as a **standalone `.html`** and as an **Artifact source**. It declares `<meta charset="utf-8">` first, so smart quotes / em-dashes / emoji render correctly over `file://`, HTTP, and Artifacts.
 

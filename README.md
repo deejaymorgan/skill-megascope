@@ -95,10 +95,6 @@ skill-megascope/
 │       ├── writing-questions.md       #   recommendation-first question doctrine
 │       ├── research-fanout.md         #   workflow patterns, dossier → synthesis
 │       └── theming.md                 #   subject-grounded accent + theme tokens
-├── examples/paperclips/               # one full worked example
-│   ├── request.md                     #   the fuzzy input request
-│   ├── scoping.data.json              #   the generated questions-JSON (the real per-run artifact)
-│   └── scoping.html                   #   engine + injected data (what gets published)
 ├── scripts/
 │   ├── build-doc.mjs                  # inject a data.json into the shell → standalone HTML
 │   ├── inject.mjs                     # the one injection operation
@@ -106,7 +102,9 @@ skill-megascope/
 │   └── mega.sh                        # flip the deployed skill between the prod/dev worktrees
 ├── tests/
 │   ├── smoke.mjs                      # schema-validate + headless render + round-trip assertions
-│   └── fixtures/minimal.data.json     # a tiny second case (incl. a multi-select question)
+│   └── fixtures/
+│       ├── rich.data.json             #   exercises every part of the format (also `npm run dev`'s sample)
+│       └── minimal.data.json          #   a tiny second case (incl. a multi-select question)
 ├── CLAUDE.md                          # repo workflow rules for Claude sessions
 ├── package.json
 ├── LICENSE
@@ -119,7 +117,6 @@ skill-megascope/
 npm install            # ajv + jsdom (dev only)
 npm test               # validate schema + render both cases headless + assert invariants
 npm run dev            # live engine preview — watch + rebuild scratch/preview.html on save
-npm run build:example  # rebuild examples/paperclips/scoping.html from its data
 ```
 
 Build any scoping doc from a data file:
@@ -128,11 +125,11 @@ Build any scoping doc from a data file:
 node scripts/build-doc.mjs path/to/scoping.data.json path/to/scoping.html
 ```
 
-The smoke test asserts, for both the paperclips example and the minimal fixture: schema validity, zero render errors, correct card count, **every default pre-selected to its recommendation**, correct live counts, and a clean export round-trip.
+The smoke test asserts, for every fixture under `tests/fixtures/`: schema validity, zero render errors, correct card count, **every default pre-selected to its recommendation**, correct live counts, and a clean export round-trip.
 
 ## Authoring a questions-JSON
 
-See [`skills/megascope/assets/schema.json`](skills/megascope/assets/schema.json) for the contract, [`references/engine-data.md`](skills/megascope/references/engine-data.md) for how each field renders, and [`references/writing-questions.md`](skills/megascope/references/writing-questions.md) for how to write questions that are worth pre-answering. [`examples/paperclips/scoping.data.json`](examples/paperclips/scoping.data.json) is a complete, real example.
+See [`skills/megascope/assets/schema.json`](skills/megascope/assets/schema.json) for the contract, [`references/engine-data.md`](skills/megascope/references/engine-data.md) for how each field renders, and [`references/writing-questions.md`](skills/megascope/references/writing-questions.md) for how to write questions that are worth pre-answering. [`tests/fixtures/rich.data.json`](tests/fixtures/rich.data.json) is a complete example that exercises every part of the format.
 
 ## License
 

@@ -1,0 +1,116 @@
+{
+  "meta": {
+    "project": "orchard-weather-station",
+    "title": "Orchard — a garden weather station",
+    "subtitle": "Scoping",
+    "favicon": "🌦",
+    "eyebrow": "Scoping document · 3 areas · 4 decisions",
+    "headline": "Let’s settle the sensor before we pour concrete.",
+    "lede": "Each decision below is pre-filled with a **recommended default** and the reasoning behind it. Review, override where you have a view, and flag anything to discuss.",
+    "legend": "Every question is pre-set to a recommended default (★). Change what you disagree with.",
+    "steps": ["Review the defaults", "Change & flag what matters", "Copy answers → paste into chat"],
+    "overallNotesTitle": "Anything else on your mind?",
+    "overallNotesHint": "Constraints, worries, or brand-new questions.",
+    "closingAsk": "Turn these into a build order and tell me what you still need from me.",
+    "constraints": [
+      { "label": "Power:", "text": "mains socket in the shed, 12 m from the mast" },
+      "No cloud account — the data stays on the home network"
+    ],
+    "context": {
+      "title": "Site context",
+      "note": "The station sits at the top of a ~0.4 ha orchard on a `north-facing` slope. Frost pockets form at the bottom, which is the whole reason for building it.",
+      "cards": [
+        { "title": "Mast", "body": "3 m pole at the high corner, clear of the hedge.", "foot": "Ends: **anemometer + vane**" },
+        { "title": "Shed", "body": "Houses the receiver and the mains supply.", "foot": "Ends: **logger + display**" }
+      ],
+      "blocks": [
+        {
+          "heading": "Proposed phases",
+          "type": "phases",
+          "items": [
+            { "key": "P1", "label": "Read", "desc": "One sensor, one reading, written to disk." },
+            { "key": "P2", "label": "Log", "desc": "Full sensor set on a schedule, with gaps handled." },
+            { "key": "P3", "label": "Show", "desc": "A frost alert you actually trust at 5 a.m." }
+          ]
+        },
+        {
+          "heading": "Vocabulary",
+          "type": "list",
+          "items": [
+            { "term": "frost pocket", "desc": "cold air pooling at the low end of the slope" },
+            { "term": "dew point", "desc": "the temperature at which the air gives up its moisture" }
+          ]
+        },
+        {
+          "heading": "Shape",
+          "type": "diagram",
+          "lines": [
+            "  mast ──~433 MHz~──▶ shed receiver ──▶ **logger** ──▶ disk",
+            "                                          └──────────▶ frost alert"
+          ]
+        },
+        {
+          "heading": "Note",
+          "type": "prose",
+          "text": "Nothing here needs to survive a power cut for more than an hour."
+        }
+      ]
+    },
+    "theme": { "accent": "#4A6E3A", "neutralBias": "warm" }
+  },
+  "sections": [
+    { "id": "H", "title": "Hardware" },
+    { "id": "D", "title": "Data & storage" },
+    { "id": "A", "title": "Alerting" }
+  ],
+  "questions": [
+    {
+      "id": "H1",
+      "section": "H",
+      "rec": "b",
+      "question": "How does the mast talk to the shed?",
+      "why": "A 12 m trench for a cable is a weekend of digging; a 433 MHz link is an afternoon and the range is generous at this distance.",
+      "options": [
+        { "key": "a", "label": "Buried cable", "detail": "Utterly reliable, but you are digging a trench." },
+        { "key": "b", "label": "433 MHz radio link", "detail": "Cheap, long-range, and no groundwork." },
+        { "key": "c", "label": "Wi-Fi at the mast", "detail": "Needs power and coverage at the far corner." }
+      ]
+    },
+    {
+      "id": "H2",
+      "section": "H",
+      "rec": "a",
+      "question": "Which sensors go up first?",
+      "why": "Temperature and humidity give you the dew point, which is the one number a frost alert actually needs; wind is nice to have.",
+      "options": [
+        { "key": "a", "label": "Temperature + humidity", "detail": "The minimum that answers the frost question." },
+        { "key": "b", "label": "The full set at once", "detail": "More to mount, more to debug, same first answer." }
+      ]
+    },
+    {
+      "id": "D1",
+      "section": "D",
+      "rec": "b",
+      "question": "Where do the readings live?",
+      "why": "A plain file per day is trivially inspectable and survives a machine rebuild; a database is a dependency you would be maintaining for one reader.",
+      "options": [
+        { "key": "a", "label": "SQLite", "detail": "Queryable from day one; one more thing to back up." },
+        { "key": "b", "label": "One CSV per day", "detail": "Readable in anything, trivial to copy off." },
+        { "key": "c", "label": "Straight to a chart service", "detail": "Conflicts with keeping data off the cloud." }
+      ]
+    },
+    {
+      "id": "A1",
+      "section": "A",
+      "rec": ["push", "screen"],
+      "multi": true,
+      "question": "How should a frost alert reach you?",
+      "why": "A push at 5 a.m. is the one that saves the blossom; the shed display is the one you glance at anyway.",
+      "options": [
+        { "key": "push", "label": "Phone push", "detail": "Wakes you in time to light the candles." },
+        { "key": "screen", "label": "Shed display", "detail": "Always-on number by the door." },
+        { "key": "email", "label": "Email", "detail": "You will read it at nine, which is too late." }
+      ]
+    }
+  ]
+}

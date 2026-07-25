@@ -18,7 +18,7 @@ The document is produced by a **data-driven engine**: one static HTML shell (`as
 
 ## Operating rules (read first)
 
-- **Files.** The engine shell, schema, and playbook sit alongside this skill: `assets/engine.html`, `assets/schema.json`, and `references/`. (The worked example and the `build-doc.mjs` helper live in the megascope repo — `examples/paperclips/` and `scripts/` — useful when developing, not needed at run time.)
+- **Files.** The engine shell, schema, and playbook sit alongside this skill: `assets/engine.html`, `assets/schema.json`, and `references/`. (The worked example and the `build-doc.mjs` helper live in the megascope repo — `examples/` and `scripts/` — useful when developing, not needed at run time.)
 - **Never edit the engine shell for a run.** Generate the questions-JSON, then produce the doc by taking `assets/engine.html` and replacing ONLY the contents of its `<script id="scoping-data">` block with your JSON: Read the engine, write the combined result into the target project. (Working in the repo, `node scripts/build-doc.mjs <data.json> <out.html>` does exactly this.)
 - **Validate every JSON** against `assets/schema.json` before building; a malformed block makes the engine fall back to its empty state.
 - **Recommendation-first, always.** Every question ships pre-answered with a `rec` and a one-line `why`. The user's job is to *review*, not to author. A blank-looking question is a bug.
@@ -87,4 +87,4 @@ Produce the **phased build plan + detailed Phase-1/MVP requirements**, reflectin
 - `assets/schema.json` — the questions-JSON schema (validate against this).
 - `references/{writing-questions,research-fanout,theming,engine-data}.md` — playbook.
 
-In the megascope repo (development only): `examples/paperclips/` (worked example), `scripts/build-doc.mjs` (injection helper), `tests/smoke.mjs` (render + round-trip test).
+In the megascope repo (development only): `examples/` (worked example), `scripts/build-doc.mjs` (injection helper), `tests/smoke.mjs` (render + round-trip test).

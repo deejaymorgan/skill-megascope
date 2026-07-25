@@ -47,7 +47,7 @@ Fire a batch of parallel `Agent` calls (one per facet) in a single message, then
 
 ## The three synthesis artifacts
 
-Mirror the gold-standard reference (`examples/paperclips` is built from exactly these):
+Mirror the gold-standard reference (the worked example under `examples/` is built from exactly these):
 
 1. **Master dossier** — canonical, deduplicated facts. Numbers verified in source override web-derived numbers. A contradiction table (what conflicted, how it resolved, evidence).
 2. **Open questions** — the raw material for `questions[]`. Each: 2–4 concrete options, a ★ recommended default, a one-line rationale that names the tradeoff and the runner-up condition. Group by area.

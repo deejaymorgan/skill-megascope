@@ -6,7 +6,6 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build-doc.mjs",
-    "build:example": "node scripts/build-doc.mjs examples/paperclips/scoping.data.json examples/paperclips/scoping.html",
     "dev": "node scripts/dev.mjs",
     "test": "node tests/smoke.mjs",
     "dogfood": "bash scripts/mega.sh dogfood",

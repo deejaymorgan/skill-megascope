@@ -47,14 +47,14 @@ tracked files, not in memory.
 - **`scripts/`** — dev helpers: `build-doc.mjs`, `inject.mjs`, `dev.mjs`, `mega.sh`.
 - **`docs/`** — notes on working *on* the repo, as opposed to notes that ship with the skill.
 - **`tests/`** — machinery tests for the engine and schema; run with `npm test`.
-- **`examples/paperclips/`** — one worked example, from input request to finished document.
+  - `fixtures/` — the data files the tests render. Also the sample data for `npm run dev`.
 
 ## Read
 - **`skills/megascope/references/engine-data.md`**
   - The data format — every field and how it appears on the page.
   - Start here for anything about the questions-JSON.
-- **`examples/paperclips/scoping.data.json`**
-  - A complete example data file.
+- **`tests/fixtures/rich.data.json`**
+  - A complete example data file, exercising every part of the format.
   - Read it to see the shape and quality to aim for.
 - **`skills/megascope/assets/engine.html`**
   - The page that renders the document.
@@ -66,10 +66,9 @@ tracked files, not in memory.
     engine looks broken when it isn't.
 
 ## Don't read
-- **`examples/paperclips/scoping.html`**
-  - A finished scoping document.
-  - A script builds it by combining the engine with `examples/paperclips/scoping.data.json`; read
-    that instead.
+- **Any built `.html` scoping document** (e.g. `scratch/preview.html`)
+  - A script builds it by combining the engine with a data file; read the data file instead.
+  - The repo deliberately ships none of these — only the engine and the data that feeds it.
 - **`skills/megascope/assets/schema.json`**
   - The same format, machine-checkable.
   - Written for a program to check rather than a person to read.

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // smoke.mjs — megascope render + round-trip smoke test.
 //
-// For each data case (the paperclips example + the minimal fixture) it:
+// For each data case (the fixtures under tests/fixtures/) it:
 //   1. validates the questions-JSON against assets/schema.json (ajv) + semantic checks
 //   2. injects it into the engine shell and renders headless (jsdom)
 //   3. asserts: zero script errors, correct card count, EVERY default pre-selected
@@ -33,8 +33,8 @@ const ajv = new Ajv({ allErrors: true, strict: false });
 const validate = ajv.compile(schema);
 
 const CASES = [
-  { name: 'paperclips (example)', path: resolve(ROOT, 'examples/paperclips/scoping.data.json') },
-  { name: 'minimal (fixture)',    path: resolve(ROOT, 'tests/fixtures/minimal.data.json') },
+  { name: 'rich (fixture)',    path: resolve(ROOT, 'tests/fixtures/rich.data.json') },
+  { name: 'minimal (fixture)', path: resolve(ROOT, 'tests/fixtures/minimal.data.json') },
 ];
 
 const recKeys = (q) => (Array.isArray(q.rec) ? q.rec.slice() : [q.rec]);

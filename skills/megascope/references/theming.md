@@ -17,7 +17,7 @@ Usually you set only `accent` (and maybe `neutralBias`). The engine derives `--a
 ## Choosing the accent (subject-grounded, not defaulted)
 
 Pick a hue from the **subject's own world**, then keep everything around it quiet:
-- Universal Paperclips → a steel/office blue (`#2C6BA6`).
+- An idle/incremental browser game → a steel/office blue (`#2C6BA6`).
 - A CLI dev tool → terminal green (`#0E7C66`).
 - A fintech ledger → deep indigo or gilt.
 - A climate/maps project → a considered forest or ocean tone.
