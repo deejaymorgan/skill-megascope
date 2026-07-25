@@ -60,7 +60,7 @@
 
         "title": { "type": "string", "description": "Header title, document title, and export title.", "minLength": 1, "maxLength": 80 },
         "subtitle": { "type": "string", "description": "Small uppercase label under the title. Default: 'Round n of m'.", "minLength": 1, "maxLength": 60 },
-        "favicon": { "type": "string", "description": "One or two emoji for the header mark (and the Artifact favicon).", "minLength": 1, "maxLength": 4 },
+        "favicon": { "type": "string", "description": "ONE emoji, used as the browser-tab and Artifact icon. Not drawn on the page. maxLength is generous because a single emoji can be several code units (skin tones, ZWJ sequences); 'exactly one' is counted in graphemes by check S16, which the schema cannot express.", "minLength": 1, "maxLength": 16 },
         "eyebrow": { "type": "string", "description": "Small mono label above the headline. Default auto-derives from the round and the counts.", "minLength": 3, "maxLength": 80 },
         "headline": { "type": "string", "description": "Serif intro headline: a short, plain-language sentence.", "minLength": 10, "maxLength": 90 },
         "lede": { "type": "string", "description": "1-3 sentence intro. Say what the previous round settled and what this one is for.", "minLength": 30, "maxLength": 400 },

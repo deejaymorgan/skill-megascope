@@ -450,4 +450,11 @@ export const MUTATIONS = [
     mutate: (d) => { d.meta.research.mode = 'none'; },
     expect: { check: 'S15' },
   },
+  {
+    id: 'favicon-is-two-emoji',
+    guarantee: 'the favicon is exactly one emoji — counted in graphemes, which maxLength cannot do',
+    base: 'round-1',
+    mutate: (d) => { d.meta.favicon = '📎🧹'; },
+    expect: { check: 'S16' },
+  },
 ];

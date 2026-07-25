@@ -8,7 +8,7 @@ What gets handed over is itself a scoping decision — a build plan, a feature s
 
 The scoping document is produced by a **data-driven engine** — a single static, self-contained, theme-aware HTML shell ([`skills/megascope/assets/engine.html`](skills/megascope/assets/engine.html)) fed a per-run **questions-JSON**. Each run generates *only the JSON*; the engine is never edited. That's the efficiency win and the thing the skill protects.
 
-The engine renders everything from data — header, intro, constraint chips, a collapsible context panel, sectioned recommendation-first question cards, live counts, sticky nav with scroll-spy, a clean **Copy answers for Claude** export, JSON download, `localStorage` persistence, and full light/dark theming — offline and CSP-safe, so the same file works as a standalone `.html` **and** as a published Artifact.
+The engine renders everything from data — header, intro, the already-decided list, a collapsible context panel, sectioned recommendation-first question cards, live counts in a single action bar, sticky nav with scroll-spy, a clean **Copy answers for Claude** export, JSON download, `localStorage` persistence, and full light/dark theming — offline and CSP-safe, so the same file works as a standalone `.html` **and** as a published Artifact.
 
 ## What makes it work (preserved by design)
 
@@ -19,7 +19,7 @@ The engine renders everything from data — header, intro, constraint chips, a c
 - **A flag is a bookmark, not an objection** — copy a question out on its own, ask about it elsewhere, come back. The answer still stands and the round doesn't wait.
 - **A clean, parseable export** closes the human→Claude loop — and is parsed back by the tool, so a later round's claims are checked against what you actually said.
 - **Readiness is a check, not a self-report** — five scope slots, each settled only on evidence that resolves. The loop terminates on a tool refusal.
-- **Constraints as chips** — already-decided facts are shown and therefore *not re-asked*.
+- **Constraints stated up front** — already-decided facts are listed under "Already decided — not re-asked here", and therefore *not re-asked*.
 - **Tasteful, subject-grounded, theme-aware craft** — personality via `meta.theme`, not by touching the shell.
 
 ## Setup

@@ -34,7 +34,8 @@ edited shell. That is the core efficiency win and the thing to protect.
 - **The engine adds the escapes; the data must not.** Every question automatically gets
   *In my own words*, *This doesn't make sense*, a flag, a note and its own copy button. They
   are a parse contract, not styling. Do not try to declare or restyle them.
-- **Don't re-ask what's decided.** Facts the user already fixed become `meta.constraints` chips.
+- **Don't re-ask what's decided.** Facts the user already fixed become `meta.constraints`, listed
+  under a heading the engine supplies: *Already decided — not re-asked here*.
 - **Recommendation-first, always.** Every question ships pre-answered with a `rec`, a `why` and a
   `switchIf`. The user reviews; they do not author. A blank-looking question is a bug.
 
@@ -77,7 +78,8 @@ node assets/megascope.mjs build docs/scoping/<project>/round-1.data.json docs/sc
 
 Then **publish it as an Artifact**. Load the `artifact-design` skill for calibration — the shell is
 already tasteful, so keep it so. The engine omits `<!doctype>/<html>/<head>/<body>`, so it is
-Artifact-ready as-is. Pass `meta.favicon` as the favicon and a stable title.
+Artifact-ready as-is. Pass `meta.favicon` — one emoji, a tab icon only, never drawn on the page —
+as the Artifact favicon, along with a stable title.
 
 Hand it over in one line: *review the defaults, change or reject anything that doesn't fit, then
 click "Copy answers for Claude" and paste it back.*

@@ -51,7 +51,7 @@ Every display string is HTML-escaped, then a tiny formatter runs. Use it sparing
 | `scope` | ✓ | The five slots — see below. |
 | `glossary` | ✓ | Term → gloss. May be `{}`. |
 | `subtitle` | | Small uppercase label. Default `Round n of m`. |
-| `favicon` | | 1–2 emoji for the header mark. Pass it as the Artifact favicon too. |
+| `favicon` | | **One** emoji (checked as graphemes, not characters). The browser-tab icon, and what you pass as the Artifact favicon. Never drawn on the page. |
 | `eyebrow` | | Mono label above the headline. Defaults to `Round n of m · A areas · B decisions`. |
 | `headline` | | Serif intro headline, ≤90 chars. |
 | `lede` | | Intro paragraph. Say what the last round settled and what this one is for. |
@@ -60,7 +60,7 @@ Every display string is HTML-escaped, then a tiny formatter runs. Use it sparing
 | `overallNotesTitle` / `overallNotesHint` | | The free-text catch-all box. |
 | `closingAsk` | | Final line of the export. |
 | `research` | | `{mode, trigger[], sources[]}` — see `rounds.md`. |
-| `constraints[]` | | Check chips: already-decided facts, so they aren't re-asked. `{label,text}` or a bare string. |
+| `constraints[]` | | Already-decided facts, so they aren't re-asked. Renders as a ticked list under the heading **"Already decided — not re-asked here"**, which the engine supplies. `{label,text}` or a bare string. |
 | `context` | | The collapsible panel. Hidden entirely if empty. |
 | `theme` | | Personality — see `theming.md`. **The only source of it.** |
 
@@ -85,7 +85,11 @@ preference stays project-wide, since light-or-dark is a person's preference acro
 ### `meta.scope`
 
 Exactly five entries, in the order `goal, deliverable, boundary, verification, constraints`. Renders
-as the panel above the toolbar: state pill, label, full text, and provenance.
+as the panel above the questions: state pill, label, full text, and provenance.
+
+Readiness — which slots this round advances — is **not** on the page. Until the last question is
+answered it read as five labels and five dashes, which told the reader nothing they could act on.
+It still goes into the export verbatim, which is where the next round is written from.
 
 ```jsonc
 { "slot": "goal",
@@ -104,7 +108,7 @@ as the panel above the toolbar: state pill, label, full text, and provenance.
 
 `{ "term": "what it means, in plain words" }`, up to 10. Identifier-shaped terms are allowed only in
 a question's `example` and an option's `detail`; each one needs an entry here, and every entry must
-be used. Renders as a term list at the foot of the scope panel.
+be used. Renders as a term list at the foot of the scope panel, headed **Glossary**.
 
 ### `meta.context`
 
@@ -152,7 +156,12 @@ would let a run break it.
 
 Four states form a **partition** — `DEFAULT`, `CHANGED`, `OWN`, `REJECTED` — and `FLAGGED` is
 orthogonal to all four. "Answered" means reviewed **and not rejected**, so the progress bar cannot
-read complete while a question is still rejected, and "Accept all defaults" skips rejected ones.
+read complete while a question is still rejected.
+
+The page **reads out two of these**: flagged, and answered-of-total, in the action bar at the foot,
+alongside the header's progress bar. All four states are still tracked per question, still colour
+each card's edge, and still reach the export in full — the readout is a display decision, the
+partition is a parse contract. Don't trim one to match the other.
 
 Everything persists to `localStorage` under the derived slug.
 

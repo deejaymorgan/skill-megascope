@@ -25,9 +25,9 @@
 //             the closed vocabulary both sides agree on, and tests/schema.mjs
 //             fails the build if schema.json ever reaches outside it.
 //
-// SEMANTIC    S1-S15. Split by phase, because the two phases ask different
+// SEMANTIC    S1-S16. Split by phase, because the two phases ask different
 //             questions:
-//               validate  S1-S5, S10-S15 — is this file coherent?
+//               validate  S1-S5, S10-S16 — is this file coherent?
 //               build     + S6-S9 — is this round fit to be put in front of
 //                         someone? A round with nothing open, nothing advanced,
 //                         or a question about something already settled is a
@@ -461,6 +461,17 @@ export function semanticChecks(data, opts = {}) {
 
   // ── S11 · the round counts itself honestly ───────────────────────────────
   if (round.of < round.n) fail('S11', `this is round ${round.n} of ${round.of}`);
+
+  // ── S16 · the favicon is exactly one emoji ───────────────────────────────
+  // It is a tab icon and nothing else now, so "one" is the whole spec. The
+  // schema can only bound the string's LENGTH, and a single emoji is not one
+  // code unit — 👨‍👩‍👧 is eleven — so the count that matters is graphemes, which
+  // is exactly the kind of thing that lands here rather than in schema.json.
+  if (meta.favicon != null) {
+    const seg = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+    const n = [...seg.segment(meta.favicon)].length;
+    if (n !== 1) fail('S16', `meta.favicon is ${n} characters ("${meta.favicon}") — it must be exactly one emoji`);
+  }
 
   // ── S12/S13/S10 · evidence resolves against what the user really sent ────
   const answerFiles = new Map();   // round number -> parsed export (or null)

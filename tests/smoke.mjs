@@ -172,10 +172,19 @@ for (const c of CASES) {
   check([...doc.querySelectorAll('.q')].every((c) => c.querySelector('.opt.own')),
     'every question carries the __own escape, added by the engine and never declared by the data');
 
-  check(doc.getElementById('tb-total').textContent === String(data.questions.length), 'total count = N');
-  for (const id of ['tb-changed', 'tb-own', 'tb-rejected', 'tb-flagged', 'tb-answered']) {
+  check(doc.getElementById('ab-total').textContent === String(data.questions.length), 'total count = N');
+  for (const id of ['ab-flagged', 'ab-answered']) {
     check(doc.getElementById(id).textContent === '0', `${id.slice(3)} starts at 0`);
   }
+  // One control surface. The sticky mid-page toolbar showed its counts through
+  // a translucent seam with the page scrolling behind it, and "accept all"
+  // could mark a document finished without any of it having been read.
+  check(!doc.querySelector('.toolbar') && !doc.getElementById('acceptAll'),
+    'no sticky mid-page toolbar and no accept-all — the action bar is the only control surface');
+  check(['resetAll', 'downloadBtn', 'copyBtn'].every((id) => doc.querySelector(`.actionbar #${id}`)),
+    'reset, download and copy all live in the action bar');
+  check(!doc.getElementById('brandMark') && !doc.querySelector('.brand-mark'),
+    'the header carries no emoji mark');
   check(doc.querySelectorAll('.nav a[data-sec]').length === data.sections.length, 'nav links = sections');
 
   // --- drive all four states + the flag, then round-trip the export ---
@@ -198,11 +207,12 @@ for (const c of CASES) {
 
   doc.querySelector(`#card-${qRejected.id} .rej-toggle`).click();
 
-  check(doc.getElementById('tb-changed').textContent === '1', 'changing an option increments "changed"');
-  check(doc.getElementById('tb-own').textContent === '1', 'own words counts separately from changed');
-  check(doc.getElementById('tb-rejected').textContent === '1', 'rejecting increments "need explaining"');
-  check(doc.getElementById('tb-flagged').textContent === '1', 'flagging increments "flagged"');
+  // The page reads out two numbers now. The four states did NOT go with the
+  // display — they still drive each card and still reach the export in full —
+  // so they are asserted on the card and on the summary line instead.
+  check(doc.getElementById('ab-flagged').textContent === '1', 'flagging increments the flagged count');
   check(doc.getElementById('card-' + qChanged.id).dataset.state === 'changed', 'changed card gets its border state');
+  check(doc.getElementById('card-' + qOwn.id).dataset.state === 'own', 'own words is its own state, not "changed"');
   check(doc.getElementById('card-' + qRejected.id).dataset.state === 'rejected',
     'rejected outranks everything else the card could be saying');
 
@@ -220,6 +230,10 @@ for (const c of CASES) {
     'line 2 is the machine-readable scope-id — its absence is how a legacy export identifies itself');
   check(/^Summary: \d+ default · \d+ changed · \d+ in own words · \d+ rejected · \d+ flagged · \d+\/\d+ answered\.$/m.test(exp),
     'the summary line reports all four states as a partition');
+  // The page shows flagged + answered. The export must not have been trimmed
+  // to match it — evidence resolution in a later round reads these numbers.
+  check(/^Summary: \d+ default · 1 changed · 1 in own words · 1 rejected · 1 flagged · /m.test(exp),
+    'and it still counts each state the page no longer displays');
   check(/^Readiness this round: .+ [✓—]( · .+ [✓—])+$/m.test(exp), 'the readiness strip is reproduced verbatim in the export');
 
   check(/^- \S+ \[CHANGED\] \(\w+\) [A-Z0-9-]+: .+ {3}\(rec was [A-Z0-9-]+: .+\)$/.test(line(qChanged.id)),
@@ -240,12 +254,11 @@ for (const c of CASES) {
   check(data.questions.every((q) => new RegExp(`^- ${q.id} \\[`, 'm').test(exp)), 'every question reaches the export');
   check(exp.trim().endsWith(data.meta.closingAsk || CLOSING_DEFAULT), 'export ends with the closing ask');
 
-  // Last, because it deliberately resets the states set up above.
-  doc.getElementById('acceptAll').click();
-  check(doc.getElementById('tb-rejected').textContent === '1',
-    '"Accept all defaults" does not sweep up a question the user said they did not understand');
-  check(Number(doc.getElementById('tb-answered').textContent) === data.questions.length - 1,
-    'answered = reviewed AND not rejected, even after accepting everything else');
+  // answered = reviewed AND not rejected. With accept-all gone this is the
+  // only thing that can still make the counts and the bar disagree.
+  const touched = new Set([qChanged.id, qFlagged.id, qOwn.id, qRejected.id]).size;
+  check(Number(doc.getElementById('ab-answered').textContent) === touched - 1,
+    'answered = reviewed AND not rejected — the rejected question is not one of them');
 
   window.close();
 }
@@ -299,7 +312,7 @@ check(c.doc.getElementById('globalNotes').value === 'notes from the round before
 // Fed entirely by meta.scope in this round's own file. The engine hardcodes no
 // slot names — it iterates the array as given — so the data-less invariant
 // survives a feature that is entirely about project-specific state.
-console.log('\n▶ scope panel + readiness strip');
+console.log('\n▶ scope panel + readiness (export-only)');
 
 const sp = render(injectData(engine, r2Data));
 const slots = [...sp.doc.querySelectorAll('.sp-slot')];
@@ -313,28 +326,33 @@ check(sp.doc.querySelector('.sp-slot[data-state="settled"] .sp-prov')?.textConte
 check(sp.doc.querySelector('.sp-gloss').hidden === false &&
       sp.doc.querySelector('.sp-gloss').textContent.includes('CSV'),
   'the glossary renders beside the scope, where the jargon it explains is used');
+check(sp.doc.querySelector('.sp-gloss-h').textContent === 'Glossary',
+  'and it is headed "Glossary" — "In plain words" named a tone, not a list');
 check(sp.doc.getElementById('spRound').textContent.includes(r2Data.meta.round.label),
   'the panel names which round this is');
 
-// The strip and the export must agree — they are one computation.
-const strip = [...sp.doc.querySelectorAll('#readyStrip .rs')].map((n) => n.textContent.trim());
-check(strip.length === 5, `the readiness strip covers every slot (${strip.length}/5)`);
-check(strip.every((s) => s.startsWith('—')), 'nothing is ✓ before a single question is answered');
+// Readiness left the page — five labels reading "—" until the very last
+// question is answered is not something a reader can act on — but it still
+// drives the next round, so it is asserted where it now lives: the export.
+check(!sp.doc.getElementById('readyStrip') && !sp.doc.querySelector('.sp-ready'),
+  'the readiness strip no longer renders on the page');
+const readyLine = (d) => {
+  d.getElementById('copyBtn').click();   // openModal rebuilds the export each time
+  return d.getElementById('exportText').textContent
+    .split('\n').find((l) => l.startsWith('Readiness this round:'));
+};
+const ready0 = readyLine(sp.doc);
+check(ready0.split('·').length === 5, `the export covers every slot (${ready0.split('·').length}/5)`);
+check(!ready0.includes('✓'), 'nothing is ✓ before a single question is answered');
 for (const q of r2Data.questions) {
   const i = sp.doc.querySelector(`#card-${q.id} .opt input`);
   i.checked = true; sp.fire(i, 'change');
 }
-const stripAfter = [...sp.doc.querySelectorAll('#readyStrip .rs')];
-check(stripAfter.filter((n) => n.classList.contains('on')).length === 2,
+check(readyLine(sp.doc).split('·').filter((s) => s.includes('✓')).length === 2,
   'exactly the two slots this round targets go ✓ once their questions are answered');
 sp.doc.querySelector('#card-Q6 .rej-toggle').click();
-check([...sp.doc.querySelectorAll('#readyStrip .rs')].filter((n) => n.classList.contains('on')).length === 1,
+check(readyLine(sp.doc).split('·').filter((s) => s.includes('✓')).length === 1,
   'one rejection takes its slot back off ✓ — a slot cannot be ready on a question nobody understood');
-sp.doc.getElementById('copyBtn').click();
-const spReadyLine = sp.doc.getElementById('exportText').textContent
-  .split('\n').find((l) => l.startsWith('Readiness this round:'));
-check(spReadyLine.split('·').filter((s) => s.includes('✓')).length === 1,
-  'and the export reports the identical reading, not a second opinion');
 
 // ══ sandbox behaviour ══════════════════════════════════════════════════════
 // Both of these WORK locally and tell you nothing; they fail only in the one
@@ -346,11 +364,11 @@ sb.window.confirm = () => undefined;   // what a sandboxed iframe really does
 const alt1 = sb.doc.querySelector('#card-Q1 .opt[data-key="b"] input');
 alt1.checked = true; sb.fire(alt1, 'change');
 sb.doc.getElementById('resetAll').click();
-check(sb.doc.getElementById('tb-changed').textContent === '1',
+check(sb.doc.getElementById('card-Q1').dataset.state === 'changed',
   'one click does NOT reset — the confirm() guard evaporates in a sandbox, so the guard is in the DOM');
 check(sb.doc.getElementById('resetAll').textContent.includes('Click again'), 'the button says what it wants');
 sb.doc.getElementById('resetAll').click();
-check(sb.doc.getElementById('tb-changed').textContent === '0', 'the second click does reset');
+check(sb.doc.getElementById('card-Q1').dataset.state === 'default', 'the second click does reset');
 
 const dl = render(injectData(engine, r1Data));
 dl.window.URL.createObjectURL = () => { throw new Error('blocked'); };
@@ -393,9 +411,10 @@ check(back.doc.querySelector('#card-Q1 .q-other').value === 'neither of those, a
   'the user’s own words come back after a reload');
 check(!back.doc.querySelector('#card-Q1 .q-other').hidden, 'and the box is open to show them');
 check(back.doc.getElementById('card-Q2').dataset.state === 'rejected', 'a rejection comes back after a reload');
-check(back.doc.getElementById('tb-rejected').textContent === '1', 'and is still counted');
 back.doc.getElementById('copyBtn').click();
-check(back.doc.getElementById('exportText').textContent.includes('    own words: neither of those, actually'),
+const backExp = back.doc.getElementById('exportText').textContent;
+check(/^Summary: .* 1 rejected · /m.test(backExp), 'and is still counted as rejected');
+check(backExp.includes('    own words: neither of those, actually'),
   'and both reach the export from restored state alone');
 
 // ══ orphan sections ═══════════════════════════════════════════════════════

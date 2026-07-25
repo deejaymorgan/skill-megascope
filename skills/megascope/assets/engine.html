@@ -22,6 +22,9 @@
     --ok:#3C7A52;
     --stop:#B0443B;
     --radius:13px; --radius-sm:9px;
+    /* the intro's reading measure — headline and lede share it, so they share
+       a right edge no matter which font stack meta.theme hands them */
+    --measure:31rem;
     --shadow:0 1px 2px rgba(20,24,33,.05), 0 6px 22px rgba(20,24,33,.05);
     --shadow-sm:0 1px 2px rgba(20,24,33,.05);
     --serif:Georgia,"Iowan Old Style","Palatino Linotype",Palatino,"Times New Roman",serif;
@@ -83,10 +86,7 @@
   .site-header{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--ground) 82%,transparent);
     backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--border);}
   .site-header-in{max-width:1220px;margin:0 auto;padding:13px 22px;display:flex;align-items:center;gap:16px;}
-  .lockup{display:flex;align-items:center;gap:12px;min-width:0;}
-  .brand-mark{width:32px;height:32px;flex:none;display:grid;place-items:center;border-radius:9px;
-    background:var(--accent-tint);color:var(--accent);font-size:19px;line-height:1;}
-  .brand-mark svg{width:20px;height:20px;}
+  .lockup{min-width:0;}
   .lockup h1{font-family:var(--serif);font-weight:600;font-size:17px;letter-spacing:.1px;line-height:1.15;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .lockup .sub{font-size:12px;color:var(--faint);letter-spacing:.3px;text-transform:uppercase;}
@@ -131,21 +131,30 @@
   .intro{margin-bottom:26px;}
   .eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);
     margin-bottom:12px;}
+  /* Headline and lede share ONE right edge. A `ch` cap cannot do that — `ch`
+     is relative to each element's own font, so 64ch on a 29px serif is nearly
+     twice 64ch on a 15.5px sans. One absolute measure holds the edge under any
+     meta.theme font override, which a per-element `ch` value would not. */
   .intro h2{font-family:var(--serif);font-size:29px;line-height:1.15;font-weight:600;letter-spacing:-.2px;
-    text-wrap:balance;max-width:24ch;}
-  .lede{margin-top:14px;font-size:15.5px;color:var(--muted);max-width:64ch;line-height:1.62;}
+    text-wrap:balance;max-width:var(--measure);}
+  .lede{margin-top:14px;font-size:15.5px;color:var(--muted);max-width:var(--measure);line-height:1.62;}
   .lede b{color:var(--ink);font-weight:600;}
   .steps{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--muted);}
   .steps span{display:inline-flex;align-items:center;gap:7px;}
   .steps .n{font-family:var(--mono);font-size:11px;width:19px;height:19px;border-radius:99px;flex:none;
     display:grid;place-items:center;background:var(--accent-tint);color:var(--accent-2);font-weight:600;}
 
-  .chips{margin-top:22px;display:flex;flex-wrap:wrap;gap:8px;}
-  .chips:empty{display:none;}
-  .chip{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;padding:6px 11px 6px 9px;border-radius:99px;
-    background:var(--surface);border:1px solid var(--border);color:var(--muted);}
-  .chip svg{width:13px;height:13px;color:var(--accent);flex:none;}
-  .chips .k{font-weight:500;color:var(--ink);}
+  /* Already-decided facts. These are full sentences, so they read as lines,
+     not as pills — a row of six sentence-length chips is a wall of rounded
+     boxes with no stated purpose, which is what the heading now supplies. */
+  .settled{margin-top:22px;}
+  .settled-h{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--faint);font-weight:600;margin-bottom:8px;}
+  .settled-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;
+    max-width:var(--measure);}
+  .settled-list li{display:flex;gap:9px;font-size:13px;color:var(--muted);line-height:1.55;}
+  .settled-list svg{width:13px;height:13px;color:var(--ok);flex:none;margin-top:4px;}
+  .settled-list .k{font-weight:600;color:var(--ink);}
 
   /* ---------- context accordion ---------- */
   .ctx{margin-top:20px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);
@@ -205,28 +214,12 @@
   .sp-prov{margin-top:4px;font-family:var(--mono);font-size:11px;color:var(--muted);}
   .sp-assumed{margin-top:5px;font-size:12px;color:var(--warn-ink);background:var(--warn-tint);
     border-radius:7px;padding:6px 9px;line-height:1.5;max-width:78ch;}
-  .sp-ready{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:11px 18px;
-    border-top:1px solid var(--hairline);background:var(--surface-2);}
-  .sp-ready-h{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
-  .rs-row{display:flex;flex-wrap:wrap;gap:6px 14px;}
-  .rs{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);}
-  .rs i{font-style:normal;font-family:var(--mono);font-size:11px;width:15px;height:15px;border-radius:99px;
-    display:grid;place-items:center;background:var(--hairline);color:var(--faint);}
-  .rs.on{color:var(--ink);} .rs.on i{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok);}
   .sp-gloss{padding:11px 18px;border-top:1px solid var(--hairline);display:flex;flex-wrap:wrap;gap:6px 16px;
     align-items:baseline;}
   .sp-gloss-h{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
   .gterm{font-size:12px;color:var(--muted);} .gterm b{color:var(--ink);font-weight:600;}
 
-  /* ---------- toolbar ---------- */
-  .toolbar{position:sticky;top:74px;z-index:20;margin:6px 0 22px;padding:11px 14px;border:1px solid var(--border);
-    border-radius:12px;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(8px);
-    display:flex;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:var(--shadow-sm);}
-  .tb-stat{display:flex;align-items:center;gap:16px;font-size:12.5px;color:var(--muted);flex:1 1 auto;}
-  .tb-stat b{font-family:var(--mono);font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;}
-  .tb-stat .dot{width:8px;height:8px;border-radius:99px;display:inline-block;margin-right:5px;vertical-align:-1px;}
-  .dot.changed{background:var(--accent);} .dot.flagged{background:var(--warn);} .dot.answered{background:var(--ok);}
-  .dot.own{background:var(--accent-2);} .dot.rejected{background:var(--stop);}
+  /* ---------- buttons ---------- */
   .btn{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:500;padding:8px 13px;border-radius:9px;
     border:1px solid var(--border);background:var(--surface);color:var(--ink);cursor:pointer;white-space:nowrap;
     transition:background .15s,border-color .15s,transform .05s;}
@@ -349,9 +342,20 @@
   /* ---------- action bar ---------- */
   .actionbar{position:fixed;left:0;right:0;bottom:0;z-index:45;background:color-mix(in srgb,var(--ground) 84%,transparent);
     backdrop-filter:saturate(1.4) blur(12px);border-top:1px solid var(--border);}
-  .actionbar-in{max-width:1220px;margin:0 auto;padding:12px 22px;display:flex;align-items:center;gap:14px;}
-  .ab-stat{font-size:12.5px;color:var(--muted);display:flex;gap:15px;flex-wrap:wrap;flex:1 1 auto;min-width:0;}
+  /* wrap is a safety net, not a layout: the counts and three buttons fit one
+     row down to ~700px, and below that the counts take a row of their own
+     rather than shoving Copy — the whole point of the document — off-screen */
+  .actionbar-in{max-width:1220px;margin:0 auto;padding:12px 22px;display:flex;align-items:center;
+    gap:10px;flex-wrap:wrap;}
+  /* the page's ONLY control surface — the sticky mid-page toolbar is gone, so
+     nothing overlaps the content while it scrolls */
+  .ab-stat{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:16px;
+    flex:1 1 auto;min-width:0;}
   .ab-stat b{font-family:var(--mono);color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;}
+  .ab-stat .lead{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;}
+  .ab-stat .ct{white-space:nowrap;flex:none;}
+  .dot{width:8px;height:8px;border-radius:99px;display:inline-block;margin-right:6px;vertical-align:-1px;}
+  .dot.flagged{background:var(--warn);} .dot.answered{background:var(--ok);}
   .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600;box-shadow:var(--shadow-sm);}
   .btn.primary svg{color:currentColor;opacity:.85;}
   .btn.primary:hover{background:var(--accent-2);border-color:var(--accent-2);}
@@ -394,7 +398,6 @@
     .nav a{white-space:nowrap;flex:none;}
     .nav a .lbl{display:none;}
     .nav a .tag{min-width:auto;}
-    .toolbar{top:64px;}
     .qsection,.q{scroll-margin-top:120px;}
   }
   @media (max-width:560px){
@@ -403,8 +406,21 @@
     .q-context,.q-title,.q-why,.q-switch,.opts,.q-foot{padding-left:0;}
     .q-breakdown{padding-left:0;} .q-example{margin-left:0;}
     .q-note,.q-other{width:100%;margin-left:0;}
-    .intro h2{font-size:24px;} .actionbar-in{padding:10px 15px;}
-    .ab-stat{font-size:11.5px;gap:10px;}
+    .intro h2{font-size:24px;} .actionbar-in{padding:10px 15px;gap:8px;}
+    /* Three buttons and two counts do not fit a phone in one row. The counts
+       take the row above — the framing line goes, since the header already
+       says "n / N answered" — and the two secondary buttons drop to icons,
+       still labelled for a screen reader. Copy takes the rest of the width. */
+    .ab-stat{font-size:11.5px;gap:14px;flex:1 0 100%;}
+    .ab-stat .lead{display:none;}
+    .actionbar .btn{padding:8px 10px;}
+    /* stripped to a glyph, a borderless ghost reads as loose furniture beside
+       a bordered one — give the two icon buttons the same edge */
+    .actionbar .btn.ghost{border-color:var(--border);}
+    #copyBtn{flex:1 1 auto;justify-content:center;}
+    .actionbar .btn.ghost .rb-label,#downloadBtn .b-label{
+      position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
+    .actionbar .btn.armed .rb-label{position:static;width:auto;height:auto;clip-path:none;}
     .deflist .dr{grid-template-columns:1fr;gap:2px;}
   }
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
@@ -415,11 +431,8 @@
 <header class="site-header">
   <div class="site-header-in">
     <div class="lockup">
-      <span class="brand-mark" id="brandMark" aria-hidden="true"></span>
-      <div>
-        <h1 id="brandTitle">Scoping</h1>
-        <div class="sub" id="brandSub"></div>
-      </div>
+      <h1 id="brandTitle">Scoping</h1>
+      <div class="sub" id="brandSub"></div>
     </div>
     <div class="header-spacer"></div>
     <div class="hprogress"><span id="hprog-txt">0 / 0 answered</span><span class="hbar"><i id="hprog-bar"></i></span></div>
@@ -442,7 +455,10 @@
       <h2 id="headline"></h2>
       <p class="lede" id="lede"></p>
       <div class="steps" id="steps"></div>
-      <div class="chips" id="chips" aria-label="Already-decided constraints"></div>
+      <section class="settled" id="settled" hidden aria-labelledby="settledH">
+        <h3 class="settled-h" id="settledH">Already decided &mdash; not re-asked here</h3>
+        <ul class="settled-list" id="chips"></ul>
+      </section>
       <details class="ctx" id="ctx" hidden>
         <summary>
           <svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 16v-4.5M12 8.2h.01"/></svg>
@@ -459,24 +475,8 @@
         <span class="sp-round" id="spRound"></span>
       </div>
       <div class="sp-slots" id="spSlots"></div>
-      <div class="sp-ready">
-        <span class="sp-ready-h">Advanced by this round</span>
-        <div class="rs-row" id="readyStrip"></div>
-      </div>
       <div class="sp-gloss" id="spGloss" hidden></div>
     </section>
-
-    <div class="toolbar">
-      <div class="tb-stat">
-        <span><span class="dot changed"></span><b id="tb-changed">0</b> changed</span>
-        <span><span class="dot own"></span><b id="tb-own">0</b> in your words</span>
-        <span><span class="dot rejected"></span><b id="tb-rejected">0</b> need explaining</span>
-        <span><span class="dot flagged"></span><b id="tb-flagged">0</b> flagged</span>
-        <span><span class="dot answered"></span><b id="tb-answered">0</b>/<span id="tb-total">0</span> answered</span>
-      </div>
-      <button class="btn ghost" id="acceptAll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Accept all defaults</button>
-      <button class="btn ghost" id="resetAll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span class="rb-label">Reset</span></button>
-    </div>
 
     <div id="questions"></div>
 
@@ -491,9 +491,12 @@
 <div class="actionbar" id="actionbar">
   <div class="actionbar-in">
     <div class="ab-stat">
-      <span>Defaults pre-filled &mdash; <b id="ab-changed">0</b> changed &middot; <b id="ab-own">0</b> in your words &middot; <b id="ab-rejected">0</b> need explaining &middot; <b id="ab-flagged">0</b> flagged &middot; <b id="ab-answered">0</b>/<span id="ab-total">0</span> answered</span>
+      <span class="lead">Defaults pre-filled</span>
+      <span class="ct"><span class="dot flagged"></span><b id="ab-flagged">0</b> flagged</span>
+      <span class="ct"><span class="dot answered"></span><b id="ab-answered">0</b>/<span id="ab-total">0</span> answered</span>
     </div>
-    <button class="btn" id="downloadBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>Download JSON</button>
+    <button class="btn ghost" id="resetAll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span class="rb-label">Reset</span></button>
+    <button class="btn" id="downloadBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg><span class="b-label">Download JSON</span></button>
     <button class="btn primary" id="copyBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>Copy answers for Claude</button>
   </div>
 </div>
@@ -703,9 +706,17 @@
     document.title=title+" · Scoping";
     $("brandTitle").textContent=title;
     $("brandSub").textContent=META.subtitle||"Scoping & planning";
-    var mark=$("brandMark");
-    if(META.favicon){ mark.textContent=META.favicon; }
-    else { mark.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l6-6a3 3 0 0 1 4 4l-8 8a5 5 0 0 1-7-7l8-8"/></svg>'; }
+    // meta.favicon is a TAB icon and nothing else — the header carries no mark.
+    // The page ships no <head> so it can be both a standalone .html and an
+    // Artifact source, which means the icon has to be attached at run time.
+    if(META.favicon){
+      var ic=document.createElement("link");
+      ic.rel="icon";
+      ic.href="data:image/svg+xml,"+encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">'+
+        '<text x="16" y="24" font-size="26" text-anchor="middle">'+esc(META.favicon)+'</text></svg>');
+      document.head.appendChild(ic);
+    }
 
     var nSec=SECTIONS.length, nQ=QUESTIONS.length;
     $("eyebrow").textContent=META.eyebrow||("Round "+RN+" of "+ROF+" · "+nSec+" area"+(nSec===1?"":"s")+" · "+nQ+" decision"+(nQ===1?"":"s"));
@@ -723,16 +734,18 @@
       stepsEl.appendChild(span);
     });
 
-    // constraint chips
-    var chipsEl=$("chips");
-    (META.constraints||[]).forEach(function(c){
+    // already-decided facts — a labelled list, so the reader is told what the
+    // ticks mean rather than left to infer it from a row of pills
+    var chipsEl=$("chips"), cons=META.constraints||[];
+    cons.forEach(function(c){
       var label=typeof c==="string"?"":(c.label||"");
       var text=typeof c==="string"?c:(c.text||"");
-      var chip=el("span","chip",
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'+
-        (label?'<span class="k">'+esc(label)+'</span> ':'')+esc(text));
-      chipsEl.appendChild(chip);
+      var li=el("li",null,
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>'+
+        '<span>'+(label?'<span class="k">'+esc(label)+'</span> ':'')+esc(text)+'</span>');
+      chipsEl.appendChild(li);
     });
+    if(cons.length)$("settled").hidden=false;
 
     // legend
     $("navLegend").innerHTML='<b>How to read this</b><br>'+
@@ -780,7 +793,7 @@
     var gl=META.glossary||{}, terms=Object.keys(gl);
     if(terms.length){
       var g=$("spGloss");
-      g.innerHTML='<span class="sp-gloss-h">In plain words</span>'+terms.map(function(t){
+      g.innerHTML='<span class="sp-gloss-h">Glossary</span>'+terms.map(function(t){
         return '<span class="gterm"><b>'+esc(t)+'</b> — '+esc(gl[t])+'</span>';}).join("");
       g.hidden=false;
     }
@@ -995,9 +1008,10 @@
   }
 
   // ---------- readiness ----------
-  // One computation, two consumers: the strip in the page and the line in the
-  // export. The user watches the state machine advance; Claude receives the
-  // identical reading rather than a second opinion.
+  // Which slots this round advances. It no longer shows on the page — five
+  // labels reading "—" until the last question is answered told the reader
+  // nothing they could act on — but it still goes into the export verbatim,
+  // which is where the next round is written from.
   function readiness(){
     return (META.scope||[]).map(function(sl){
       var feeding=QUESTIONS.filter(function(q){return q.slot===sl.slot;});
@@ -1009,40 +1023,29 @@
     });
   }
 
+  // The page reads out two numbers: flagged, and answered. The four states are
+  // still tracked per question and still reach the export in full — they are a
+  // parse contract, not a display preference — but a five-way breakdown was
+  // more bookkeeping than a reader needs while working through the questions.
   function updateSummary(){
-    var changed=0,own=0,rejected=0,flagged=0,answered=0,perSec={};
+    var flagged=0,answered=0,perSec={};
     SECTIONS.forEach(function(s){perSec[s.id]=0;}); perSec["__other"]=0;
     QUESTIONS.forEach(function(q){
       var s=state[q.id], st=stateOf(q);
-      if(st==="CHANGED")changed++; else if(st==="OWN")own++; else if(st==="REJECTED")rejected++;
       if(s.flag)flagged++;
       if(isAnswered(q))answered++;
       var key=perSec.hasOwnProperty(q.sec)?q.sec:"__other";
       if(st!=="DEFAULT"||s.flag)perSec[key]++;
     });
-    ["tb-changed","ab-changed"].forEach(function(id){$(id).textContent=changed;});
-    ["tb-own","ab-own"].forEach(function(id){$(id).textContent=own;});
-    ["tb-rejected","ab-rejected"].forEach(function(id){$(id).textContent=rejected;});
-    ["tb-flagged","ab-flagged"].forEach(function(id){$(id).textContent=flagged;});
-    ["tb-answered","ab-answered"].forEach(function(id){$(id).textContent=answered;});
-    ["tb-total","ab-total"].forEach(function(id){$(id).textContent=TOTAL;});
+    $("ab-flagged").textContent=flagged;
+    $("ab-answered").textContent=answered;
+    $("ab-total").textContent=TOTAL;
     var pct=TOTAL?Math.round(answered/TOTAL*100):0;
     $("hprog-bar").style.width=pct+"%";
     $("hprog-txt").textContent=answered+" / "+TOTAL+" answered";
     var links=navEl.querySelectorAll("a[data-sec]");
     for(var i=0;i<links.length;i++){var sid=links[i].dataset.sec;var n=perSec[sid]||0;
       links[i].dataset.touched=n>0?"1":"0";links[i].querySelector(".badge").textContent=n;}
-    updateReadinessStrip();
-  }
-
-  // The strip's host element is rendered by the scope panel; until then this
-  // is a no-op, so the same readiness() feeds the export either way.
-  function updateReadinessStrip(){
-    var host=$("readyStrip"); if(!host)return;
-    host.innerHTML=readiness().map(function(r){
-      return '<span class="rs'+(r.ok?" on":"")+'" title="'+esc(r.n?r.n+" question(s) this round":"not asked this round")+'">'+
-        '<i aria-hidden="true">'+(r.ok?"✓":"—")+'</i>'+esc(r.label)+'</span>';
-    }).join("");
   }
 
   function refresh(){QUESTIONS.forEach(updateCard);updateSummary();save();}
@@ -1090,7 +1093,7 @@
       s.flag=!s.flag; if(s.flag)s.rev=true; updateCard(q); updateSummary(); save();
     }else if(btn.classList.contains("rej-toggle")){
       // rejection is NOT review. Letting it count as reviewed is what would let
-      // the readiness strip go green on questions nobody understood.
+      // a slot report ready on questions nobody understood.
       s.rej=!s.rej; if(s.rej)s.rev=false; updateCard(q); updateSummary(); save();
     }else if(btn.classList.contains("copyq-btn")){
       copyText(questionPrompt(q),"Question copied — paste it into a fresh chat");
@@ -1132,19 +1135,11 @@
   var gn=$("globalNotes");
   gn.addEventListener("input",function(){state.__notes=gn.value;save();});
 
-  // toolbar
-  $("acceptAll").addEventListener("click",function(){
-    var skipped=0;
-    QUESTIONS.forEach(function(q){
-      // a question the user said they did not understand must not be silently
-      // swept up into "accepted" — that is the one thing this button must not do
-      if(state[q.id].rej){skipped++;return;}
-      state[q.id].choice=q.multi?q.recArr.slice():q.recArr[0];
-      state[q.id].rev=true;
-    });
-    refresh();
-    toast(skipped?("Defaults accepted · "+skipped+" left for explaining"):"All defaults accepted · marked answered");
-  });
+  // Reset is the only bulk action. "Accept all defaults" is gone: every
+  // question already carries its recommendation pre-selected, so the button
+  // only ever marked them reviewed — and a document that can mark itself
+  // finished in one click is one the reader never had to read.
+  //
   // confirm() silently returns undefined inside a sandboxed iframe, so a guard
   // built on it evaporates and the reset fires on the first click — in the one
   // environment (a published Artifact) where the user is most likely to lose
