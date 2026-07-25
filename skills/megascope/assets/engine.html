@@ -20,6 +20,7 @@
     --accent:#2C6BA6; --accent-2:#1F547F; --accent-tint:#E9F1F8; --accent-line:#BFD6EA;
     --warn:#A96C05; --warn-ink:#845408; --warn-tint:#F7EDD6; --warn-line:#E8CE97;
     --ok:#3C7A52;
+    --stop:#B0443B;
     --radius:13px; --radius-sm:9px;
     --shadow:0 1px 2px rgba(20,24,33,.05), 0 6px 22px rgba(20,24,33,.05);
     --shadow-sm:0 1px 2px rgba(20,24,33,.05);
@@ -36,6 +37,7 @@
       --accent:#6EA8DC; --accent-2:#A9CDEC; --accent-tint:#182838; --accent-line:#2E4A66;
       --warn:#DFA64E; --warn-ink:#EDC57C; --warn-tint:#2B2412; --warn-line:#4A3C1B;
       --ok:#6FBF8C;
+      --stop:#E48F84;
       --on-accent:#0b1016;
       --shadow:0 1px 2px rgba(0,0,0,.35), 0 8px 26px rgba(0,0,0,.38);
       --shadow-sm:0 1px 2px rgba(0,0,0,.35);
@@ -47,7 +49,7 @@
     --ink:#15171C; --muted:#565C68; --faint:#878D99;
     --border:#E2E5EA; --hairline:#EBEDF1;
     --accent:#2C6BA6; --accent-2:#1F547F; --accent-tint:#E9F1F8; --accent-line:#BFD6EA;
-    --warn:#A96C05; --warn-ink:#845408; --warn-tint:#F7EDD6; --warn-line:#E8CE97; --ok:#3C7A52;
+    --warn:#A96C05; --warn-ink:#845408; --warn-tint:#F7EDD6; --warn-line:#E8CE97; --ok:#3C7A52; --stop:#B0443B;
     --on-accent:#fff;
     --shadow:0 1px 2px rgba(20,24,33,.05), 0 6px 22px rgba(20,24,33,.05);
     --shadow-sm:0 1px 2px rgba(20,24,33,.05);
@@ -58,7 +60,7 @@
     --ink:#E8EAEF; --muted:#9BA2AF; --faint:#6C7482;
     --border:#2A2F39; --hairline:#232830;
     --accent:#6EA8DC; --accent-2:#A9CDEC; --accent-tint:#182838; --accent-line:#2E4A66;
-    --warn:#DFA64E; --warn-ink:#EDC57C; --warn-tint:#2B2412; --warn-line:#4A3C1B; --ok:#6FBF8C;
+    --warn:#DFA64E; --warn-ink:#EDC57C; --warn-tint:#2B2412; --warn-line:#4A3C1B; --ok:#6FBF8C; --stop:#E48F84;
     --on-accent:#0b1016;
     --shadow:0 1px 2px rgba(0,0,0,.35), 0 8px 26px rgba(0,0,0,.38);
     --shadow-sm:0 1px 2px rgba(0,0,0,.35);
@@ -190,7 +192,8 @@
   .tb-stat{display:flex;align-items:center;gap:16px;font-size:12.5px;color:var(--muted);flex:1 1 auto;}
   .tb-stat b{font-family:var(--mono);font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;}
   .tb-stat .dot{width:8px;height:8px;border-radius:99px;display:inline-block;margin-right:5px;vertical-align:-1px;}
-  .dot.changed{background:var(--accent);} .dot.flagged{background:var(--warn);} .dot.reviewed{background:var(--ok);}
+  .dot.changed{background:var(--accent);} .dot.flagged{background:var(--warn);} .dot.answered{background:var(--ok);}
+  .dot.own{background:var(--accent-2);} .dot.rejected{background:var(--stop);}
   .btn{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:500;padding:8px 13px;border-radius:9px;
     border:1px solid var(--border);background:var(--surface);color:var(--ink);cursor:pointer;white-space:nowrap;
     transition:background .15s,border-color .15s,transform .05s;}
@@ -212,14 +215,20 @@
   .q{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 19px 15px;
     margin-bottom:14px;box-shadow:var(--shadow-sm);scroll-margin-top:150px;transition:border-color .18s,box-shadow .18s;}
   .q:hover{box-shadow:var(--shadow);}
+  /* precedence: rejected > flagged > changed > default. "I don't understand
+     this" outranks everything else the card could be saying. */
   .q[data-state="changed"]{border-left:3px solid var(--accent);padding-left:17px;}
+  .q[data-state="own"]{border-left:3px solid var(--accent-2);padding-left:17px;}
   .q[data-state="flagged"]{border-left:3px solid var(--warn);padding-left:17px;}
+  .q[data-state="rejected"]{border-left:3px solid var(--stop);padding-left:17px;}
   .q-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:11px;}
   .q-id{font-family:var(--mono);font-size:12px;color:var(--faint);flex:none;min-width:26px;}
   .q-status{flex:none;font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;padding:4px 8px;border-radius:99px;
     background:var(--hairline);color:var(--faint);white-space:nowrap;}
   .q-status.is-changed{background:var(--accent-tint);color:var(--accent-2);}
+  .q-status.is-own{background:var(--accent-tint);color:var(--accent-2);}
   .q-status.is-flagged{background:var(--warn-tint);color:var(--warn-ink);}
+  .q-status.is-rejected{background:color-mix(in srgb,var(--stop) 15%,transparent);color:var(--stop);}
 
   /* ---------- the four-part question shape ----------
      In reading order: why this is on the table, the decision broken down,
@@ -281,6 +290,8 @@
   .foot-btn:hover{color:var(--ink);border-color:var(--accent-line);}
   .foot-btn svg{width:13px;height:13px;}
   .foot-btn.on-flag{background:var(--warn-tint);border-color:var(--warn-line);color:var(--warn-ink);}
+  .foot-btn.on-rej{background:color-mix(in srgb,var(--stop) 12%,transparent);
+    border-color:color-mix(in srgb,var(--stop) 40%,transparent);color:var(--stop);}
   .foot-btn.on-rev{background:color-mix(in srgb,var(--ok) 14%,transparent);border-color:color-mix(in srgb,var(--ok) 40%,transparent);color:var(--ok);}
   .foot-btn.has-note{border-color:var(--accent-line);color:var(--accent-2);}
   .q-note,.q-other{width:calc(100% - 38px);margin:11px 0 2px 38px;background:var(--surface-2);border:1px solid var(--border);
@@ -376,7 +387,7 @@
       </div>
     </div>
     <div class="header-spacer"></div>
-    <div class="hprogress"><span id="hprog-txt">0 / 0 reviewed</span><span class="hbar"><i id="hprog-bar"></i></span></div>
+    <div class="hprogress"><span id="hprog-txt">0 / 0 answered</span><span class="hbar"><i id="hprog-bar"></i></span></div>
     <button class="icon-btn" id="themeBtn" title="Toggle light / dark" aria-label="Toggle theme">
       <svg class="theme-light-only" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"/></svg>
       <svg class="theme-dark-only" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4 7 7 0 1 0 20 14.5Z"/></svg>
@@ -410,8 +421,10 @@
     <div class="toolbar">
       <div class="tb-stat">
         <span><span class="dot changed"></span><b id="tb-changed">0</b> changed</span>
+        <span><span class="dot own"></span><b id="tb-own">0</b> in your words</span>
+        <span><span class="dot rejected"></span><b id="tb-rejected">0</b> need explaining</span>
         <span><span class="dot flagged"></span><b id="tb-flagged">0</b> flagged</span>
-        <span><span class="dot reviewed"></span><b id="tb-reviewed">0</b>/<span id="tb-total">0</span> reviewed</span>
+        <span><span class="dot answered"></span><b id="tb-answered">0</b>/<span id="tb-total">0</span> answered</span>
       </div>
       <button class="btn ghost" id="acceptAll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Accept all defaults</button>
       <button class="btn ghost" id="resetAll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Reset</button>
@@ -430,7 +443,7 @@
 <div class="actionbar" id="actionbar">
   <div class="actionbar-in">
     <div class="ab-stat">
-      <span>Defaults pre-filled &mdash; <b id="ab-changed">0</b> changed &middot; <b id="ab-flagged">0</b> flagged &middot; <b id="ab-reviewed">0</b>/<span id="ab-total">0</span> reviewed</span>
+      <span>Defaults pre-filled &mdash; <b id="ab-changed">0</b> changed &middot; <b id="ab-own">0</b> in your words &middot; <b id="ab-rejected">0</b> need explaining &middot; <b id="ab-flagged">0</b> flagged &middot; <b id="ab-answered">0</b>/<span id="ab-total">0</span> answered</span>
     </div>
     <button class="btn" id="downloadBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>Download JSON</button>
     <button class="btn primary" id="copyBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>Copy answers for Claude</button>
@@ -842,53 +855,107 @@
     return e;
   }
 
-  // ---------- update ----------
-  function changeSummaryText(q){
-    var s=state[q.id];
-    if(q.multi){
-      var picks=(s.choice||[]).map(function(k){return k.toUpperCase();}).join(", ");
-      return picks||"—";
-    }
-    return (s.choice||"").toString().toUpperCase();
+  // ---------- the four states, as a partition ----------
+  // Every question is exactly one of DEFAULT / CHANGED / OWN / REJECTED, and
+  // FLAGGED is orthogonal to all four — a flag is the user's own bookmark, not
+  // an objection, so the answer still stands. Precedence matters:
+  // "I don't understand this" outranks anything else the card could be saying.
+  function picksOf(q){var s=state[q.id];return q.multi?(s.choice||[]):[s.choice];}
+  function isOwn(q){return picksOf(q).indexOf(OWN_KEY)>-1;}
+  function stateOf(q){
+    if(state[q.id].rej)return "REJECTED";
+    if(isOwn(q))return "OWN";
+    return isChanged(q)?"CHANGED":"DEFAULT";
   }
+  // Answered means reviewed AND not rejected. Without the second half the
+  // progress bar could read 100% with open rejections, which is exactly the
+  // reassuring lie this document must not tell.
+  function isAnswered(q){var s=state[q.id];return !!s.rev&&!s.rej;}
+
+  function changeSummaryText(q){
+    var picks=picksOf(q).filter(function(k){return k!=null;});
+    return picks.map(function(k){return k===OWN_KEY?"yours":k.toUpperCase();}).join(", ")||"—";
+  }
+
   function updateCard(q){
     var s=state[q.id], e=$("card-"+q.id);
     if(!e)return;
-    var changed=isChanged(q);
-    var sel=q.multi?(s.choice||[]):[s.choice];
+    var st=stateOf(q), changed=isChanged(q);
+    var sel=picksOf(q);
     var opts=e.querySelectorAll(".opt");
     for(var i=0;i<opts.length;i++){opts[i].classList.toggle("selected",sel.indexOf(opts[i].dataset.key)>-1);}
+
     var chip=e.querySelector(".q-status");
-    chip.className="q-status"+(s.flag?" is-flagged":(changed?" is-changed":""));
-    chip.textContent=s.flag?(changed?"Changed → "+changeSummaryText(q)+" · ⚑":"⚑ Follow-up")
-                           :(changed?"Changed → "+changeSummaryText(q):"Using default");
-    e.dataset.state=s.flag?"flagged":(changed?"changed":"default");
+    var chipText=st==="REJECTED"?"Needs explaining"
+      :st==="OWN"?"In your words"
+      :changed?"Changed → "+changeSummaryText(q):"Using default";
+    chip.className="q-status"+(st==="REJECTED"?" is-rejected":st==="OWN"?" is-own":s.flag?" is-flagged":changed?" is-changed":"");
+    chip.textContent=chipText+(s.flag&&st!=="REJECTED"?" · ⚑":"");
+    e.dataset.state=st==="REJECTED"?"rejected":s.flag?"flagged":st==="OWN"?"own":changed?"changed":"default";
+
     var flagBtn=e.querySelector(".flag-toggle"); flagBtn.classList.toggle("on-flag",s.flag);
     flagBtn.querySelector(".ft-label").textContent=s.flag?"Flagged":"Flag for follow-up";
+    var rejBtn=e.querySelector(".rej-toggle"); rejBtn.classList.toggle("on-rej",s.rej);
+    rejBtn.querySelector(".ft-label").textContent=s.rej?"Marked: needs explaining":"This doesn’t make sense";
     var revBtn=e.querySelector(".rev-toggle"); revBtn.classList.toggle("on-rev",s.rev);
     var noteBtn=e.querySelector(".note-toggle"); noteBtn.classList.toggle("has-note",!!s.note);
     noteBtn.querySelector(".ft-label").textContent=s.note?"Edit note":"Add note";
+
+    // keep the own-words box open while it holds text, so nothing is lost by
+    // clicking away from the option that revealed it
+    var other=e.querySelector(".q-other");
+    if(other)other.hidden=!(isOwn(q)||s.otherText);
+  }
+
+  // ---------- readiness ----------
+  // One computation, two consumers: the strip in the page and the line in the
+  // export. The user watches the state machine advance; Claude receives the
+  // identical reading rather than a second opinion.
+  function readiness(){
+    return (META.scope||[]).map(function(sl){
+      var feeding=QUESTIONS.filter(function(q){return q.slot===sl.slot;});
+      return {
+        slot:sl.slot, label:sl.label||sl.slot, state:sl.state, n:feeding.length,
+        // a slot with nothing feeding it this round has not been advanced by it
+        ok:feeding.length>0&&feeding.every(isAnswered)
+      };
+    });
   }
 
   function updateSummary(){
-    var changed=0,flagged=0,reviewed=0,perSec={};
+    var changed=0,own=0,rejected=0,flagged=0,answered=0,perSec={};
     SECTIONS.forEach(function(s){perSec[s.id]=0;}); perSec["__other"]=0;
     QUESTIONS.forEach(function(q){
-      var s=state[q.id]; var ch=isChanged(q);
-      if(ch)changed++; if(s.flag)flagged++; if(s.rev)reviewed++;
+      var s=state[q.id], st=stateOf(q);
+      if(st==="CHANGED")changed++; else if(st==="OWN")own++; else if(st==="REJECTED")rejected++;
+      if(s.flag)flagged++;
+      if(isAnswered(q))answered++;
       var key=perSec.hasOwnProperty(q.sec)?q.sec:"__other";
-      if(ch||s.flag)perSec[key]++;
+      if(st!=="DEFAULT"||s.flag)perSec[key]++;
     });
     ["tb-changed","ab-changed"].forEach(function(id){$(id).textContent=changed;});
+    ["tb-own","ab-own"].forEach(function(id){$(id).textContent=own;});
+    ["tb-rejected","ab-rejected"].forEach(function(id){$(id).textContent=rejected;});
     ["tb-flagged","ab-flagged"].forEach(function(id){$(id).textContent=flagged;});
-    ["tb-reviewed","ab-reviewed"].forEach(function(id){$(id).textContent=reviewed;});
+    ["tb-answered","ab-answered"].forEach(function(id){$(id).textContent=answered;});
     ["tb-total","ab-total"].forEach(function(id){$(id).textContent=TOTAL;});
-    var pct=TOTAL?Math.round(reviewed/TOTAL*100):0;
+    var pct=TOTAL?Math.round(answered/TOTAL*100):0;
     $("hprog-bar").style.width=pct+"%";
-    $("hprog-txt").textContent=reviewed+" / "+TOTAL+" reviewed";
+    $("hprog-txt").textContent=answered+" / "+TOTAL+" answered";
     var links=navEl.querySelectorAll("a[data-sec]");
     for(var i=0;i<links.length;i++){var sid=links[i].dataset.sec;var n=perSec[sid]||0;
       links[i].dataset.touched=n>0?"1":"0";links[i].querySelector(".badge").textContent=n;}
+    updateReadinessStrip();
+  }
+
+  // The strip's host element is rendered by the scope panel; until then this
+  // is a no-op, so the same readiness() feeds the export either way.
+  function updateReadinessStrip(){
+    var host=$("readyStrip"); if(!host)return;
+    host.innerHTML=readiness().map(function(r){
+      return '<span class="rs'+(r.ok?" on":"")+'" title="'+esc(r.n?r.n+" question(s) this round":"not asked this round")+'">'+
+        '<i aria-hidden="true">'+(r.ok?"✓":"—")+'</i>'+esc(r.label)+'</span>';
+    }).join("");
   }
 
   function refresh(){QUESTIONS.forEach(updateCard);updateSummary();save();}
@@ -899,6 +966,7 @@
   qRoot.addEventListener("change",function(ev){
     var t=ev.target; if(t.tagName!=="INPUT")return;
     var q=byId(t.name); if(!q)return; var s=state[q.id];
+    var wasOwn=isOwn(q);
     if(q.multi){
       var set=new Set(s.choice||[]);
       if(t.checked)set.add(t.value); else set.delete(t.value);
@@ -907,11 +975,21 @@
       s.choice=t.value;
     }
     s.rev=true; updateCard(q); updateSummary(); save();
+    // picking "in my own words" is a promise the box will be there to fill in
+    if(!wasOwn&&isOwn(q)){
+      var other=$("card-"+q.id).querySelector(".q-other");
+      if(other){other.hidden=false;other.focus();}
+    }
   });
   qRoot.addEventListener("input",function(ev){
-    var t=ev.target;
-    if(t.classList.contains("q-note")){var qid=cardQ(t);var q=byId(qid);if(!q)return;
-      state[q.id].note=t.value;state[q.id].rev=true;updateCard(q);updateSummary();save();}
+    var t=ev.target; var q=byId(cardQ(t)); if(!q)return;
+    if(t.classList.contains("q-note")){
+      state[q.id].note=t.value;state[q.id].rev=true;updateCard(q);updateSummary();save();
+    }else if(t.classList.contains("q-other")){
+      // the user's own words ARE the answer — the note is a separate, quieter
+      // thing, and conflating them loses the multi-select case entirely
+      state[q.id].otherText=t.value;state[q.id].rev=true;updateCard(q);updateSummary();save();
+    }
   });
   qRoot.addEventListener("click",function(ev){
     var btn=ev.target.closest(".foot-btn"); if(!btn)return;
@@ -920,11 +998,46 @@
       var ta=$("card-"+q.id).querySelector(".q-note");
       ta.hidden=!ta.hidden; if(!ta.hidden)ta.focus();
     }else if(btn.classList.contains("flag-toggle")){
+      // a flag is a bookmark for the user's own workflow, so it marks the
+      // question dealt with; rejection below deliberately does the opposite
       s.flag=!s.flag; if(s.flag)s.rev=true; updateCard(q); updateSummary(); save();
+    }else if(btn.classList.contains("rej-toggle")){
+      // rejection is NOT review. Letting it count as reviewed is what would let
+      // the readiness strip go green on questions nobody understood.
+      s.rej=!s.rej; if(s.rej)s.rev=false; updateCard(q); updateSummary(); save();
+    }else if(btn.classList.contains("copyq-btn")){
+      copyText(questionPrompt(q),"Question copied — paste it into a fresh chat");
     }else if(btn.classList.contains("rev-toggle")){
-      s.rev=!s.rev; updateCard(q); updateSummary(); save();
+      s.rev=!s.rev; if(s.rev)s.rej=false; updateCard(q); updateSummary(); save();
     }
   });
+
+  // ---------- the per-question clipboard payload ----------
+  // This is what makes "flag" a genuinely distinct affordance from "reject":
+  // fork the question into its own session, ask about it there, come back and
+  // answer it — without holding the round open.
+  function questionPrompt(q){
+    var s=state[q.id], L=[];
+    L.push("Clarifying question — "+(META.title||"this project")+", round "+RN+", "+q.id+" (slot: "+q.slot+")");
+    L.push("");
+    L.push("Background: "+flat(q.context));
+    L.push("The question: "+flat(q.question));
+    L.push("What it comes down to:");
+    q.breakdown.forEach(function(b){L.push("- "+flat(b));});
+    if(q.example)L.push("Example given: "+flat(q.example));
+    L.push("The choices offered:");
+    q.opts.forEach(function(o){
+      if(o.own)return;   // the escape hatch is not a choice to be explained
+      L.push("- "+o.key.toUpperCase()+": "+o.label+" — "+flat(o.detail));
+    });
+    L.push("The recommendation was "+recLabelText(q)+" — "+flat(q.why));
+    if(q.switchIf)L.push("It said to switch if: "+flat(q.switchIf));
+    L.push("My note so far: "+(flat(s.note)||"(none)"));
+    L.push("");
+    L.push("Explain this to me in plain language with a concrete example, then help me answer it.");
+    L.push("Don’t assume I know any jargon. I’ll take the answer back to the scoping document.");
+    return L.join("\n");
+  }
 
   // global notes — the value is restored in INIT, AFTER state=load(). Setting
   // it here read the empty pre-load state, so overall notes never survived a
@@ -934,8 +1047,16 @@
 
   // toolbar
   $("acceptAll").addEventListener("click",function(){
-    QUESTIONS.forEach(function(q){state[q.id].choice=q.multi?q.recArr.slice():q.recArr[0];state[q.id].rev=true;});
-    refresh(); toast("All defaults accepted · marked reviewed");
+    var skipped=0;
+    QUESTIONS.forEach(function(q){
+      // a question the user said they did not understand must not be silently
+      // swept up into "accepted" — that is the one thing this button must not do
+      if(state[q.id].rej){skipped++;return;}
+      state[q.id].choice=q.multi?q.recArr.slice():q.recArr[0];
+      state[q.id].rev=true;
+    });
+    refresh();
+    toast(skipped?("Defaults accepted · "+skipped+" left for explaining"):"All defaults accepted · marked answered");
   });
   $("resetAll").addEventListener("click",function(){
     if(!confirm("Reset every answer to its default and clear all notes, flags, and reviewed marks?"))return;
@@ -943,42 +1064,82 @@
   });
 
   // ---------- export ----------
+  // This is a PARSE CONTRACT, not a formatting preference. megascope.mjs reads
+  // it back to resolve every evidence claim a later round makes, so the grammar
+  // has to be total rather than best-effort. Two things make it so: option
+  // labels are pattern-banned from containing | [ ] / ; and every continuation
+  // value has its whitespace collapsed — so no author or user text can forge
+  // the tag brackets, the " | " join, or the three-space "(rec was …)".
+  var REJECTED_TEXT="no answer — this question did not make sense to me";
+  var OWN_EXPORT="OWN: in my own words";
+  // Deliverable-neutral: the output of a round is an updated scope. What kind
+  // of work this is comes from the deliverable slot, which is DATA — the shell
+  // no longer assumes a phased plan with an MVP.
+  var CLOSING_DEFAULT="Update the scope from these answers, then tell me what is still open.";
+
+  function payloadOf(q,st){
+    if(st==="REJECTED")return REJECTED_TEXT;
+    var picks=picksOf(q);
+    // printed in OPTION order, so the line is stable regardless of click order
+    var line=q.opts.filter(function(o){return picks.indexOf(o.key)>-1;}).map(function(o){
+      return o.key===OWN_KEY?OWN_EXPORT:(o.key.toUpperCase()+": "+o.label);
+    }).join(" | ");
+    if(st==="CHANGED"||st==="OWN")line+="   (rec was "+recLabelText(q)+")";
+    return line;
+  }
+
   function buildExport(){
-    var changed=0,flagged=0,reviewed=0;
-    QUESTIONS.forEach(function(q){var s=state[q.id];if(isChanged(q))changed++;if(s.flag)flagged++;if(s.rev)reviewed++;});
+    var n={DEFAULT:0,CHANGED:0,OWN:0,REJECTED:0},flagged=0,answered=0;
+    QUESTIONS.forEach(function(q){
+      n[stateOf(q)]++; if(state[q.id].flag)flagged++; if(isAnswered(q))answered++;
+    });
     var L=[];
-    L.push("# "+(META.title||"Project")+" — scoping answers");
+    L.push("# "+(META.title||"Project")+" — round "+RN+" of "+ROF+": answers");
+    // line 2 is the machine-readable round identifier. Parse it first; its
+    // ABSENCE is how a pre-v2 export identifies itself.
+    L.push("scope-id: "+PROJECT+" · r"+RN+"/"+ROF+" rev "+RV);
     L.push("");
-    L.push("Summary: "+changed+" changed · "+flagged+" flagged for follow-up · "+reviewed+"/"+TOTAL+" reviewed.");
-    L.push("(Questions not marked CHANGED keep the recommended default.)");
+    L.push("Summary: "+n.DEFAULT+" default · "+n.CHANGED+" changed · "+n.OWN+" in own words · "+
+      n.REJECTED+" rejected · "+flagged+" flagged · "+answered+"/"+TOTAL+" answered.");
+    var rd=readiness();
+    if(rd.length){
+      L.push("Readiness this round: "+rd.map(function(r){return r.label+" "+(r.ok?"✓":"—");}).join(" · "));
+      L.push("(✓ = every question feeding that slot is answered and none rejected.)");
+    }
     L.push("");
-    var renderSec=function(secId,secTitle){
-      var inSec=QUESTIONS.filter(function(q){return (perSecKey(q))===secId;});
+    var renderSec=function(secId,heading){
+      var inSec=QUESTIONS.filter(function(q){return perSecKey(q)===secId;});
       if(!inSec.length)return;
-      L.push("## "+secId+". "+secTitle);
+      L.push("## "+heading);
       inSec.forEach(function(q){
-        var s=state[q.id]; var ch=isChanged(q);
-        var tags=[]; tags.push(ch?"CHANGED":"default"); if(s.flag)tags.push("⚑ FOLLOW-UP");
-        var choiceStr=q.multi?(s.choice||[]).map(function(k){return k.toUpperCase()+": "+optLabel(q,k);}).join(" | ")
-                             :(s.choice.toUpperCase()+": "+optLabel(q,s.choice));
-        var line="- "+q.id+" ["+tags.join(" · ")+"] "+choiceStr;
-        if(ch)line+="   (rec was "+recLabelText(q)+")";
-        L.push(line);
-        if(s.note)L.push("    note: "+s.note.replace(/\s+/g," ").trim());
+        var s=state[q.id], st=stateOf(q);
+        // FLAGGED sits INSIDE the brackets, orthogonal to state: both
+        // [DEFAULT · FLAGGED] and [REJECTED · FLAGGED] are legal readings.
+        L.push("- "+q.id+" ["+st+(s.flag?" · FLAGGED":"")+"] ("+q.slot+") "+payloadOf(q,st));
+        // continuations are exactly four spaces, in this fixed order
+        if(st==="OWN")L.push("    own words: "+(flat(s.otherText)||"(nothing written yet)"));
+        if(st==="REJECTED")L.push("    asked: "+flat(q.question));
+        if(flat(s.note))L.push("    note: "+flat(s.note));
       });
       L.push("");
     };
-    SECTIONS.forEach(function(sec){renderSec(sec.id,sec.title);});
+    SECTIONS.forEach(function(sec){renderSec(sec.id,sec.id+". "+sec.title);});
+    // the sentinel used to leak into the document as "## __other. Other"
     if(QUESTIONS.some(function(q){return perSecKey(q)==="__other";}))renderSec("__other","Other");
-    var notes=(state.__notes||"").trim();
+    var notes=flatBlock(state.__notes);
     L.push("## Overall notes / new questions");
     L.push(notes?notes:"(none)");
     L.push("");
     L.push("---");
-    L.push(META.closingAsk||"Please turn these into a phased build plan with detailed Phase-1 (MVP) requirements, and follow up on anything I flagged.");
+    L.push(META.closingAsk||CLOSING_DEFAULT);
     return L.join("\n");
   }
   function perSecKey(q){return SECTIONS.some(function(s){return s.id===q.sec;})?q.sec:"__other";}
+  // a continuation can carry no newline and no run of spaces, which is what
+  // makes the three-space "(rec was …)" delimiter unforgeable by user text
+  function flat(x){return String(x==null?"":x).replace(/\s+/g," ").trim();}
+  // the notes BLOCK may hold newlines — it is bounded by its heading and the ---
+  function flatBlock(x){return String(x==null?"":x).replace(/[ \t]+\n/g,"\n").trim();}
 
   function copyText(txt,okMsg){
     if(navigator.clipboard&&navigator.clipboard.writeText){
@@ -1014,8 +1175,9 @@
     var payload={meta:{project:PROJECT,round:RN,of:ROF,revision:RV,kind:"scoping-answers",version:FORMAT_VERSION,total:TOTAL},
       answers:{},notes:state.__notes||""};
     QUESTIONS.forEach(function(q){var s=state[q.id];
-      payload.answers[q.id]={section:q.sec,choice:s.choice,changed:isChanged(q),rec:q.rec,flag:s.flag,reviewed:s.rev,note:s.note,
-        label:q.multi?(s.choice||[]).map(function(k){return optLabel(q,k);}):optLabel(q,s.choice)};});
+      payload.answers[q.id]={section:q.sec,slot:q.slot,state:stateOf(q),choice:s.choice,rec:q.rec,
+        flag:s.flag,rejected:s.rej,answered:isAnswered(q),ownWords:s.otherText,note:s.note,
+        label:picksOf(q).map(function(k){return optLabel(q,k);})};});
     var blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
     var a=el("a");a.href=URL.createObjectURL(blob);a.download=SLUG+"-scoping-answers.json";
     document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
