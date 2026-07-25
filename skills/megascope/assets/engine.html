@@ -166,13 +166,6 @@
   .stagecard .end{margin-top:8px;font-size:11.5px;color:var(--faint);}
   .stagecard .end b{color:var(--muted);font-weight:600;}
   .ctx h5{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:22px 0 10px;font-weight:600;}
-  .phaselist{display:flex;flex-direction:column;gap:2px;}
-  .phaselist .pr{display:grid;grid-template-columns:120px 1fr;gap:12px;padding:7px 0;border-top:1px solid var(--hairline);
-    font-size:13px;}
-  .phaselist .pr:first-child{border-top:none;}
-  .phaselist .pk{font-family:var(--mono);font-size:11.5px;color:var(--accent-2);}
-  .phaselist .pd{color:var(--muted);}
-  .phaselist .pd b{color:var(--ink);font-weight:600;}
   .deflist{display:flex;flex-direction:column;gap:2px;}
   .deflist .dr{display:grid;grid-template-columns:minmax(120px,200px) 1fr;gap:12px;padding:7px 0;
     border-top:1px solid var(--hairline);font-size:13px;}
@@ -184,6 +177,46 @@
     white-space:pre-wrap;}
   .arch b{color:var(--ink);}
   .ctx-prose{font-size:13px;color:var(--muted);line-height:1.6;max-width:72ch;margin-top:6px;}
+
+  /* ---------- running scope panel ----------
+     Deliberately NOT a third column: there is no breakpoint between 940px and
+     1220px, so a third rail squeezes the content to ~335px, and it would mean
+     surgery on the grid, the sticky nav and the action-bar reserve. It goes in
+     the intro flow instead. */
+  .scopepanel{margin:0 0 22px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);
+    box-shadow:var(--shadow-sm);overflow:hidden;}
+  .sp-head{display:flex;align-items:baseline;gap:12px;padding:14px 18px 12px;border-bottom:1px solid var(--hairline);}
+  .sp-head h3{font-family:var(--serif);font-size:15.5px;font-weight:600;}
+  .sp-round{margin-left:auto;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--faint);text-align:right;}
+  .sp-slots{display:flex;flex-direction:column;}
+  .sp-slot{display:flex;gap:12px;padding:12px 18px;border-top:1px solid var(--hairline);}
+  .sp-slot:first-child{border-top:none;}
+  .sp-pill{flex:none;align-self:flex-start;font-family:var(--mono);font-size:9.5px;letter-spacing:.07em;
+    text-transform:uppercase;padding:3px 8px;border-radius:99px;background:var(--hairline);color:var(--faint);
+    min-width:62px;text-align:center;}
+  .sp-slot[data-state="settled"] .sp-pill{background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok);}
+  .sp-slot[data-state="open"] .sp-pill{background:var(--accent-tint);color:var(--accent-2);}
+  .sp-body{min-width:0;flex:1;}
+  .sp-label{display:block;font-size:12px;font-weight:600;color:var(--ink);margin-bottom:2px;}
+  .sp-text{font-size:13px;color:var(--muted);line-height:1.55;max-width:78ch;}
+  /* provenance is load-bearing, not decoration — it is what stops "settled"
+     being a bare assertion — so it stays at body-text contrast */
+  .sp-prov{margin-top:4px;font-family:var(--mono);font-size:11px;color:var(--muted);}
+  .sp-assumed{margin-top:5px;font-size:12px;color:var(--warn-ink);background:var(--warn-tint);
+    border-radius:7px;padding:6px 9px;line-height:1.5;max-width:78ch;}
+  .sp-ready{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:11px 18px;
+    border-top:1px solid var(--hairline);background:var(--surface-2);}
+  .sp-ready-h{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
+  .rs-row{display:flex;flex-wrap:wrap;gap:6px 14px;}
+  .rs{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);}
+  .rs i{font-style:normal;font-family:var(--mono);font-size:11px;width:15px;height:15px;border-radius:99px;
+    display:grid;place-items:center;background:var(--hairline);color:var(--faint);}
+  .rs.on{color:var(--ink);} .rs.on i{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok);}
+  .sp-gloss{padding:11px 18px;border-top:1px solid var(--hairline);display:flex;flex-wrap:wrap;gap:6px 16px;
+    align-items:baseline;}
+  .sp-gloss-h{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
+  .gterm{font-size:12px;color:var(--muted);} .gterm b{color:var(--ink);font-weight:600;}
 
   /* ---------- toolbar ---------- */
   .toolbar{position:sticky;top:74px;z-index:20;margin:6px 0 22px;padding:11px 14px;border:1px solid var(--border);
@@ -202,6 +235,8 @@
   .btn svg{width:15px;height:15px;color:var(--muted);}
   .btn.ghost{background:transparent;border-color:transparent;color:var(--muted);}
   .btn.ghost:hover{background:var(--surface-2);color:var(--ink);}
+  .btn.armed{background:var(--warn-tint);border-color:var(--warn-line);color:var(--warn-ink);}
+  .btn.armed svg{color:currentColor;}
 
   /* ---------- sections & cards ---------- */
   .qsection{margin-top:30px;scroll-margin-top:150px;}
@@ -370,7 +405,7 @@
     .q-note,.q-other{width:100%;margin-left:0;}
     .intro h2{font-size:24px;} .actionbar-in{padding:10px 15px;}
     .ab-stat{font-size:11.5px;gap:10px;}
-    .phaselist .pr,.deflist .dr{grid-template-columns:1fr;gap:2px;}
+    .deflist .dr{grid-template-columns:1fr;gap:2px;}
   }
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
 </style>
@@ -418,6 +453,19 @@
       </details>
     </section>
 
+    <section class="scopepanel" id="scopePanel" hidden aria-labelledby="spHead">
+      <div class="sp-head">
+        <h3 id="spHead">Where the scope stands</h3>
+        <span class="sp-round" id="spRound"></span>
+      </div>
+      <div class="sp-slots" id="spSlots"></div>
+      <div class="sp-ready">
+        <span class="sp-ready-h">Advanced by this round</span>
+        <div class="rs-row" id="readyStrip"></div>
+      </div>
+      <div class="sp-gloss" id="spGloss" hidden></div>
+    </section>
+
     <div class="toolbar">
       <div class="tb-stat">
         <span><span class="dot changed"></span><b id="tb-changed">0</b> changed</span>
@@ -427,7 +475,7 @@
         <span><span class="dot answered"></span><b id="tb-answered">0</b>/<span id="tb-total">0</span> answered</span>
       </div>
       <button class="btn ghost" id="acceptAll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Accept all defaults</button>
-      <button class="btn ghost" id="resetAll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Reset</button>
+      <button class="btn ghost" id="resetAll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span class="rb-label">Reset</span></button>
     </div>
 
     <div id="questions"></div>
@@ -660,13 +708,15 @@
     else { mark.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l6-6a3 3 0 0 1 4 4l-8 8a5 5 0 0 1-7-7l8-8"/></svg>'; }
 
     var nSec=SECTIONS.length, nQ=QUESTIONS.length;
-    $("eyebrow").textContent=META.eyebrow||("Scoping document · "+nSec+" area"+(nSec===1?"":"s")+" · "+nQ+" decision"+(nQ===1?"":"s"));
+    $("eyebrow").textContent=META.eyebrow||("Round "+RN+" of "+ROF+" · "+nSec+" area"+(nSec===1?"":"s")+" · "+nQ+" decision"+(nQ===1?"":"s"));
     $("headline").textContent=META.headline||"Let’s lock the plan.";
     $("lede").innerHTML=fmt(META.lede||"Each decision below is pre-filled with a recommended default and the reasoning behind it. Review, override where you have a view, and flag anything to discuss.");
 
     // steps
+    // Deliverable-neutral: what gets handed over is a scoping DECISION, held in
+    // the deliverable slot, not something the shell gets to assume.
     var steps=Array.isArray(META.steps)&&META.steps.length?META.steps:
-      ["Review the defaults","Change & flag what matters","Copy answers → paste into chat","I return the phased plan + MVP"];
+      ["Read where the scope stands","Change, reject or note what matters","Copy answers → paste into chat","I update the scope"];
     var stepsEl=$("steps");
     steps.forEach(function(s,i){
       var span=el("span"); span.innerHTML='<span class="n">'+(i+1)+'</span>'+esc(s);
@@ -694,6 +744,47 @@
     if(META.overallNotesHint)$("gnDesc").textContent=META.overallNotesHint;
 
     renderContext();
+    renderScopePanel();
+  }
+
+  // ---------- the running scope panel ----------
+  // Fed entirely by meta.scope in THIS round's own file — no cross-file reads
+  // at run time. The engine hardcodes no slot names either: it iterates the
+  // array in the order given, so the data-less invariant holds.
+  function renderScopePanel(){
+    var scope=Array.isArray(META.scope)?META.scope:[];
+    var panel=$("scopePanel"); if(!panel||!scope.length)return;
+
+    $("spRound").textContent="Round "+RN+" of "+ROF+(ROUND.label?" · "+ROUND.label:"");
+    var host=$("spSlots");
+    scope.forEach(function(sl){
+      var row=el("div","sp-slot"); row.dataset.state=sl.state;
+      // provenance, so "settled" is never just an assertion on the page
+      var prov=[];
+      if(sl.kind)prov.push(sl.kind==="other"?(sl.kindOther||"other"):sl.kind);
+      if(sl.assumed)prov.push("assumed, not agreed");
+      else if(sl.evidence&&sl.evidence.length)prov.push("from "+sl.evidence.join(", "));
+      if(sl.reopened)prov.push("reopened");
+      row.innerHTML=
+        '<span class="sp-pill">'+(sl.state==="settled"?"Settled":"Open")+'</span>'+
+        '<div class="sp-body">'+
+          '<span class="sp-label">'+esc(sl.label||sl.slot)+'</span>'+
+          '<p class="sp-text">'+fmt(sl.text||"")+'</p>'+
+          (prov.length?'<p class="sp-prov">'+esc(prov.join(" · "))+'</p>':'')+
+          (sl.assumption?'<p class="sp-assumed">'+fmt(sl.assumption)+'</p>':'')+
+          (sl.reopened?'<p class="sp-assumed">'+fmt(sl.reopened)+'</p>':'')+
+        '</div>';
+      host.appendChild(row);
+    });
+
+    var gl=META.glossary||{}, terms=Object.keys(gl);
+    if(terms.length){
+      var g=$("spGloss");
+      g.innerHTML='<span class="sp-gloss-h">In plain words</span>'+terms.map(function(t){
+        return '<span class="gterm"><b>'+esc(t)+'</b> — '+esc(gl[t])+'</span>';}).join("");
+      g.hidden=false;
+    }
+    panel.hidden=false;
   }
 
   function renderContext(){
@@ -715,13 +806,9 @@
     }
     (ctx.blocks||[]).forEach(function(b){
       if(b.heading)body.appendChild(el("h5",null,esc(b.heading)));
-      if(b.type==="phases"){
-        var list=el("div","phaselist");
-        (b.items||[]).forEach(function(it){
-          list.appendChild(el("div","pr",'<span class="pk">'+esc(it.key||"")+'</span><span class="pd">'+fmt(it.desc||it.label||"")+'</span>'));
-        });
-        body.appendChild(list);
-      }else if(b.type==="list"){
+      // there is no "phases" block type any more — the phased plan is one
+      // possible deliverable, not a fixed part of the contract
+      if(b.type==="list"){
         var dl=el("div","deflist");
         (b.items||[]).forEach(function(it){
           dl.appendChild(el("div","dr",'<span class="dt">'+esc(it.term||"")+'</span><span class="dd">'+fmt(it.desc||"")+'</span>'));
@@ -1058,8 +1145,24 @@
     refresh();
     toast(skipped?("Defaults accepted · "+skipped+" left for explaining"):"All defaults accepted · marked answered");
   });
+  // confirm() silently returns undefined inside a sandboxed iframe, so a guard
+  // built on it evaporates and the reset fires on the first click — in the one
+  // environment (a published Artifact) where the user is most likely to lose
+  // real work. Arm the button instead: the guard is in the DOM, not the host.
+  var resetArmed=false, resetT=null;
+  function disarmReset(){
+    resetArmed=false;
+    var b=$("resetAll"); b.classList.remove("armed");
+    b.querySelector(".rb-label").textContent="Reset";
+  }
   $("resetAll").addEventListener("click",function(){
-    if(!confirm("Reset every answer to its default and clear all notes, flags, and reviewed marks?"))return;
+    if(!resetArmed){
+      resetArmed=true; this.classList.add("armed");
+      this.querySelector(".rb-label").textContent="Click again to reset";
+      clearTimeout(resetT); resetT=setTimeout(disarmReset,4000);
+      return;
+    }
+    clearTimeout(resetT); disarmReset();
     state=blank(); gn.value=""; refresh(); toast("Reset to defaults");
   });
 
@@ -1178,10 +1281,24 @@
       payload.answers[q.id]={section:q.sec,slot:q.slot,state:stateOf(q),choice:s.choice,rec:q.rec,
         flag:s.flag,rejected:s.rej,answered:isAnswered(q),ownWords:s.otherText,note:s.note,
         label:picksOf(q).map(function(k){return optLabel(q,k);})};});
-    var blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
-    var a=el("a");a.href=URL.createObjectURL(blob);a.download=SLUG+"-scoping-answers.json";
-    document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
-    toast("Downloaded JSON");
+    var json=JSON.stringify(payload,null,2);
+    // A published Artifact may block blob downloads outright. Degrade to the
+    // modal so the data is still reachable by copy, rather than the button
+    // appearing to work and producing nothing.
+    try{
+      if(!window.URL||!URL.createObjectURL)throw new Error("blob URLs unavailable");
+      var blob=new Blob([json],{type:"application/json"});
+      var a=el("a");a.href=URL.createObjectURL(blob);a.download=SLUG+"-scoping-answers.json";
+      document.body.appendChild(a);a.click();document.body.removeChild(a);
+      setTimeout(function(){try{URL.revokeObjectURL(a.href);}catch(e){}},1000);
+      toast("Downloaded JSON");
+    }catch(e){
+      $("exportText").textContent=json;
+      modal.classList.add("show");
+      modalReturn=document.activeElement;
+      var card=modal.querySelector(".modal-card"); if(card&&card.focus)card.focus();
+      toast("Download is blocked here — copy it instead");
+    }
   });
 
   // ---------- toast ----------

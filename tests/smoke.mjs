@@ -295,6 +295,84 @@ check(JSON.stringify(q6restored) === JSON.stringify(['a']),
 check(c.doc.getElementById('globalNotes').value === 'notes from the round before',
   'and its own notes come back');
 
+// ══ the running scope panel ════════════════════════════════════════════════
+// Fed entirely by meta.scope in this round's own file. The engine hardcodes no
+// slot names — it iterates the array as given — so the data-less invariant
+// survives a feature that is entirely about project-specific state.
+console.log('\n▶ scope panel + readiness strip');
+
+const sp = render(injectData(engine, r2Data));
+const slots = [...sp.doc.querySelectorAll('.sp-slot')];
+check(slots.length === 5, `all five slots render (${slots.length}/5)`);
+check(slots.every((row, i) => row.querySelector('.sp-text').textContent === r2Data.meta.scope[i].text),
+  'each slot shows its full text, in the order the data gives — not a truncation');
+check(slots.every((row, i) => row.dataset.state === r2Data.meta.scope[i].state),
+  'settled and open are visually distinct states');
+check(sp.doc.querySelector('.sp-slot[data-state="settled"] .sp-prov')?.textContent.includes('from r1:'),
+  'a settled slot shows what earned it, so "settled" is never just an assertion on the page');
+check(sp.doc.querySelector('.sp-gloss').hidden === false &&
+      sp.doc.querySelector('.sp-gloss').textContent.includes('CSV'),
+  'the glossary renders beside the scope, where the jargon it explains is used');
+check(sp.doc.getElementById('spRound').textContent.includes(r2Data.meta.round.label),
+  'the panel names which round this is');
+
+// The strip and the export must agree — they are one computation.
+const strip = [...sp.doc.querySelectorAll('#readyStrip .rs')].map((n) => n.textContent.trim());
+check(strip.length === 5, `the readiness strip covers every slot (${strip.length}/5)`);
+check(strip.every((s) => s.startsWith('—')), 'nothing is ✓ before a single question is answered');
+for (const q of r2Data.questions) {
+  const i = sp.doc.querySelector(`#card-${q.id} .opt input`);
+  i.checked = true; sp.fire(i, 'change');
+}
+const stripAfter = [...sp.doc.querySelectorAll('#readyStrip .rs')];
+check(stripAfter.filter((n) => n.classList.contains('on')).length === 2,
+  'exactly the two slots this round targets go ✓ once their questions are answered');
+sp.doc.querySelector('#card-Q6 .rej-toggle').click();
+check([...sp.doc.querySelectorAll('#readyStrip .rs')].filter((n) => n.classList.contains('on')).length === 1,
+  'one rejection takes its slot back off ✓ — a slot cannot be ready on a question nobody understood');
+sp.doc.getElementById('copyBtn').click();
+const spReadyLine = sp.doc.getElementById('exportText').textContent
+  .split('\n').find((l) => l.startsWith('Readiness this round:'));
+check(spReadyLine.split('·').filter((s) => s.includes('✓')).length === 1,
+  'and the export reports the identical reading, not a second opinion');
+
+// ══ sandbox behaviour ══════════════════════════════════════════════════════
+// Both of these WORK locally and tell you nothing; they fail only in the one
+// place the document is actually published.
+console.log('\n▶ sandbox (Artifact iframe behaviour)');
+
+const sb = render(injectData(engine, r1Data));
+sb.window.confirm = () => undefined;   // what a sandboxed iframe really does
+const alt1 = sb.doc.querySelector('#card-Q1 .opt[data-key="b"] input');
+alt1.checked = true; sb.fire(alt1, 'change');
+sb.doc.getElementById('resetAll').click();
+check(sb.doc.getElementById('tb-changed').textContent === '1',
+  'one click does NOT reset — the confirm() guard evaporates in a sandbox, so the guard is in the DOM');
+check(sb.doc.getElementById('resetAll').textContent.includes('Click again'), 'the button says what it wants');
+sb.doc.getElementById('resetAll').click();
+check(sb.doc.getElementById('tb-changed').textContent === '0', 'the second click does reset');
+
+const dl = render(injectData(engine, r1Data));
+dl.window.URL.createObjectURL = () => { throw new Error('blocked'); };
+dl.doc.getElementById('downloadBtn').click();
+check(dl.doc.getElementById('modal').classList.contains('show'),
+  'a blocked download falls back to the modal instead of appearing to work');
+check(dl.doc.getElementById('exportText').textContent.includes('"scoping-answers"'),
+  'and the JSON is right there to copy');
+
+// ══ deliverable-neutral defaults ═══════════════════════════════════════════
+console.log('\n▶ deliverable-neutral defaults');
+
+const bare = structuredClone(r1Data);
+delete bare.meta.steps; delete bare.meta.closingAsk; delete bare.meta.eyebrow;
+const nd = render(injectData(engine, bare));
+check(!/phase|MVP/i.test(nd.doc.getElementById('steps').textContent),
+  'the default steps no longer promise a phased plan with an MVP');
+nd.doc.getElementById('copyBtn').click();
+check(nd.doc.getElementById('exportText').textContent.trim().endsWith(CLOSING_DEFAULT),
+  'and the default closing ask asks for an updated scope');
+check(nd.doc.getElementById('eyebrow').textContent.startsWith('Round 1 of 3'), 'the eyebrow names the round');
+
 // ══ the escapes survive a reload ═══════════════════════════════════════════
 // otherText and rej have to be in BOTH blank() and load()'s whitelist. Missing
 // from either, the two controls that exist so nobody gets boxed in are the two
