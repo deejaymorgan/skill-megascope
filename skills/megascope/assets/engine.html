@@ -22,9 +22,12 @@
     --ok:#3C7A52;
     --stop:#B0443B;
     --radius:13px; --radius-sm:9px;
-    /* the intro's reading measure — headline and lede share it, so they share
-       a right edge no matter which font stack meta.theme hands them */
+    /* the intro's reading measures. --measure is prose (lede, single-column
+       settled); --measure-head is the masthead question, which is set larger
+       and so needs a wider cap to wrap in two lines rather than four. Both are
+       absolute, not `ch`, so the caps survive a meta.theme font swap. */
     --measure:31rem;
+    --measure-head:55rem;
     --shadow:0 1px 2px rgba(20,24,33,.05), 0 6px 22px rgba(20,24,33,.05);
     --shadow-sm:0 1px 2px rgba(20,24,33,.05);
     --serif:Georgia,"Iowan Old Style","Palatino Linotype",Palatino,"Times New Roman",serif;
@@ -127,34 +130,79 @@
 
   .content{padding:26px 0 130px;min-width:0;}
 
-  /* ---------- intro ---------- */
+  /* ---------- intro (masthead) ----------
+     Set like a masthead: meta line, rule, the question the round asks at
+     display size, rule, then a band. The rules and the column edge do the
+     grouping. Every rule is a 1px --border/--hairline and every gutter is the
+     same, so the parts read as one plate rather than four stacks that happen
+     to share a left margin. */
   .intro{margin-bottom:26px;}
-  .eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);
-    margin-bottom:12px;}
-  /* Headline and lede share ONE right edge. A `ch` cap cannot do that — `ch`
-     is relative to each element's own font, so 64ch on a 29px serif is nearly
-     twice 64ch on a 15.5px sans. One absolute measure holds the edge under any
-     meta.theme font override, which a per-element `ch` value would not. */
-  .intro h2{font-family:var(--serif);font-size:29px;line-height:1.15;font-weight:600;letter-spacing:-.2px;
-    text-wrap:balance;max-width:var(--measure);}
-  .lede{margin-top:14px;font-size:15.5px;color:var(--muted);max-width:var(--measure);line-height:1.62;}
-  .lede b{color:var(--ink);font-weight:600;}
-  .steps{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--muted);}
-  .steps span{display:inline-flex;align-items:center;gap:7px;}
-  .steps .n{font-family:var(--mono);font-size:11px;width:19px;height:19px;border-radius:99px;flex:none;
-    display:grid;place-items:center;background:var(--accent-tint);color:var(--accent-2);font-weight:600;}
 
-  /* Already-decided facts. These are full sentences, so they read as lines,
-     not as pills — a row of six sentence-length chips is a wall of rounded
-     boxes with no stated purpose, which is what the heading now supplies. */
-  .settled{margin-top:22px;}
+  /* The meta line. Lead segment sits left; any further segments are set right
+     against the rule, which is what gives the line its full-width span. */
+  .eyebrow{display:flex;flex-wrap:wrap;align-items:baseline;gap:5px 16px;
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);
+    padding-bottom:9px;border-bottom:1px solid var(--border);}
+  /* the trailing segments are demoted a step from the accent lead, but only to
+     --muted: --faint on --ground is ~3:1, and these carry real information
+     (round, areas, decisions) at 11.5px, which is not large text */
+  .eyebrow .mast-r{margin-left:auto;display:flex;flex-wrap:wrap;align-items:baseline;gap:5px 13px;
+    color:var(--muted);letter-spacing:.1em;}
+  .eyebrow .mast-r > span + span{padding-left:13px;border-left:1px solid var(--border);}
+
+  /* The question, on its own wider measure. A `ch` cap cannot hold an edge
+     across two font stacks — `ch` is relative to each element's own font — so
+     the caps stay absolute. The wider cap is what lets text-wrap:balance make
+     two even lines instead of fighting a prose measure into four short ones. */
+  .mast-title{padding:19px 0 21px;border-bottom:1px solid var(--border);}
+  .intro h2{font-family:var(--serif);font-size:40px;line-height:1.13;font-weight:600;letter-spacing:-.5px;
+    text-wrap:balance;max-width:var(--measure-head);overflow-wrap:break-word;}
+
+  /* The band: what to do, left; what is already decided, right. Two columns
+     mean the intro's height is the taller of the two, not their sum.
+     `stretch`, not `start`: the column rule is the divider between the two
+     halves, so it has to run the full band. Left to `start` it ends wherever
+     the shorter list happens to stop — three constraints beside four steps
+     leaves a 100px stub hanging in the middle of the band. */
+  .band{margin-top:21px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:24px 40px;align-items:stretch;}
+  .band-main{min-width:0;}
+  .lede{font-size:15.5px;color:var(--muted);max-width:var(--measure);line-height:1.62;}
+  .lede b{color:var(--ink);font-weight:600;}
+
+  /* Steps read DOWN one rail. Wrapped into rows they were a 2x2 grid with no
+     stated reading order; a single column threaded by a hairline states it. */
+  .steps{margin-top:18px;display:grid;font-size:13px;color:var(--muted);}
+  .steps .step{position:relative;display:grid;grid-template-columns:21px minmax(0,1fr);gap:11px;
+    align-items:start;padding:5px 0;}
+  .steps .step::before{content:"";position:absolute;left:10px;top:0;bottom:0;width:1px;background:var(--border);}
+  .steps .step:first-child::before{top:15px;}
+  .steps .step:last-child::before{bottom:calc(100% - 15px);}
+  .steps .n{position:relative;font-family:var(--mono);font-size:11px;width:21px;height:21px;border-radius:99px;
+    display:grid;place-items:center;background:var(--accent-tint);color:var(--accent-2);font-weight:600;}
+  .steps .t{padding-top:2px;line-height:1.5;}
+
+  /* Already-decided facts. Reference material, not something to act on, so it
+     is demoted to the right column behind a column rule and set small — but
+     kept at body contrast (--muted on --ink labels), because demoting by
+     lowering contrast would put 12.5px text under 4.5:1. Still a real list. */
+  /* The column rule is --border, not --hairline: it is the only thing dividing
+     the two halves of the band, and --hairline is the page's faintest line
+     (~1.1:1 in light) — a rule doing structural work has to be seen. */
+  .settled{min-width:0;border-left:1px solid var(--border);padding-left:24px;}
   .settled-h{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
-    color:var(--faint);font-weight:600;margin-bottom:8px;}
-  .settled-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;
-    max-width:var(--measure);}
-  .settled-list li{display:flex;gap:9px;font-size:13px;color:var(--muted);line-height:1.55;}
-  .settled-list svg{width:13px;height:13px;color:var(--ok);flex:none;margin-top:4px;}
+    color:var(--faint);font-weight:600;padding-bottom:8px;margin-bottom:10px;
+    border-bottom:1px solid var(--hairline);}
+  .settled-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;}
+  .settled-list li{display:flex;gap:8px;font-size:12.5px;color:var(--muted);line-height:1.5;}
+  .settled-list svg{width:11px;height:11px;color:var(--ok);flex:none;margin-top:3px;}
   .settled-list .k{font-weight:600;color:var(--ink);}
+
+  /* No constraints this round: the right column would be a hole, so the band
+     re-lays as lede | steps and the full-width rules keep their edge. */
+  .band.solo{grid-template-columns:minmax(0,1fr);}
+  .band.solo .band-main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:34px;align-items:start;}
+  .band.solo .steps{margin-top:0;}
 
   /* ---------- context accordion ---------- */
   .ctx{margin-top:20px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);
@@ -391,7 +439,38 @@
   .empty.bad code{background:color-mix(in srgb,var(--warn-tint) 60%,#ffffff);border-color:var(--warn-line);}
 
   /* ---------- responsive ---------- */
+  /* Below ~1160px the content column is under 850px, where a 40px question
+     needs a third line. Step it down before that happens, not after. */
+  @media (max-width:1160px){
+    .intro h2{font-size:34px;letter-spacing:-.35px;}
+    .mast-title{padding:17px 0 19px;}
+  }
   @media (max-width:940px){
+    /* one column: the band stacks and the settled block's column rule becomes
+       a rule above it, so no hairline is left hanging off a missing edge */
+    .band{grid-template-columns:minmax(0,1fr);gap:22px;}
+    /* Third step for the question. 34px was set for a ~850px column; here the
+       column is under 900px and shrinking, and a display size that has to wrap
+       five times is not display size any more — it is just a tall paragraph. */
+    .intro h2{font-size:29px;letter-spacing:-.25px;}
+    /* gap:0 because stacked the steps take their own margin back — leaving the
+       column gap in place would space lede/steps 52px apart in the solo case
+       and 18px everywhere else */
+    .band.solo .band-main{grid-template-columns:minmax(0,1fr);gap:0;}
+    .band.solo .steps{margin-top:18px;}
+    .settled{border-left:none;padding-left:0;padding-top:15px;border-top:1px solid var(--border);}
+    .mast-title{padding:15px 0 16px;}
+    /* Stacked, the list has the whole column, and capping it at the prose
+       measure made it the tallest block on the page — seven items at 496px is
+       three lines each. It takes as many columns as fit instead. Each column
+       is 1fr, NOT a fixed max: auto-fit takes its track count from the max when
+       that max is definite, so minmax(20rem,32rem) resolves to a single 512px
+       column at 860px and the whole exercise silently does nothing. The line
+       length is capped on the ITEM instead, which also holds when one column
+       is all that fits. */
+    .settled-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(20rem,1fr));
+      gap:9px 26px;align-content:start;max-width:none;}
+    .settled-list li{max-width:32rem;}
     .wrap{grid-template-columns:1fr;gap:0;}
     .nav{position:static;flex-direction:row;overflow-x:auto;padding:12px 0;gap:6px;border-bottom:1px solid var(--border);}
     .nav-h,.nav-legend{display:none;}
@@ -400,13 +479,33 @@
     .nav a .tag{min-width:auto;}
     .qsection,.q{scroll-margin-top:120px;}
   }
+  /* Where the reference list runs out of room for a second column it becomes
+     the tallest block in the intro again, so the squeeze that pays for it
+     starts HERE, not at the phone breakpoint — 660px is where auto-fit drops
+     to one track at a 20rem minimum. Below 12px it stops being comfortably
+     readable, which is the floor, not a target. */
+  @media (max-width:660px){
+    .settled{padding-top:12px;} .settled-h{margin-bottom:7px;padding-bottom:7px;}
+    .settled-list{gap:6px;}
+    .settled-list li{font-size:12px;line-height:1.45;}
+    .settled-list svg{margin-top:2px;}
+  }
   @media (max-width:560px){
     .site-header-in{padding:11px 15px;} .wrap{padding:0 15px;}
     .hprogress .hbar{width:70px;} .lockup .sub{display:none;}
     .q-context,.q-title,.q-why,.q-switch,.opts,.q-foot{padding-left:0;}
     .q-breakdown{padding-left:0;} .q-example{margin-left:0;}
     .q-note,.q-other{width:100%;margin-left:0;}
-    .intro h2{font-size:24px;} .actionbar-in{padding:10px 15px;gap:8px;}
+    .intro h2{font-size:26px;letter-spacing:-.2px;} .actionbar-in{padding:10px 15px;gap:8px;}
+    /* phone: the meta line has no room to set anything against the right rule,
+       so the trailing segments follow the lead one and tighten up */
+    .eyebrow{font-size:10.5px;letter-spacing:.1em;gap:4px 12px;}
+    .eyebrow .mast-r{margin-left:0;gap:4px 11px;}
+    .eyebrow .mast-r > span + span{padding-left:11px;}
+    /* stacked, the masthead's gutters are pure cost — pull them all in */
+    .mast-title{padding:10px 0 11px;}
+    .band{margin-top:13px;gap:15px;}
+    .steps{margin-top:12px;} .steps .step{padding:3px 0;}
     /* Three buttons and two counts do not fit a phone in one row. The counts
        take the row above — the framing line goes, since the header already
        says "n / N answered" — and the two secondary buttons drop to icons,
@@ -452,13 +551,17 @@
   <main class="content">
     <section class="intro">
       <div class="eyebrow" id="eyebrow"></div>
-      <h2 id="headline"></h2>
-      <p class="lede" id="lede"></p>
-      <div class="steps" id="steps"></div>
-      <section class="settled" id="settled" hidden aria-labelledby="settledH">
-        <h3 class="settled-h" id="settledH">Already decided &mdash; not re-asked here</h3>
-        <ul class="settled-list" id="chips"></ul>
-      </section>
+      <div class="mast-title"><h2 id="headline"></h2></div>
+      <div class="band" id="introBand">
+        <div class="band-main">
+          <p class="lede" id="lede"></p>
+          <div class="steps" id="steps"></div>
+        </div>
+        <section class="settled" id="settled" hidden aria-labelledby="settledH">
+          <h3 class="settled-h" id="settledH">Already decided &mdash; not re-asked here</h3>
+          <ul class="settled-list" id="chips"></ul>
+        </section>
+      </div>
       <details class="ctx" id="ctx" hidden>
         <summary>
           <svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 16v-4.5M12 8.2h.01"/></svg>
@@ -723,8 +826,22 @@
       document.head.appendChild(ic);
     }
 
+    // masthead meta line. The eyebrow is ONE authored string; it is split on
+    // its own separators so the trailing segments can be set right against the
+    // rule and use the width. A string with no separator simply stays left —
+    // nothing here invents a field or a label the data did not supply.
     var nSec=SECTIONS.length, nQ=QUESTIONS.length;
-    $("eyebrow").textContent=META.eyebrow||("Round "+RN+" of "+ROF+" · "+nSec+" area"+(nSec===1?"":"s")+" · "+nQ+" decision"+(nQ===1?"":"s"));
+    var eyeTxt=META.eyebrow||("Round "+RN+" of "+ROF+" · "+nSec+" area"+(nSec===1?"":"s")+" · "+nQ+" decision"+(nQ===1?"":"s"));
+    var eyeEl=$("eyebrow"); eyeEl.textContent="";
+    var segs=String(eyeTxt).split(/\s+[·•|]\s+/);
+    segs=segs.map(function(s){return s.trim();}).filter(function(s){return s.length;});
+    if(!segs.length)segs=[String(eyeTxt)];
+    eyeEl.appendChild(el("span","mast-l",esc(segs[0])));
+    if(segs.length>1){
+      var mastR=el("span","mast-r");
+      segs.slice(1).forEach(function(s){mastR.appendChild(el("span",null,esc(s)));});
+      eyeEl.appendChild(mastR);
+    }
     $("headline").textContent=META.headline||"Let’s lock the plan.";
     $("lede").innerHTML=fmt(META.lede||"Each decision below is pre-filled with a recommended default and the reasoning behind it. Review, override where you have a view, and flag anything to discuss.");
 
@@ -735,8 +852,7 @@
       ["Read where the scope stands","Change, reject or note what matters","Copy answers → paste into chat","I update the scope"];
     var stepsEl=$("steps");
     steps.forEach(function(s,i){
-      var span=el("span"); span.innerHTML='<span class="n">'+(i+1)+'</span>'+esc(s);
-      stepsEl.appendChild(span);
+      stepsEl.appendChild(el("span","step",'<span class="n">'+(i+1)+'</span><span class="t">'+esc(s)+'</span>'));
     });
 
     // already-decided facts — a labelled list, so the reader is told what the
@@ -750,7 +866,10 @@
         '<span>'+(label?'<span class="k">'+esc(label)+'</span> ':'')+esc(text)+'</span>');
       chipsEl.appendChild(li);
     });
+    // with nothing already decided the right column would be an empty hole, so
+    // the band re-lays itself rather than leaving one
     if(cons.length)$("settled").hidden=false;
+    else $("introBand").classList.add("solo");
 
     // legend
     $("navLegend").innerHTML='<b>How to read this</b><br>'+
