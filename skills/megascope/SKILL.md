@@ -1,14 +1,14 @@
 ---
 name: megascope
+disable-model-invocation: true
 description: >-
-  Drive a fuzzy project request to an agreed, checkable scope through short
+  Drive a fuzzy project request to an agreed, checkable plan through short
   rounds of questions, then produce a kick-off brief a fresh agent can execute.
   Each round is a polished interactive HTML document the user fills in and
-  pastes back. Use when the user wants to scope, plan, or spec a non-trivial
-  project — "scope this", "help me plan X", "turn this idea into a build plan",
-  "what should the first version be", "let's figure out requirements before
-  building". Especially strong for technical and software work, but the
-  deliverable is itself a scoping decision, not a fixed output.
+  pastes back. For non-trivial projects that need requirements settled before
+  building — especially technical and software work, where the deliverable is
+  itself a planning decision, not a fixed output. Explicit-only: runs when
+  invoked as /megascope, never auto-triggered.
 ---
 
 # megascope — scoping in rounds
