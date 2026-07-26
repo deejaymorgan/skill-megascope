@@ -667,12 +667,17 @@
         '--ground:color-mix(in srgb,#F4F5F7 97%,'+hue+');'+
         '--surface-2:color-mix(in srgb,#FAFBFC 97%,'+hue+');'+
         '--hairline:color-mix(in srgb,#EBEDF1 95%,'+hue+');}');
+      // every token the light block re-declares must be re-declared here too: this
+      // sheet is appended after the base <style>, so a token left out of the dark
+      // blocks keeps its *light* value under prefers-color-scheme:dark.
       lines.push('@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){'+
         '--ground:color-mix(in srgb,#101217 95%,'+hue+');'+
-        '--surface-2:color-mix(in srgb,#1D212A 95%,'+hue+');}}');
+        '--surface-2:color-mix(in srgb,#1D212A 95%,'+hue+');'+
+        '--hairline:color-mix(in srgb,#232830 95%,'+hue+');}}');
       lines.push(':root[data-theme="dark"]{'+
         '--ground:color-mix(in srgb,#101217 95%,'+hue+');'+
-        '--surface-2:color-mix(in srgb,#1D212A 95%,'+hue+');}');
+        '--surface-2:color-mix(in srgb,#1D212A 95%,'+hue+');'+
+        '--hairline:color-mix(in srgb,#232830 95%,'+hue+');}');
     }
     var fontMap={serif:"--serif",sans:"--sans",mono:"--mono"};
     var fv=[];
