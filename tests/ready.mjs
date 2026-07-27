@@ -83,6 +83,14 @@ const run = (damage) => {
   const s8 = b.semantic.find((f) => f.id === 'S8');
   check(!!s8, 'while `build` refuses it — the loop terminates on a tool refusal, not a judgment call');
   check(s8?.message.includes('kick-off prompt'), `and says what to do instead: "${s8?.message}"`);
+  // ...and S8 is ALL it says. Every question in a closed round targets a slot
+  // that is now settled — by the answers to those very questions, which cite
+  // it as evidence — so S6 fires once per question unless it knows the round
+  // has already been asked. Five faults the file does not have, printed above
+  // the one line that is true and tells you what to do next.
+  const alsoSaid = b.semantic.filter((f) => f.id !== 'S8');
+  check(alsoSaid.length === 0, 'and S8 is the only thing it says — a closed round is not also one S6 per question' +
+    (alsoSaid.length ? `: got ${alsoSaid.map((f) => `${f.id} ${f.message}`).join('; ')}` : ''));
   rmSync(dir, { recursive: true, force: true });
 }
 

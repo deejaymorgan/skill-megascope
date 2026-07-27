@@ -118,7 +118,9 @@ Update the five slots from what came back. Then either:
 
 ### 5 · Close
 Update the final round's data file in place: set the slots its answers settled, with `evidence`
-citing that round. Do not bump `revision` — the questions didn't change, the scope did. Then:
+citing that round. Do not bump `revision` — the questions didn't change, the scope did. From here
+`build` refuses that file for good, and should: it is the record of a finished scope, not a round
+still to be asked. `validate` keeps passing. Then:
 
 ```bash
 node assets/megascope.mjs ready docs/scoping/<project>/

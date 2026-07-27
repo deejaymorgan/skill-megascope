@@ -118,6 +118,22 @@ reached.
 Before running it, update the final round's data file in place: set the slots its answers settled,
 `evidence` citing that round. Don't bump `revision` — the questions didn't change, the scope did.
 
+### A closed round file is deliberately not buildable
+
+That update is one-way. Once it lands, `build` refuses the file: every slot is settled, so S8 fires
+and points at the kick-off prompt. **That refusal is the terminator working, not a fault to fix.**
+The round's page was built and answered *before* the update; the file now records the scope those
+answers produced, not the questions it asked. `validate` still passes, and has to — the record of
+an agreed scope cannot itself be malformed. `examples/reading-log/round-2.data.json` is a real
+example sitting in exactly this state.
+
+S6 and S7 stop applying at the same moment and for the same reason. On a closed round every
+question targets a slot that is now settled, because the answers to those very questions are what
+settled it — and cite it as evidence. Left switched on, S6 reports one fault per question that the
+file does not have, and buries the one line that says what to do next. The signal for both is
+`round-N.answers.md` on disk for this round's own N: the same signal S13 uses to let a slot cite
+its own round.
+
 ## `SCOPE.md` and the kick-off brief
 
 `SCOPE.md` is the record: the five slots with their text verbatim, their evidence, and the rounds

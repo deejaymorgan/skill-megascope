@@ -571,22 +571,44 @@ export function semanticChecks(data, opts = {}) {
 
   // ══ build-only: is this round fit to put in front of someone? ════════════
 
-  // ── S8 · the loop terminator is a tool refusal, not a judgment call ──────
+  // Has this round already BEEN put in front of someone? Its own paste-back on
+  // disk is the tell — the same signal S13 uses above to let a slot cite its
+  // own round. After the close, the final round's data file is updated in
+  // place to record what its answers settled (references/rounds.md, "The
+  // close"), so from that point meta.scope describes the finished scope, not
+  // what this round set out to ask. Which of the checks below still apply
+  // turns on that difference.
+  const asked = !!(dir && existsSync(resolve(dir, `round-${round.n}.answers.md`)));
   const open = scope.filter((s) => s.state === 'open').map((s) => s.slot);
+
+  // ── S8 · the loop terminator is a tool refusal, not a judgment call ──────
+  // Unconditional, the closed round included: `build` must go on refusing the
+  // file the close leaves behind, or the loop stops terminating on a refusal.
+  // Only the wording changes, because "you made a mistake" and "you are done"
+  // are different things to be told.
   if (scope.length && !open.length) {
-    fail('S8', 'every slot is settled — the scope is complete. Produce the kick-off prompt, not another round');
+    fail('S8', asked
+      ? 'this round is closed — its answers are on disk and every slot is settled, so this file is now the record of a finished scope rather than a round to build. Produce the kick-off prompt'
+      : 'every slot is settled — the scope is complete. Produce the kick-off prompt, not another round');
   }
 
   // ── S6 + S7 · exact cover. Drift is a build failure. ─────────────────────
-  const targeted = new Set(questions.map((q) => q.slot));
-  for (const q of questions) {
-    const slot = bySlot.get(q.slot);
-    if (slot && slot.state !== 'open') {
-      fail('S6', `${q.id} asks about "${q.slot}", which this round declares settled`);
+  // Prospective only. On a closed round every question necessarily targets a
+  // slot that is now settled — the answers to those very questions are what
+  // settled it, and cite it as evidence — so S6 would report one fault per
+  // question that the file does not have, and bury the single true line above.
+  // S7 is its other half and goes with it.
+  if (!asked) {
+    const targeted = new Set(questions.map((q) => q.slot));
+    for (const q of questions) {
+      const slot = bySlot.get(q.slot);
+      if (slot && slot.state !== 'open') {
+        fail('S6', `${q.id} asks about "${q.slot}", which this round declares settled`);
+      }
     }
-  }
-  for (const slotName of open) {
-    if (!targeted.has(slotName)) fail('S7', `slot "${slotName}" is open but no question in this round targets it`);
+    for (const slotName of open) {
+      if (!targeted.has(slotName)) fail('S7', `slot "${slotName}" is open but no question in this round targets it`);
+    }
   }
 
   // ── S9 · a round that settles nothing is not a round ─────────────────────
