@@ -32,10 +32,9 @@ const check = (cond, msg) => {
 
 console.log('\n▶ docs (every documented command resolves)');
 
-// The design record deliberately quotes paths that no longer exist — it is a
-// history of what was broken, not a set of instructions. Everything else is
-// something a reader (or a run) is expected to actually type.
-const NOT_INSTRUCTIONS = new Set(['BRIEF-v2.md', 'PLAN-v2.md', 'LEARNINGS.md']);
+// Every markdown file in the repo is something a reader — or a run — is expected to
+// actually type from. Add a name here only if that stops being true.
+const NOT_INSTRUCTIONS = new Set();
 
 const files = [];
 for await (const f of glob('**/*.md', { cwd: ROOT, exclude: (n) => n === 'node_modules' || n === 'scratch' })) {

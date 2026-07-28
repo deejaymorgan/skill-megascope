@@ -2,15 +2,33 @@
   "name": "megascope",
   "version": "0.1.0",
   "private": true,
-  "description": "Interactive project-scoping engine + Claude Code skill (/megascope).",
+  "description": "Interactive project-scoping engine + Claude Code plugin (/megascope).",
   "type": "module",
+  "license": "MIT",
+  "author": "Daniel Morgan (https://github.com/deejaymorgan)",
+  "homepage": "https://github.com/deejaymorgan/skill-megascope#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deejaymorgan/skill-megascope.git"
+  },
+  "bugs": {
+    "url": "https://github.com/deejaymorgan/skill-megascope/issues"
+  },
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "scoping",
+    "planning",
+    "requirements"
+  ],
   "scripts": {
     "build": "node scripts/build-doc.mjs",
     "dev": "node scripts/dev.mjs",
-    "test": "node tests/schema.mjs && node tests/validate.mjs && node tests/ready.mjs && node tests/smoke.mjs && node tests/docs.mjs",
+    "test": "node tests/schema.mjs && node tests/validate.mjs && node tests/ready.mjs && node tests/smoke.mjs && node tests/docs.mjs && node tests/manifest.mjs",
     "dogfood": "bash scripts/mega.sh dogfood",
     "restore": "bash scripts/mega.sh restore",
-    "deployed": "bash scripts/mega.sh status"
+    "deployed": "bash scripts/mega.sh status",
+    "ship": "bash scripts/release.sh"
   },
   "devDependencies": {
     "ajv": "^8.17.1",

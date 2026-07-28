@@ -1,0 +1,14 @@
+{
+  "name": "skill-megascope",
+  "description": "megascope — interactive project scoping for Claude Code.",
+  "owner": {
+    "name": "Daniel Morgan"
+  },
+  "plugins": [
+    {
+      "name": "megascope",
+      "source": "./skills/megascope",
+      "description": "Interactive project scoping in rounds. Each round is a polished HTML document where every decision is pre-set to a researched default; you review, override and paste back. Ends in a kick-off brief a fresh session can execute."
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "megascope",
+  "version": "0.1.0",
+  "description": "Drive a fuzzy project request to an agreed, checkable scope through short rounds of interactive questions, then hand over a kick-off brief a fresh session can execute.",
+  "author": {
+    "name": "Daniel Morgan",
+    "url": "https://github.com/deejaymorgan"
+  },
+  "homepage": "https://github.com/deejaymorgan/skill-megascope",
+  "repository": "https://github.com/deejaymorgan/skill-megascope",
+  "license": "MIT",
+  "keywords": [
+    "scoping",
+    "planning",
+    "requirements",
+    "project-planning",
+    "interactive"
+  ]
+}

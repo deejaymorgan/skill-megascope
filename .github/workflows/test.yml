@@ -1,0 +1,44 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The shipped plugin has no dependencies, but the engine and the tooling must
+        # run wherever a contributor is: current LTS and current stable.
+        node: ['20', '22', '24']
+    name: node ${{ matrix.node }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm test
+
+  manifests:
+    runs-on: ubuntu-latest
+    name: plugin manifests
+    steps:
+      - uses: actions/checkout@v4
+
+      # Publishing is a push, so a manifest mistake reaches users directly. This is the
+      # same validation Claude Code runs when it loads the marketplace.
+      - name: Validate marketplace and plugin manifests
+        run: |
+          npx --yes @anthropic-ai/claude-code plugin validate .
+          npx --yes @anthropic-ai/claude-code plugin validate ./skills/megascope

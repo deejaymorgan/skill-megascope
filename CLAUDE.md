@@ -1,47 +1,38 @@
 # megascope — repo guide for Claude
 
-This repo **is** the `/megascope` skill. It uses a **two-worktree workflow** so the skill can be
-developed and dogfooded without disturbing the version relied on for real work. Follow it.
+This repo **is** the `/megascope` plugin. [README.md](README.md) covers what this file doesn't: what
+the skill does, how to install it, and why the engine is data-driven.
+[CONTRIBUTING.md](CONTRIBUTING.md) covers the development workflow and how a release is cut.
 
-[README.md](README.md) covers what this file doesn't: why the engine is data-driven, the design
-invariants that follow from that, and first-time setup.
+## The invariants
 
-## Two checkouts, one deployed
-- **Prod — `~/Dev/skill-megascope`:** always on `main`. The deployed skill: `~/.claude/skills/megascope`
-  is a symlink into this checkout. This is the known-good version. **Never experiment on `main`.**
-- **Dev — `~/Dev/skill-megascope-dev`:** branch `dev` (or a feature branch off it). The sandbox.
-  **Do all skill iteration here.** Check `pwd` to know which worktree you're in.
+These are the things a change must not break. The suite enforces the mechanical ones; the rest are
+judgment.
 
-One git repo, two directories — the dev worktree's `.git` is a pointer file into the prod checkout's
-`.git`, so history, branches and `origin` are shared. But Claude Code keys its project state (memory,
-session history) to the **directory path**, so the two checkouts are two separate Claude Code
-projects. Nothing carries between them except what is committed. That is why working notes belong in
-tracked files, not in memory.
+1. **`engine.html` is data-less and never edited per run.** Personality comes from the questions-JSON
+   `meta.theme`, never the shell. A run generates *only* the JSON. This is the core efficiency win and
+   the thing the design exists to protect.
+2. **The deployed plugin is `skills/megascope/` and nothing above it.** On install it is copied to a
+   cache directory, so a command that reaches `../scripts` or `../tests` resolves to nothing at run
+   time. `tests/docs.mjs` fails the build if a shipped doc names one.
+3. **Every data file validates.** `node skills/megascope/assets/megascope.mjs validate <file>` checks
+   the schema *and* the cross-references the schema cannot express. `build` refuses to write an
+   invalid round, so a broken document cannot reach a user.
+4. **The user is never boxed in.** Every question gets *in my own words* and *this doesn't make sense*
+   from the engine, so a run cannot forget them. A rejection opens a dialogue; it never counts as an
+   answer.
+5. **Both manifests move together.** `skills/megascope/.claude-plugin/plugin.json` and `package.json`
+   must carry the same version — Claude Code caches an installed plugin by version and skips the
+   update when it matches, so an unbumped release ships nothing at all. `tests/manifest.mjs` catches
+   this; `npm run ship` handles it for you.
 
-## Rules
-1. **Open the session in the dev worktree, and iterate there.** Never edit the skill on `main`
-   expecting to experiment — `main` is what live sessions run. Prod is a directory that scripts
-   touch, not one to sit in: `scripts/mega.sh` uses `$HOME`-absolute paths and `git -C` takes a
-   path, so promoting and restoring both work from a dev session. **Never switch branches** — each
-   branch is bound to its own directory, and git will refuse.
-2. **Never repoint the deployed symlink by hand.** Use `bash scripts/mega.sh {dogfood|restore|status}`
-   (or `npm run dogfood|restore|deployed`). `mega status` shows which version is live.
-3. **`npm test` is the gate** before promoting — run it from the dev worktree; it must pass. It covers
-   the machinery (engine + schema) only, not Claude's judgment (that's what dogfooding is for).
-4. **Keep `engine.html` data-less and never edited per run.** Personality comes from the questions-JSON
-   `meta.theme`, never the shell. Validate every data file with
-   `node skills/megascope/assets/megascope.mjs validate <file>` — it checks the schema *and* the
-   cross-references the schema cannot express.
+## `npm test` is the gate
 
-## The loop
-- **Iterate:** edit in the dev worktree → `npm run dev` (live engine preview) and `npm test`. Deployed
-  `/megascope` is untouched throughout.
-- **Dogfood:** `npm run dogfood` → open a **new** `claude` session → use `/megascope` for real. Skills
-  load at session start, so a flip only affects new sessions.
-- **Ship:** happy? `git -C ~/Dev/skill-megascope merge dev && npm run restore`. Not happy?
-  `npm run restore` — deployed snaps back to known-good instantly.
+It covers the machinery — engine, schema, readiness, manifests — not Claude's judgment about what
+makes a good question. That is what dogfooding is for. Run it before calling anything finished.
 
 ## Read
+
 - **`skills/megascope/references/engine-data.md`**
   - The data format — every field and how it appears on the page.
   - Start here for anything about the questions-JSON.
@@ -61,9 +52,24 @@ tracked files, not in memory.
     engine looks broken when it isn't.
 
 ## Don't read
+
 - **Any built `.html` scoping document** (e.g. `scratch/preview.html`)
   - A script builds it by combining the engine with a data file; read the data file instead.
   - The repo deliberately ships none of these — only the engine and the data that feeds it.
 - **`skills/megascope/assets/schema.json`**
   - The same format, machine-checkable.
   - Written for a program to check rather than a person to read.
+
+## Working here
+
+- **The default branch is the release channel.** Users install from this repository, so whatever lands
+  there is what they get. Develop on a branch; let `npm run ship` do the merge, the version bump and
+  the tag.
+- **If a two-worktree checkout is in use, iterate in the dev one.** `bash scripts/mega.sh status` says
+  which version is currently deployed, and both worktrees are discovered from git rather than from any
+  fixed path, so no directory layout is assumed. See [CONTRIBUTING.md](CONTRIBUTING.md). Claude Code
+  keys its project state to the directory path, so two checkouts are two separate Claude Code projects
+  and nothing carries between them except what is committed — which is why working notes belong in
+  tracked files, not in memory.
+- **Never repoint the deployed symlink by hand.** Use `bash scripts/mega.sh {dogfood|restore|status}`
+  (or `npm run dogfood|restore|deployed`).
