@@ -6,11 +6,11 @@
 to an **agreed, checkable scope** — then to a kick-off brief a fresh agent session can execute.
 
 It works in **short rounds**. Each round is a polished, theme-aware interactive document where every
-decision is already pre-set to a researched recommendation. You review, override, reject and flag;
+decision is pre-set to a researched recommendation. You review, override, reject and flag;
 click **Copy answers for Claude**; paste back. The next round is written from your answers.
 
 What gets handed over is itself a scoping decision — a build plan, a feature spec, an experiment, or
-something else. The skill infers it, and asks if the goal doesn't make it obvious.
+something else. The skill infers which, and asks when the goal doesn't make it obvious.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/document-dark.png">
@@ -18,7 +18,7 @@ something else. The skill infers it, and asks if the goal doesn't make it obviou
 </picture>
 
 <sup>Round 1 of the worked example in [`examples/reading-log/`](examples/reading-log/) — generated from
-[a 40-line data file](examples/reading-log/round-1.data.json), like every round.</sup>
+[a 200-line data file](examples/reading-log/round-1.data.json), like every round.</sup>
 
 ## Install
 
@@ -56,34 +56,35 @@ Every question looks like this — already answered, with the reasoning attached
 </picture>
 
 - **Recommendation-first, not a blank form** — every question ships pre-answered with a ★ default and
-  a one-line *why*. You review, you don't author.
-- **Rationale travels with every question** — the `why` names the tradeoff, and often the runner-up
-  condition.
+  a one-line *why* that names the tradeoff, and often when the runner-up would win. You review, you
+  don't author.
 - **Defaults are earned by research** — concrete, grounded options, not generic filler.
 - **Nobody gets boxed in** — every question also offers *in my own words* and *this doesn't make
   sense*, added by the engine so a run can't forget them. A rejection opens a dialogue; it never
   counts as an answer.
 - **A flag is a bookmark, not an objection** — copy a question out on its own, ask about it elsewhere,
   come back. The answer still stands and the round doesn't wait.
-- **A clean, parseable export** closes the human→Claude loop — and is parsed back by the tool, so a
-  later round's claims are checked against what you actually said.
-- **Readiness is a check, not a self-report** — five scope slots, each settled only on evidence that
-  resolves. The loop terminates on a tool refusal.
-- **Constraints stated up front** — already-decided facts are listed under "Already decided — not
-  re-asked here", and therefore *not re-asked*.
+- **A clean, structured export** closes the human→Claude loop — the tool parses it back, so a later
+  round's claims are checked against what you actually said.
+- **Readiness is a check, not a self-report** — five scope slots, each settled only by evidence that
+  actually resolves it. The loop ends when the tool refuses to build another round, not when Claude
+  decides it's done.
+- **Constraints stated up front** — facts already fixed are listed under "Already decided — not
+  re-asked here", so no round burns a question on them.
 
 ## How a run works
 
 0. **Intake** — pin the subject, the goal, and the facts already fixed; 2–4 clarifying questions, only
    where the answer changes what gets researched.
-1. **Round 1** — the goal, and what kind of work this is. Research is capped light here on purpose: a
+1. **Round 1** — the goal, and what kind of work this is. Research is deliberately light here: a
    first round must not make you wait.
 2. **Round-trip** — you fill it in and paste the export back. It's saved verbatim; later rounds are
    checked against it.
-3. **Round N** — written from your answers, scoping the next layer. Research is sized off what the
-   last paste-back actually opened. `build` refuses a round that advances nothing, asks about
+3. **Round N** — written from your answers, scoping the next layer. Research is sized to what your
+   last answers actually opened up. `build` refuses a round that advances nothing, asks about
    something settled, or leaves an open slot untargeted.
-4. **Close** — when every slot is settled, `build` refuses and `ready` checks the six conditions. Then
+4. **Close** — when every slot is settled, `build` refuses and `ready` checks its six closing
+   conditions. Then
    a scope summary you approve, and a **kick-off brief** a fresh session can act on with no other
    context.
 
@@ -100,7 +101,7 @@ That's the efficiency win, and the thing the skill protects.
 The engine renders everything from data — header, intro, the already-decided list, a collapsible
 context panel, sectioned recommendation-first question cards, live counts in a single action bar,
 sticky nav with scroll-spy, a clean **Copy answers for Claude** export, JSON download, `localStorage`
-persistence, and full light/dark theming — offline and CSP-safe, so the same file works as a
+persistence, and full light/dark theming. It's offline and CSP-safe, so the same file works as a
 standalone `.html` **and** as a published Artifact.
 
 ## Repo layout
