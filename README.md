@@ -1,5 +1,7 @@
 # megascope
 
+[![test](https://github.com/deejaymorgan/skill-megascope/actions/workflows/test.yml/badge.svg)](https://github.com/deejaymorgan/skill-megascope/actions/workflows/test.yml)
+
 **Interactive project scoping for Claude Code.** Point it at a fuzzy request and it drives the project
 to an **agreed, checkable scope** — then to a kick-off brief a fresh agent session can execute.
 
