@@ -14,11 +14,10 @@
 //
 // Run: `npm test`.
 
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve, relative } from 'node:path';
-import { glob } from 'node:fs/promises';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
@@ -36,8 +35,21 @@ console.log('\n▶ docs (every documented command resolves)');
 // actually type from. Add a name here only if that stops being true.
 const NOT_INSTRUCTIONS = new Set();
 
+// Walked by hand rather than with fs/promises' glob: the shipped tool imports nothing
+// newer than node:fs, so megascope runs on old Node, and the suite should be able to
+// prove that on the same versions rather than needing 22+ itself.
+const SKIP = new Set(['node_modules', 'scratch', '.git']);
+async function* markdownIn(dir, base = '') {
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    if (SKIP.has(entry.name)) continue;
+    const rel = base ? `${base}/${entry.name}` : entry.name;
+    if (entry.isDirectory()) yield* markdownIn(resolve(dir, entry.name), rel);
+    else if (entry.name.endsWith('.md')) yield rel;
+  }
+}
+
 const files = [];
-for await (const f of glob('**/*.md', { cwd: ROOT, exclude: (n) => n === 'node_modules' || n === 'scratch' })) {
+for await (const f of markdownIn(ROOT)) {
   if (!NOT_INSTRUCTIONS.has(f)) files.push(f);
 }
 files.sort();
