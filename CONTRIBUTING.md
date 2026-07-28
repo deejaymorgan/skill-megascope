@@ -113,6 +113,20 @@ contrast ratio is wrong or that a breakpoint drops a gutter. See
 [docs/testing-the-engine.md](docs/testing-the-engine.md), and read it **before** opening a built
 document: over `file://` the page's JS never runs, so the engine looks broken when it isn't.
 
+## The README images
+
+`docs/images/` is generated, not curated. If you change the engine's appearance, regenerate it:
+
+```bash
+npm i --no-save playwright     # not a dependency: a heavy install only this script needs
+npm run screenshot
+```
+
+That builds round 1 of the worked example through the shipped tool, serves it, and captures two frames
+in light and dark — refusing to write anything if the page logs an error or renders the wrong number of
+cards, so a broken engine can't quietly become the picture at the top of the README. The four files are
+wired in as `<picture>` elements, so they follow the reader's own GitHub theme.
+
 ## Conventions
 
 - **Never edit `engine.html` to change how one run looks.** Personality arrives through the

@@ -10,6 +10,14 @@ click **Copy answers for Claude**; paste back. The next round is written from yo
 What gets handed over is itself a scoping decision — a build plan, a feature spec, an experiment, or
 something else. The skill infers it, and asks if the goal doesn't make it obvious.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/document-dark.png">
+  <img alt="The top of a megascope round: a masthead reading 'Before you build anything — what is this for?', the four-step loop, a panel of facts already decided and therefore not re-asked, and a running scope panel showing which of the five slots are open and which are settled." src="docs/images/document-light.png">
+</picture>
+
+<sup>Round 1 of the worked example in [`examples/reading-log/`](examples/reading-log/) — generated from
+[a 40-line data file](examples/reading-log/round-1.data.json), like every round.</sup>
+
 ## Install
 
 ```
@@ -37,6 +45,13 @@ reinstall. See [CONTRIBUTING.md](CONTRIBUTING.md).
 </details>
 
 ## What makes it work
+
+Every question looks like this — already answered, with the reasoning attached and two ways out:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/question-dark.png">
+  <img alt="A single question card. Two bullets of context, the question 'What is the log actually for?', a one-line why, and a 'switch if' condition naming the runner-up. Three options, with 'A habit you keep' pre-selected and badged RECOMMENDED, plus an 'In my own words' box. Along the bottom: add note, flag for follow-up, this doesn't make sense, copy this question, reviewed." src="docs/images/question-light.png">
+</picture>
 
 - **Recommendation-first, not a blank form** — every question ships pre-answered with a ★ default and
   a one-line *why*. You review, you don't author.
