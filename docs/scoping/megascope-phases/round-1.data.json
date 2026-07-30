@@ -1,0 +1,268 @@
+{
+  "formatVersion": 2,
+  "meta": {
+    "project": "megascope-phases",
+    "round": {
+      "n": 1,
+      "of": 3,
+      "revision": 1,
+      "label": "What this is for",
+      "prev": null,
+      "prevAnswers": null
+    },
+    "title": "megascope — asking before answering",
+    "favicon": "🔭",
+    "headline": "Listen first, then narrow",
+    "lede": "You said the emphasis on recommendation is not what you had in mind: a run should ask what you want before it proposes anything. Four things from our conversation are already fixed and listed below. This round settles only two — what this change is for, and what it hands over. Note that it is written in the very format we are about to change, so every question here still arrives pre-answered.",
+    "overallNotesTitle": "Anything I have not asked",
+    "overallNotesHint": "The closest thing this round has to an open question. Say what you want in your own words — it outranks every option above.",
+    "closingAsk": "Update the goal and the deliverable from these answers, then tell me what is still open.",
+    "research": {
+      "mode": "light",
+      "sources": [
+        "skills/megascope/SKILL.md — the loop, and the recommendation-first operating rule this change contradicts",
+        "skills/megascope/references/rounds.md — the five slots, round sizing, the close",
+        "skills/megascope/references/writing-questions.md — the doctrine behind pre-answering every question",
+        "skills/megascope/assets/schema.json + megascope.mjs — every question requires 2-4 options and a rec, so an open question is currently unrepresentable",
+        "skills/megascope/assets/engine.html — the only free-text affordances are the per-question own-words box and the global notes box"
+      ]
+    },
+    "constraints": [
+      { "label": "Discovery is its own page", "text": "A round zero of open questions, built by the same engine, with nothing pre-selected." },
+      { "label": "Two kinds of question", "text": "Narrowing questions arrive pre-answered; questions that open new ground arrive open." },
+      { "label": "The scope phase ends at the gate", "text": "Design is entered in a fresh session that loads only the hand-off." },
+      { "label": "Design gets its own rounds", "text": "A second loop, the same machinery, with its own set of slots." },
+      { "label": "The page shell carries no data", "text": "Personality arrives only through the theme, and a run generates only the data file." },
+      { "label": "Only the installed folder ships", "text": "Anything above it is missing at run time, so nothing shipped may point at it." },
+      { "label": "Broad first, narrower each round", "text": "The existing shape stays: each round takes what is settled and scopes the next layer." }
+    ],
+    "context": {
+      "title": "Where the gate would sit",
+      "note": "The four things you already decided are shown above as fixed. This panel is here only so the shape of the change stays visible while you answer — nothing in it is a question.",
+      "blocks": [
+        {
+          "heading": "Now, and where the gate would go",
+          "type": "diagram",
+          "lines": [
+            "**now**",
+            "   request → round 1 → round 2 → hand-off → build",
+            "",
+            "**proposed**",
+            "   request → ~open questions~ → round 1 → round 2 → ~gate~",
+            "",
+            "   the ~gate~ ends the scope phase. a fresh session starts here:",
+            "   design round 1 → design round 2 → ~second gate~ → build"
+          ]
+        },
+        {
+          "heading": "The two kinds of question",
+          "type": "list",
+          "items": [
+            { "term": "Narrowing", "desc": "Arrives pre-answered, because enough is known to make a real suggestion and defend where it came from." },
+            { "term": "Ground-opening", "desc": "Arrives open, because any suggestion here would be a guess wearing the costume of a sensible default." }
+          ]
+        }
+      ]
+    },
+    "theme": {
+      "accent": "#8A5E2B",
+      "neutralBias": "warm"
+    },
+    "scope": [
+      {
+        "slot": "goal",
+        "label": "What we're trying to achieve",
+        "state": "open",
+        "text": "Change how a run opens so it asks before it answers, and separate scoping from design. Which failure matters most, and how far the change reaches, is what this round decides.",
+        "evidence": [],
+        "kind": null,
+        "kindOther": null,
+        "assumed": false,
+        "assumption": null,
+        "reopened": null
+      },
+      {
+        "slot": "deliverable",
+        "label": "What we hand over",
+        "state": "open",
+        "text": "Something between a fix to the existing loop and a new two-phase model. This round decides whether we hand over a shipped change, a written design, or a first page to look at.",
+        "evidence": [],
+        "kind": null,
+        "kindOther": null,
+        "assumed": false,
+        "assumption": null,
+        "reopened": null
+      },
+      {
+        "slot": "boundary",
+        "label": "What's in, and what's out",
+        "state": "settled",
+        "text": "Assumed for now: the page shell stays free of data and is never edited per run, and only the installed folder ships. Where the line actually sits is the next round's question.",
+        "evidence": [],
+        "kind": null,
+        "kindOther": null,
+        "assumed": true,
+        "assumption": "Taken from this repository's own invariants rather than from anything you have said, because round 1 cannot ask about a line before the goal is agreed.",
+        "reopened": null
+      },
+      {
+        "slot": "verification",
+        "label": "How we know it's done",
+        "state": "settled",
+        "text": "Assumed for now: the existing suite stays the gate for the machinery, and a real browser is what proves a new page works. What would convince you the change succeeded is round 3.",
+        "evidence": [],
+        "kind": null,
+        "kindOther": null,
+        "assumed": true,
+        "assumption": "The repository already treats its suite as the gate, so that is the honest default until you say what would actually convince you.",
+        "reopened": null
+      },
+      {
+        "slot": "constraints",
+        "label": "What we work inside",
+        "state": "settled",
+        "text": "Assumed for now: the four answers you gave in conversation are fixed, as is the rule that both version files move together on release. Anything else fixed comes later.",
+        "evidence": [],
+        "kind": null,
+        "kindOther": null,
+        "assumed": true,
+        "assumption": "Your four opening answers and the repository's release rule are treated as fixed; nothing else is claimed as a constraint until you name it.",
+        "reopened": null
+      }
+    ],
+    "glossary": {}
+  },
+  "sections": [
+    { "id": "aim", "title": "What this change is for" },
+    { "id": "hand", "title": "What we hand over" }
+  ],
+  "questions": [
+    {
+      "id": "Q1",
+      "section": "aim",
+      "slot": "goal",
+      "context": "You said the emphasis on recommendation is not what you had in mind. Naming the one failure that matters most decides which part of the loop gets rewritten first, and which parts survive untouched.",
+      "breakdown": [
+        "Every failure below is real, so this is a ranking question rather than a true-or-false one.",
+        "The one you pick is what the rest of the change gets measured against later.",
+        "The others do not go away — they become the next round's material."
+      ],
+      "technical": false,
+      "question": "Which failure is this change mainly meant to fix?",
+      "why": "You led with this one, and it is the only failure visible on the very first screen, so fixing it changes a run before anything else can. It does nothing for the room-running-out problem.",
+      "switchIf": "Pick the second if what actually hurts is a session running out of room, not a page that guesses.",
+      "rec": "a",
+      "options": [
+        { "key": "a", "label": "It answers before it has listened", "detail": "The first page arrives pre-filled, so your opening move is reacting to guesses instead of saying what you actually want." },
+        { "key": "b", "label": "Scope and design run together", "detail": "One session carries scoping talk into building decisions, so room runs out and the two kinds of thinking blur into each other." },
+        { "key": "c", "label": "Rounds narrow too fast", "detail": "By the second page, choices you never consciously made are already fixed by defaults you skimmed past." },
+        { "key": "d", "label": "You are cast as a reviewer", "detail": "Each question hands you someone else's answer to approve, which is the wrong posture when only you know the answer." }
+      ]
+    },
+    {
+      "id": "Q2",
+      "section": "aim",
+      "slot": "goal",
+      "context": "A page of open questions can serve two masters: room for you to think out loud, or a form that collects exactly what is needed to write good questions later. Those are two different pages.",
+      "breakdown": [
+        "Wide and few invites the things nobody thought to ask about, and risks a blank page.",
+        "Narrow and specific is quicker to answer, but collects only what was already anticipated.",
+        "Whichever you pick sets how the opening page looks and how long it takes you."
+      ],
+      "technical": false,
+      "question": "Who is the opening set of questions really for?",
+      "why": "The wide prompt is what stops the tool guessing at the start; the specific gaps are what stop it guessing again next round. The cost is a longer page than either alone.",
+      "switchIf": "Pick the first if you would rather write one long answer and be asked follow-up questions in conversation.",
+      "rec": "c",
+      "options": [
+        { "key": "a", "label": "Room for you to think out loud", "detail": "A few wide prompts with generous space. It reads like a good blank page, and nothing on it is counted or scored." },
+        { "key": "b", "label": "A brief Claude needs filled in", "detail": "Targeted prompts, each one present because a later question cannot be written without it. Faster, but narrower in what it invites." },
+        { "key": "c", "label": "Both, in two visible parts", "detail": "One wide prompt to say what you want in your own words, then a handful of specific gaps underneath it." }
+      ]
+    },
+    {
+      "id": "Q3",
+      "section": "aim",
+      "slot": "goal",
+      "context": "You asked for a gate between scope and design, and for design to get its own rounds. That makes design part of what this tool does, which is a larger claim than fixing how questions are asked.",
+      "breakdown": [
+        "One tool with two phases can enforce the gate, because it owns both sides of it.",
+        "Two separate tools keep each one small, but the gate becomes a file one writes and the other trusts.",
+        "This also decides how the tool describes itself to anyone who installs it."
+      ],
+      "technical": false,
+      "question": "Is this a fix to the scoping loop, or a bigger tool?",
+      "why": "You already chose that design gets its own rounds, and keeping both in one tool is what makes the gate enforceable rather than a convention. The cost is a tool twice as large to explain.",
+      "switchIf": "Pick the third if you want the scoping half to stay small and shippable alone, even at the price of a looser gate.",
+      "rec": "b",
+      "options": [
+        { "key": "a", "label": "Fix how the scoping loop asks", "detail": "The tool still stops at an agreed scope. The opening page and the suggestion change land, and the gate is just a clean ending." },
+        { "key": "b", "label": "Two phases, one tool", "detail": "The tool owns scope and design as separate loops with a gate between them, and says so in how it introduces itself." },
+        { "key": "c", "label": "Two tools, one hand-off", "detail": "Scoping stays roughly as it is, and a separate second thing does design. The gate is the file one writes and the other reads." }
+      ]
+    },
+    {
+      "id": "Q4",
+      "section": "hand",
+      "slot": "deliverable",
+      "context": "This is a change to something already installed and in daily use. What we hand over decides whether the next session writes code, writes a specification, or builds one small thing for you to look at.",
+      "breakdown": [
+        "Four changes at once is a lot of risk for one release of a tool you use daily.",
+        "The opening page is the part most likely to need a second look once you have seen it.",
+        "A specification nobody builds is the failure this repository already warns about."
+      ],
+      "technical": false,
+      "question": "What does this piece of work hand over?",
+      "why": "The opening page is both the riskiest part and the cheapest to look at, so it earns its own release. The cost is two releases and two rounds of testing instead of one.",
+      "switchIf": "Pick the first if you would rather the whole phase model landed together, so the gate is never half-built.",
+      "rec": "c",
+      "options": [
+        { "key": "a", "label": "The shipped change, working", "detail": "One release carrying the opening page, the two kinds of question, and the gate, all working end to end." },
+        { "key": "b", "label": "A written design to build from", "detail": "A specification of the new page format and the phase model, with nothing built until you have read it." },
+        { "key": "c", "label": "The open page first, then the rest", "detail": "Ship the opening page and the suggestion change as one release, then the gate and the design loop as a second." }
+      ]
+    },
+    {
+      "id": "Q5",
+      "section": "hand",
+      "slot": "deliverable",
+      "context": "You said the scope phase should end and design should start fresh. What actually crosses the gate decides whether a new session can pick it up cold, without reading the conversation behind it.",
+      "breakdown": [
+        "Too little, and the design session has to re-derive reasoning it cannot see.",
+        "Too much, and it reloads the whole scoping conversation, which is the problem you wanted solved.",
+        "Whatever crosses has to stay correct without anyone remembering to update it."
+      ],
+      "technical": false,
+      "question": "What crosses the gate into the design phase?",
+      "why": "A brief alone loses the reasoning, and a folder invites reloading everything. A fixed-length log keeps the trail without reopening the transcript. The cost is one more file to keep in step.",
+      "switchIf": "Pick the first if you want the hardest possible line, and would rather a design session asked you than read anything else.",
+      "rec": "c",
+      "options": [
+        { "key": "a", "label": "One self-contained brief", "detail": "The design session opens exactly one file: the agreed scope, what is out of scope, and what was assumed rather than agreed." },
+        { "key": "b", "label": "A brief that can be drilled into", "detail": "The brief names the folder it came from, so a design session can go and read the actual answers when a line reads ambiguously." },
+        { "key": "c", "label": "A brief plus a frozen decision log", "detail": "The brief, and a short fixed list of every decision beside the answer that earned it, so nothing has to be re-derived or re-read." }
+      ]
+    },
+    {
+      "id": "Q6",
+      "section": "hand",
+      "slot": "deliverable",
+      "context": "If design gets its own rounds, it also needs an ending. Whether design produces a hand-off of its own decides whether this tool has one gate or two, and how much there is to build.",
+      "breakdown": [
+        "Two gates of the same shape is one idea to learn rather than two.",
+        "Building is arguably where a fresh session pays off most, since it burns the most room.",
+        "Each extra hand-off is another document that has to stay in step with the rest."
+      ],
+      "technical": false,
+      "question": "Does the design phase end in a hand-off of its own?",
+      "why": "The same gate twice is cheaper to learn than two different endings, and building is where a fresh session helps most. The cost is one more document to write per project.",
+      "switchIf": "Pick the third if you would rather not maintain two hand-off formats, and can live with a record that reads like notes.",
+      "rec": "a",
+      "options": [
+        { "key": "a", "label": "Design ends in a build brief", "detail": "A second gate and a second self-contained hand-off, so building also starts in a fresh session." },
+        { "key": "b", "label": "Design ends where building starts", "detail": "The design rounds close and the same session carries straight on into building, with no second hand-off." },
+        { "key": "c", "label": "The design record is the brief", "detail": "No extra step: the last design round's own record is what a building session gets pointed at and reads." }
+      ]
+    }
+  ]
+}

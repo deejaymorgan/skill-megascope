@@ -1,0 +1,266 @@
+{
+  "formatVersion": 2,
+  "meta": {
+    "project": "megascope-phases",
+    "round": {
+      "n": 2,
+      "of": 3,
+      "revision": 1,
+      "label": "Where the line is",
+      "prev": "round-1.data.json",
+      "prevAnswers": "round-1.answers.md"
+    },
+    "title": "megascope — where the line is",
+    "favicon": "🔭",
+    "headline": "Now the rules, and where they stop",
+    "lede": "Round 1 settled two things: this change is about posture rather than pre-filling, and it ships as two releases inside one tool. Your answer in your own words opened rules round 1 never asked about, so this round is written from the published guidance on planning before building rather than from my guesses. Two slots are open — where the line sits, and the rules we work inside.",
+    "overallNotesTitle": "Anything I have not asked",
+    "overallNotesHint": "Same as last time: whatever you write here outranks every option above, and it sets the next round rather than being argued with.",
+    "closingAsk": "Update the line and the rules from these answers, then tell me what is still open.",
+    "research": {
+      "mode": "deep",
+      "trigger": [
+        "Q6 came back in your own words and opened design depth, which round 1 never asked about",
+        "Q1 changed to the reviewer-posture option, moving the goal off pre-filling and onto posture",
+        "the boundary slot was settled by assumption in round 1 and can now be asked about properly",
+        "the export counted 2 of 6 answered, which surfaced a fault in how agreement gets recorded"
+      ],
+      "sources": [
+        "code.claude.com/docs/en/best-practices — explore then plan then code; interview-then-fresh-session; the one-sentence-diff skip test; context as the governing constraint",
+        "claude.com/blog/a-field-guide-to-claude-fable-finding-your-unknowns — the four kinds of unknown, the blind-spot pass, one question at a time prioritised by architectural impact",
+        "platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5 — remove verification instructions, constrain scope explicitly, cap subagent delegation",
+        "skills/megascope/assets/engine.html lines 1105-1357 — reviewed is set only by an explicit interaction, so a pre-filled pick exports as agreed",
+        "the claude-api skill's model tables — Opus 5 at 5 and 25 dollars per million tokens against Fable 5 at 10 and 50"
+      ]
+    },
+    "constraints": [
+      { "label": "The failure is posture", "text": "Not pre-filling itself — being cast as a reviewer when only you know the answer." },
+      { "label": "Discovery is its own page", "text": "A round zero of open questions, built by the same engine, with nothing pre-selected." },
+      { "label": "Two kinds of question", "text": "Narrowing questions arrive pre-answered; questions that open new ground arrive open." },
+      { "label": "The scope phase ends at the gate", "text": "Design is entered in a fresh session that loads only the hand-off." },
+      { "label": "Design gets its own rounds", "text": "A second loop, the same machinery, with its own set of slots." },
+      { "label": "Two releases, open page first", "text": "The opening page and the suggestion change ship before the gate and the design loop." },
+      { "label": "A brief plus a frozen log", "text": "What crosses the gate is the brief and a fixed list of decisions beside their answers." },
+      { "label": "The page shell carries no data", "text": "Personality arrives only through the theme, and a run generates only the data file." },
+      { "label": "Only the installed folder ships", "text": "Anything above it is missing at run time, so nothing shipped may point at it." }
+    ],
+    "context": {
+      "title": "What the published guidance says",
+      "note": "This round is written from the published guidance on planning before building rather than from my own instincts. These four findings shaped the questions below; none of them is itself a question.",
+      "blocks": [
+        {
+          "heading": "Four findings",
+          "type": "list",
+          "items": [
+            { "term": "The gate is documented practice", "desc": "Finish the specification, then start a fresh session to execute it, so the new one carries clean context and nothing else." },
+            { "term": "Discovery is an interview", "desc": "Ask one question at a time, and put the questions whose answers would change the shape of the thing first." },
+            { "term": "There is a skip test", "desc": "If you can describe the whole change in one sentence, skip the plan. Planning earns its cost on uncertainty and breadth." },
+            { "term": "Do not ask for verification", "desc": "Current models check their own work, and telling them to verify makes them over-check. Give them something runnable instead." }
+          ]
+        }
+      ]
+    },
+    "theme": {
+      "accent": "#8A5E2B",
+      "neutralBias": "warm"
+    },
+    "scope": [
+      {
+        "slot": "goal",
+        "label": "What we're trying to achieve",
+        "state": "settled",
+        "text": "Stop a run answering before it has listened. Discovery opens with real open questions, later rounds narrow with grounded suggestions, and the scope phase ends at a gate so design starts in a fresh session.",
+        "evidence": ["r1:Q1", "r1:Q2", "r1:Q3"],
+        "kind": null,
+        "kindOther": null,
+        "assumed": false,
+        "assumption": null,
+        "reopened": null
+      },
+      {
+        "slot": "deliverable",
+        "label": "What we hand over",
+        "state": "settled",
+        "text": "Two releases inside this one tool: first the open page and the suggestion change, then the gate and a design loop whose depth follows the size of the job. A brief plus a frozen list of decisions crosses the gate.",
+        "evidence": ["r1:Q4", "r1:Q5", "r1:Q6"],
+        "kind": "codebase-feature",
+        "kindOther": null,
+        "assumed": false,
+        "assumption": null,
+        "reopened": null
+      },
+      {
+        "slot": "boundary",
+        "label": "What's in, and what's out",
+        "state": "open",
+        "text": "Now that we know what we hand over, the line can be drawn: what the design phase owns, what the first release leaves alone, and whether the agreement-versus-silence fault gets fixed here.",
+        "evidence": [],
+        "kind": null,
+        "kindOther": null,
+        "assumed": false,
+        "assumption": null,
+        "reopened": "The deliverable is settled, so the line between this change and the design phase can finally be asked about properly."
+      },
+      {
+        "slot": "verification",
+        "label": "How we know it's done",
+        "state": "settled",
+        "text": "Assumed for now: the existing suite stays the gate for the machinery, and a real browser is what proves a new page works. What would convince you the change succeeded is the last round.",
+        "evidence": [],
+        "kind": null,
+        "kindOther": null,
+        "assumed": true,
+        "assumption": "The repository already treats its suite as the gate, so that is the honest default until you say what would actually convince you.",
+        "reopened": null
+      },
+      {
+        "slot": "constraints",
+        "label": "What we work inside",
+        "state": "open",
+        "text": "Your own words set working rules that need pinning down: how deep a design goes, how deferred features survive the hand-off, and what shape a done-test has to take.",
+        "evidence": [],
+        "kind": null,
+        "kindOther": null,
+        "assumed": false,
+        "assumption": null,
+        "reopened": "Your answer in your own words introduced working rules that round 1 never asked about."
+      }
+    ],
+    "glossary": {
+      "megascope.mjs": "the small zero-dependency program that checks a round's data file and builds the page"
+    }
+  },
+  "sections": [
+    { "id": "line", "title": "Where the line sits" },
+    { "id": "rules", "title": "The rules we work inside" }
+  ],
+  "questions": [
+    {
+      "id": "Q1",
+      "section": "line",
+      "slot": "boundary",
+      "context": "Your own words said design depth should follow complexity: small and simple gets a build prompt, larger gets a real design. That only works if something decides which is which — and it has to be a test either of us can apply.",
+      "breakdown": [
+        "A test you can apply yourself keeps the decision from being mine to make each time.",
+        "Too low a bar and small jobs drag a design phase they do not need.",
+        "Too high a bar and a genuinely uncertain change goes straight to building."
+      ],
+      "technical": false,
+      "question": "What decides whether a job gets a design pass or just a build prompt?",
+      "why": "It is the only test here that came from outside, and it is checkable rather than a judgment call each time. What it misses is uncertainty: a one-line change in code you do not know still needs a plan.",
+      "switchIf": "Pick the second if you would rather design whenever the approach is unclear, even when the change itself is one line.",
+      "rec": "a",
+      "options": [
+        { "key": "a", "label": "One sentence describes the change", "detail": "If you can state the whole change in one sentence, skip design and hand over a build prompt. Anything longer gets a design pass." },
+        { "key": "b", "label": "Uncertainty, not size", "detail": "Design whenever the approach is unclear or the code is unfamiliar, however small the change; skip it when you already know how." },
+        { "key": "c", "label": "The scope rounds decide", "detail": "If the line or the done-test needed more than one round to settle, the job is complicated enough to earn a design pass." }
+      ]
+    },
+    {
+      "id": "Q2",
+      "section": "line",
+      "slot": "boundary",
+      "context": "Your answers this round showed something. Four of the six arrived pre-filled and were never actually opened, yet they exported as though you had agreed to them. The page cannot tell agreement from silence.",
+      "breakdown": [
+        "It is the same fault as the posture problem, one layer down in how answers get recorded.",
+        "Fixing it touches the export that later rounds are checked against.",
+        "Leaving it means the first release still cannot tell agreement from silence."
+      ],
+      "technical": false,
+      "question": "Should this change also fix agreement being confused with silence?",
+      "why": "It is the mechanism behind the failure you picked as primary, and the fix is small enough to ride along with the suggestion change. The cost is a wider first release and a changed export.",
+      "switchIf": "Pick the second if you want the first release as small as possible, and would rather record this and fix it on its own.",
+      "rec": "a",
+      "options": [
+        { "key": "a", "label": "Fix it in the first release", "detail": "The export gains a way to say a pick was left alone rather than agreed to, so a later round cannot bank silence as evidence." },
+        { "key": "b", "label": "Record it, fix it separately", "detail": "Write it down as a known fault and keep the first release narrow. Simpler to ship, and the fault stays live meanwhile." },
+        { "key": "c", "label": "The open page makes it moot", "detail": "A page with nothing pre-selected cannot have untouched defaults. True of discovery, but the narrowing rounds still pre-fill." }
+      ]
+    },
+    {
+      "id": "Q3",
+      "section": "line",
+      "slot": "boundary",
+      "context": "Today a run opens with a few questions in conversation before any page gets built. Once discovery is its own page of open questions, that conversation either goes away or has a much smaller job to do.",
+      "breakdown": [
+        "Two places to ask opening questions is one more than the reader needs.",
+        "Something still has to decide how big the discovery page should be.",
+        "Whatever survives here is what a run does before you see anything at all."
+      ],
+      "technical": false,
+      "question": "What happens to the questions asked in conversation before the page?",
+      "why": "Something has to size the page before it is written, and that is a small job better done in a sentence or two than in a document. The cost is that a run still opens with some conversation.",
+      "switchIf": "Pick the first if you want the page to be the very first thing you see, with nothing asked before it.",
+      "rec": "b",
+      "options": [
+        { "key": "a", "label": "The page replaces it entirely", "detail": "A run reads your request, builds the discovery page, and asks nothing first. Simplest to follow, and it has to guess the size." },
+        { "key": "b", "label": "It shrinks to sizing the page", "detail": "One or two questions about what kind of job this is and how big, then the page. Nothing about the work itself is decided there." },
+        { "key": "c", "label": "It stays as it is", "detail": "Opening questions in conversation continue alongside the discovery page, and the two overlap by design." }
+      ]
+    },
+    {
+      "id": "Q4",
+      "section": "rules",
+      "slot": "constraints",
+      "context": "You said anything not simple and small should put the first version first and capture everything else for later. Where those captured items live decides whether they survive the hand-off or quietly vanish.",
+      "breakdown": [
+        "Out of scope and deferred until later are two different promises to a reader.",
+        "A deferred item nobody records is indistinguishable from one that was rejected.",
+        "Whoever picks the work up later needs to know which of the two it was."
+      ],
+      "technical": false,
+      "question": "Where do features deferred to a later version get recorded?",
+      "why": "Something ruled out and something agreed for later read identically if they share a heading, and the second is the one a later session needs to find. The cost is one more section to keep in step.",
+      "switchIf": "Pick the first if you would rather keep the hand-off short and can live with one heading covering both.",
+      "rec": "b",
+      "options": [
+        { "key": "a", "label": "The existing in-and-out section", "detail": "Deferred items sit with everything else that is out, marked as deferred. Fewer moving parts, and the two blur together." },
+        { "key": "b", "label": "Its own section in the hand-off", "detail": "A named list of what was agreed for later, kept apart from what was ruled out, so a later session can pick it straight up." },
+        { "key": "c", "label": "It becomes the next scope", "detail": "Deferred items are the opening material for the next run of this tool, rather than a list inside the current hand-off." }
+      ]
+    },
+    {
+      "id": "Q5",
+      "section": "rules",
+      "slot": "constraints",
+      "context": "The published guidance pulls two ways. Give the agent a check it can actually run — but do not tell it to verify, because the current models already do that, and asking makes them over-check for nothing.",
+      "breakdown": [
+        "A runnable check closes the loop without you having to watch it.",
+        "Not every job has one, because a plan has no command to run.",
+        "An instruction to double-check costs tokens and buys nothing back."
+      ],
+      "technical": true,
+      "example": "For code, a command that exits zero: `node assets/megascope.mjs ready docs/scoping/megascope-phases/`. For a plan there is none, so the test is whether a fresh session can start unaided.",
+      "question": "What shape must the done-test take in the hand-off?",
+      "why": "Tying the shape to the kind of work we already record means neither arm is a hedge: code owes a command, a plan owes a stated test. Demanding a command everywhere would just produce fake ones.",
+      "switchIf": "Pick the first if you want one hard bar, and would rather refuse to close a scope that cannot name a command.",
+      "rec": "c",
+      "options": [
+        { "key": "a", "label": "A command returning pass or fail", "detail": "The slot must name something runnable. Hardest bar, and it cannot be met when the thing handed over is a plan." },
+        { "key": "b", "label": "A plain-language done test", "detail": "A sentence a person can check. Always writable, and it leaves the agent with nothing it can run on its own." },
+        { "key": "c", "label": "Keyed to the kind of work", "detail": "A command when the hand-over is code; a stated test when it is a plan. The kind is already recorded, so the rule can follow it." }
+      ]
+    },
+    {
+      "id": "Q6",
+      "section": "rules",
+      "slot": "constraints",
+      "context": "You asked what the guidance says about models. The durable part is effort — how hard to think — because model names change. So the question is whether the hand-off names either of them at all.",
+      "breakdown": [
+        "A named model is wrong the moment a better one ships.",
+        "An effort level is advice that survives, and it is the main cost lever.",
+        "Naming neither leaves the choice to whoever runs the work."
+      ],
+      "technical": false,
+      "question": "Does the hand-off say how hard to think, or stay silent?",
+      "why": "Effort is the lever the guidance actually emphasises, and it does not rot the way a model name does. The cost is a line in every hand-off that some readers will ignore.",
+      "switchIf": "Pick the third if you want the hand-off fully self-contained, and accept editing it whenever a new model lands.",
+      "rec": "b",
+      "options": [
+        { "key": "a", "label": "It says nothing", "detail": "Whoever runs the work chooses. Nothing to keep current, and a demanding job may quietly get a shallow pass." },
+        { "key": "b", "label": "How hard to think, only", "detail": "One line on how much effort the job deserves, with no model named. Survives new releases and is the main cost control." },
+        { "key": "c", "label": "Both the model and the effort", "detail": "Fully specified, so a fresh session needs no judgment. It also goes stale, and stale advice still reads as current." }
+      ]
+    }
+  ]
+}
