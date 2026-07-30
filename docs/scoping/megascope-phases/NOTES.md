@@ -23,6 +23,16 @@ carries **no options, free text only**, and ***Reviewed* alone does not release 
 question**. Both are recorded in `SCOPE.md` under decisions taken in conversation, and in
 `KICKOFF.md` §1.1, §1.2 and section 6.
 
+The three implementation choices have since been decided too, and are written up as **C**, **D** and
+**E** in `KICKOFF.md` section 6: discovery is **round 0**; the two question kinds are told apart by an
+explicit **`openEnded`** flag rather than by a missing `rec`; and `why`/`switchIf` are **dropped**
+rather than replaced on an open question.
+
+Checking the round-0 decision turned up one thing no earlier pass had: `megascope.mjs:480` guards the
+previous-round chain on `round.n > 1`, so round 1 would never be checked against round 0's answers.
+That guard needs widening to `> 0`. The one at `:615` (S9) has the same shape and should be left
+alone — a round 1 that settles nothing after discovery is legitimate.
+
 **Release one is ready to build.** Nothing is waiting on Daniel.
 
 `build` now refuses `round-3.data.json` with S8 — every slot is settled and its answers are on disk,

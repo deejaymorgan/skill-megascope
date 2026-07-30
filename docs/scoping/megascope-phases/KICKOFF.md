@@ -30,7 +30,10 @@ Two kinds of question must be able to coexist in the format:
 | Kind | Arrives | Carries |
 |---|---|---|
 | **narrowing** | pre-answered, with a recommendation | `rec`, `why`, `switchIf`, `options` |
-| **ground-opening** | open, **free text only** | no `rec`, no `why`, no `switchIf`, **no `options`** |
+| **ground-opening** | open, **free text only** | `openEnded: true`, and none of those four |
+
+The kinds are told apart by an explicit flag, not by a missing `rec` — see decision **D** in
+section 6 for the shape, and **E** for why `why` and `switchIf` are dropped rather than replaced.
 
 **A ground-opening question offers no options at all.** This is decided, and it is stronger than
 "nothing pre-selected": the page must not put candidate answers in front of the user, because
@@ -153,8 +156,9 @@ reconcile that list rather than copying it.
 
 - `rec` is in `question.required` (`schema.json:325`) and `additionalProperties` is `false` (`:326`),
   so an open question is **currently unexpressible**: `rec` can neither be omitted nor replaced by a
-  flag. Move `rec`/`why`/`switchIf` out of `required` and behind an `if`/`then` keyed on a declared
-  discriminator — the same shape the existing `technical`/`example` rule uses at `:380`.
+  flag. Declare `openEnded` as a property, move `rec`/`why`/`switchIf`/`options` out of `required`,
+  and hinge them on it with the `if`/`then`/`else` shape at `:380`. Full spec in decision **D**,
+  section 6.
 - `options` sits at `:372` with `minItems: 2` at **`:375`** (max 4 at `:376`). A ground-opening
   question carries none, so `options` must become absent-able on that branch of the same hinge. Note
   `:339` is `breakdown`'s `minItems: 2` — a byte-identical line for a different field. Do not relax
@@ -292,10 +296,12 @@ Three traps in the existing suite:
    gate leaves `#exportText` empty, `readyLine` throws a `TypeError` instead of failing a check —
    because the change handler sets `rev` but never clears `rej` (`:1323`); only the reject button
    toggles it off (`:1353`). This case needs restructuring, with an un-reject step.
-3. **Do not name a discovery fixture `round-0.data.json` inside `tests/fixtures/scope`.** The
-   readiness glob (`megascope.mjs:713`) matches `0`, and `tests/ready.mjs:36` copies that whole
-   directory, so R6 would demand a `round-0.answers.md` and break unrelated cases. A name outside
-   that pattern is invisible to the glob.
+3. **Mind where a discovery fixture lives.** The readiness glob (`megascope.mjs:713`) already matches
+   `round-0.data.json`, and `tests/ready.mjs:36` copies the whole of `tests/fixtures/scope` into a
+   temp directory, so dropping one in there makes R6 demand a `round-0.answers.md` and changes the
+   row counts the existing cases assert. Now that round 0 is legal that demand is *correct* — so
+   either add the answers file alongside it and update those cases deliberately, or give the fixture
+   a name outside the glob and keep it out of the readiness path.
 
 **Plus one real run.** A green suite says nothing about whether a page asks the right things, so run
 the tool on something real, end to end, and confirm a usable scope comes out. Note what the commands
@@ -378,20 +384,58 @@ alternative readings both reintroduced the original fault — a tick would have 
 as `[DEFAULT]` with an empty payload, which `EVIDENTIAL` (`megascope.mjs:349`) accepts as citable
 evidence for a decision nobody made.
 
-### Implementation choices — decide these yourself, and say which you chose
+### Three implementation choices, now decided
 
-1. **How discovery is numbered.** "Round zero" is the agreed name, but the number is not, and `0` is
-   illegal in three places: `meta.round.n` has `minimum: 1` (`schema.json:39`), the evidence grammar
-   is `^r[1-6]:` (`:275`), and `engine.html:804` coerces `ROUND.n || 1`, so a zero would silently
-   render **and store** as round 1, colliding with round 1's saved state. The other branch is not
-   free either: numbering discovery as round 1 and shifting the rest runs into `n`/`of` capped at
-   `maximum: 6` (`schema.json:39`–`:40`), `prev`/`prevAnswers` becoming non-nullable from n≥2
-   (`:46`–`:50`), and doctrine stopping at four rounds (`rounds.md:64`), so a four-round scope
-   becomes five.
-2. **Whether the two kinds are marked by an explicit flag or inferred from an absent `rec`.** An
-   explicit discriminator must be declared as a property, because `additionalProperties` is `false`.
-3. **What replaces `why` and `switchIf` on an open question**, given both are currently required with
-   minimum lengths.
+**C · Discovery is round 0.** Not "round 1 with everything shifted up" — that would have added a
+round to every scope and pushed against the four-round doctrine (`rounds.md:64`). Making `0` legal
+takes four edits, and the third is the one that bites:
+
+- `meta.round.n` `minimum: 1` → `0` (`schema.json:39`). Leave `of` alone; `S11` only checks
+  `of >= n` (`megascope.mjs:463`).
+- The evidence grammar `^r[1-6]:` → `^r[0-6]:` (`schema.json:275`), so a later round can cite a
+  discovery answer as `r0:Q1`.
+- **`engine.html:804` is `var RN = ROUND.n || 1`, and `0 || 1` is `1`.** A round-zero page would
+  render as "Round 1" *and* build `SLUG` as `<project>-r1` (`:805`), so its saved answers would
+  collide with round 1's in local storage. Use `??`, not `||`. Fix this in the same commit as the
+  schema change or the two together are worse than either alone.
+- The `n >= 2` conditional that makes `prev`/`prevAnswers` required (`schema.json:46`–`:50`) should
+  become `n >= 1`: round 1 now has a predecessor, and discovery is the only round entitled to a null.
+
+**One consequence to handle deliberately, found while checking the above.** The previous-round chain
+in `megascope.mjs:480` is guarded on `round.n > 1`, so **round 1 would never be checked against round
+0's answers** — no verification that the paste-back on disk is discovery's, and `S13` evidence
+resolution for `r0:` references would not be reached the way it is for later rounds. Widen that guard
+to `round.n > 0` alongside the schema change. `S9` at `:615` carries the same guard, and there it is
+correct to leave alone: a round-1 that settles nothing after discovery is still legitimate.
+
+**D · An explicit flag, named `openEnded`.** Inference from an absent `rec` was rejected: it cannot
+tell a deliberately open question from one where the author forgot the recommendation, which is the
+exact class of error the schema exists to catch. Make it a declared boolean property
+(`additionalProperties` is `false`, so it must be declared) and hinge on it with the same
+`if`/`then`/`else` shape the `technical`/`example` rule uses at `schema.json:380` — that rule is the
+precedent worth copying because it enforces **both** directions: `example` required when technical,
+and *forbidden* when not.
+
+- `openEnded: true` ⇒ `rec`, `why`, `switchIf` and `options` must all be **absent**.
+- Otherwise ⇒ all four required, exactly as today.
+- Make it **optional, defaulting to false**, not required. Required would mean editing every existing
+  data file — the examples, the fixtures, and this scope's own three rounds — to add
+  `openEnded: false`. Optional is also the safer failure: forget the flag on an open question and it
+  is treated as narrowing, so the build refuses it for a missing `rec`. Loud, and pointing at the
+  right thing.
+- The name avoids a collision: `open` is already the vocabulary for a **slot's** `state`
+  (`schema.json:263`), and the prose uses "open slot" constantly. A question that is `openEnded` and
+  a slot that is `open` are different ideas and should not share a word.
+
+**E · `why` and `switchIf` are dropped, not replaced.** An open question simply carries neither, and
+the `not: { required: [...] }` branch above enforces it.
+
+This puts the entire burden of making a blank box answerable on `context` (40–240 characters) and
+`breakdown` (2–3 items), both of which are already required on every question and neither of which
+presupposes a recommendation. **Say so explicitly in
+`references/writing-questions.md`** when you rewrite it: for a narrowing question, `context` sets up a
+choice the reader can see; for an open one it is the only thing standing between the reader and an
+empty field. That is a higher bar for the same field, and nothing in the format enforces it.
 
 ---
 
