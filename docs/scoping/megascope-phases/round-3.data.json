@@ -1,0 +1,225 @@
+{
+  "formatVersion": 2,
+  "meta": {
+    "project": "megascope-phases",
+    "round": {
+      "n": 3,
+      "of": 3,
+      "revision": 1,
+      "label": "How we know it's done",
+      "prev": "round-2.data.json",
+      "prevAnswers": "round-2.answers.md"
+    },
+    "title": "megascope — how we know it's done",
+    "favicon": "🔭",
+    "headline": "What would actually convince you it worked",
+    "lede": "Round 2 closed the line and the rules, and three of your six answers came in your own words — so the line ended up somewhere none of the options had it. Design always produces an artifact, and the page will refuse to let answers out until every question has been answered or reviewed. One slot is left, and it is the last one: how we know it's done.",
+    "overallNotesTitle": "Anything I have not asked",
+    "overallNotesHint": "Same as before — whatever you write here outranks every option above. This is the last round, so if something is missing it needs to land here.",
+    "closingAsk": "Settle the done-test from these answers, then produce the kick-off brief — or tell me what is still not right.",
+    "research": {
+      "mode": "light",
+      "trigger": [
+        "Three of the six answers came back in your own words, and all three moved the line rather than picking an option",
+        "Your words on the export fault asked for the page to block its own export, which needs to be a thing a check can hold",
+        "Verification has been settled by assumption since round 1 and is the only slot left to ask about",
+        "The two-release split still has to say whether the first release can be called finished on its own"
+      ],
+      "sources": [
+        "the repository's own suite — six node scripts run by `npm test`; tests/smoke.mjs already drives engine.html headlessly under jsdom, so page behaviour is testable without a browser",
+        "tests/ready.mjs and the `ready` command — the closest thing the repository has to a done-test for a scope, and it checks the record rather than the reading",
+        "already-cited guidance, not re-read: give the agent something runnable and never an instruction to verify; a brief must be self-contained and end with an end-to-end verification step"
+      ]
+    },
+    "constraints": [
+      { "label": "The failure is posture", "text": "Not pre-filling itself — being cast as a reviewer when only you know the answer." },
+      { "label": "Discovery is its own page", "text": "A round zero of open questions, built by the same engine, with nothing pre-selected." },
+      { "label": "The scope phase ends at the gate", "text": "Design is entered in a fresh session that loads only the hand-off." },
+      { "label": "Design gets its own rounds", "text": "A second loop, the same machinery, with its own set of slots." },
+      { "label": "Two releases, open page first", "text": "The opening page and the suggestion change ship before the gate and the design loop." },
+      { "label": "A design artifact always", "text": "Design always produces one; the size of the job only decides whether you are offered the shortcut." },
+      { "label": "The page blocks its own export", "text": "Answers cannot be copied out until every question has been answered or reviewed." },
+      { "label": "The done-test follows the work", "text": "A command when the hand-over is code; a stated test when it is a plan." },
+      { "label": "The hand-off names no model", "text": "It says nothing about which model to use or how hard to think — whoever runs the work chooses." },
+      { "label": "Held-back work becomes a scope", "text": "Anything deferred opens the next run of this tool rather than sitting in the hand-off." }
+    ],
+    "context": {
+      "title": "What this round is not asking",
+      "note": "Last round settled the shape a done-test must take in the hand-offs this tool writes. This round asks something adjacent but different: what would prove this change itself worked. Keeping the two apart is the whole reason it is a separate round.",
+      "blocks": [
+        {
+          "heading": "Settled, and still open",
+          "type": "list",
+          "items": [
+            { "term": "Settled last round", "desc": "The rule the tool follows in a hand-off: a command when the hand-over is code, a stated test when it is a plan." },
+            { "term": "Open this round", "desc": "What would convince you that this change — the open page, the gate, the design loop — actually worked." },
+            { "term": "Testable without you", "desc": "The page is already driven in a simulated browser by the repository's own checks, so how it behaves can be tested unattended." },
+            { "term": "Not testable at all", "desc": "Whether a run listened before it answered. No check can see it, so it needs a test you agree to in advance." }
+          ]
+        }
+      ]
+    },
+    "theme": {
+      "accent": "#8A5E2B",
+      "neutralBias": "warm"
+    },
+    "scope": [
+      {
+        "slot": "goal",
+        "label": "What we're trying to achieve",
+        "state": "settled",
+        "text": "Stop a run answering before it has listened. Discovery opens with real open questions, later rounds narrow with grounded suggestions, and the scope phase ends at a gate so design starts in a fresh session.",
+        "evidence": ["r1:Q1", "r1:Q2", "r1:Q3"],
+        "kind": null,
+        "kindOther": null,
+        "assumed": false,
+        "assumption": null,
+        "reopened": null
+      },
+      {
+        "slot": "deliverable",
+        "label": "What we hand over",
+        "state": "settled",
+        "text": "Two releases inside this one tool: first the open page and the suggestion change, then the gate and a design loop whose depth follows the size of the job. A brief plus a frozen list of decisions crosses the gate.",
+        "evidence": ["r1:Q4", "r1:Q5", "r1:Q6"],
+        "kind": "codebase-feature",
+        "kindOther": null,
+        "assumed": false,
+        "assumption": null,
+        "reopened": null
+      },
+      {
+        "slot": "boundary",
+        "label": "What's in, and what's out",
+        "state": "settled",
+        "text": "A design pass always produces an artifact; the size of the job only decides whether you get offered the shortcut. The page refuses to release answers until every question is answered or reviewed. Chat questions stay, but stay obvious.",
+        "evidence": ["r2:Q1", "r2:Q2", "r2:Q3"],
+        "kind": null,
+        "kindOther": null,
+        "assumed": false,
+        "assumption": null,
+        "reopened": null
+      },
+      {
+        "slot": "verification",
+        "label": "How we know it's done",
+        "state": "settled",
+        "text": "Each release finishes on its own: the suite green, plus one real run of the tool. The hand-off is proved when a fresh session acts on it unaided. The listening half has no explicit test — discovery must reach the why before any solution.",
+        "evidence": ["r3:Q1", "r3:Q2", "r3:Q3", "r3:Q4"],
+        "kind": null,
+        "kindOther": null,
+        "assumed": false,
+        "assumption": null,
+        "reopened": "The line and the rules are settled, so what would convince you can finally be asked properly."
+      },
+      {
+        "slot": "constraints",
+        "label": "What we work inside",
+        "state": "settled",
+        "text": "Work held back becomes the next scope rather than a section in the hand-off. The done-test follows the kind of work: a command for code, a stated test for a plan. The hand-off names no model and no effort level.",
+        "evidence": ["r2:Q4", "r2:Q5", "r2:Q6"],
+        "kind": null,
+        "kindOther": null,
+        "assumed": false,
+        "assumption": null,
+        "reopened": null
+      }
+    ],
+    "glossary": {
+      "megascope.mjs": "the small zero-dependency program that checks a round's data file and builds the page",
+      "smoke.mjs": "the check that loads the page in a simulated browser and drives every question the way a reader would"
+    }
+  },
+  "sections": [
+    { "id": "done", "title": "When it counts as finished" },
+    { "id": "proof", "title": "What would actually convince you" }
+  ],
+  "questions": [
+    {
+      "id": "Q1",
+      "section": "done",
+      "slot": "verification",
+      "context": "You split this into two releases: the open page and the suggestion change first, then the gate and the design loop. Whether the first one can be called finished on its own decides when you get to stop.",
+      "breakdown": [
+        "A release with no finish line of its own is really just the first half of one.",
+        "One finish line at the end means nothing counts as done for longer.",
+        "Two finish lines mean judging the same change twice."
+      ],
+      "technical": false,
+      "question": "Is the first release finished on its own, or only once both have shipped?",
+      "why": "You already split them, and a split with no finish line of its own collapses back into one long job. The cost is that the old ending stays in place while the second half is built.",
+      "switchIf": "Pick the third if the rule you just set for held-back work should cover the second release too.",
+      "rec": "a",
+      "options": [
+        { "key": "a", "label": "Each release finishes on its own", "detail": "The first is done when its own check passes, whatever state the design loop is in. Two finish lines, two chances to stop." },
+        { "key": "b", "label": "Done means both have shipped", "detail": "One finish line at the end of the whole change. Nothing judged twice, and nothing counts as finished for longer." },
+        { "key": "c", "label": "The second release is scoped later", "detail": "This job ends when the first release ships; the gate and the design loop become the next run of this tool." }
+      ]
+    },
+    {
+      "id": "Q2",
+      "section": "done",
+      "slot": "verification",
+      "context": "The repository already treats its own suite as the gate, and the page is driven there in a simulated browser. So the open page and the export block can both be checked without you clicking anything.",
+      "breakdown": [
+        "The suite runs in seconds and catches the mechanical faults.",
+        "A simulated browser is not a real one, and only a real one shows layout.",
+        "Neither of them can tell you the questions were worth asking."
+      ],
+      "technical": true,
+      "example": "`npm test` runs six checks, and `smoke.mjs` already drives the page unattended — so \"the export refuses until every question is answered\" is a test it can hold, not a thing you check by hand.",
+      "question": "What has to pass before the first release counts as working?",
+      "why": "The change has two halves and only one is mechanical: a green suite says nothing about whether the page asks the right things. The cost is that the other half needs you in the loop.",
+      "switchIf": "Pick the first if you want a finish line nobody has to be present for, and would rather judge the reading apart from it.",
+      "rec": "c",
+      "options": [
+        { "key": "a", "label": "The suite goes green", "detail": "Every check passes, including new ones for the open page and the export block. Fast, repeatable, blind to how the page reads." },
+        { "key": "b", "label": "One real run of the tool", "detail": "Scope something real with the new flow and see a usable brief come out. Convincing, and not a thing that re-runs itself." },
+        { "key": "c", "label": "The suite, plus one real run", "detail": "The machinery is proved by the checks, the reading by using it once. Each half gets the check it can actually pass." }
+      ]
+    },
+    {
+      "id": "Q3",
+      "section": "proof",
+      "slot": "verification",
+      "context": "The failure you named was being cast as a reviewer. No suite can see that, so it needs a test of its own — and one you could point at afterwards rather than a feeling on the day.",
+      "breakdown": [
+        "Nothing pre-selected is easy to check, and does not prove anyone listened.",
+        "A run that changes what you thought the work was is the real signal.",
+        "Whatever you pick here is what later runs get judged against."
+      ],
+      "technical": false,
+      "question": "What would show you a run listened before it answered?",
+      "why": "It is the only one that measures listening rather than form — an open page that happens to guess right has changed nothing. The cost is needing something to compare against.",
+      "switchIf": "Pick the third if you would rather judge the whole loop by its brief, and treat how the page felt as beside the point.",
+      "rec": "b",
+      "options": [
+        { "key": "a", "label": "Nothing is pre-selected", "detail": "A mechanical check: the first page arrives with no answer chosen. True, and shallow — an open page can still ask the wrong things." },
+        { "key": "b", "label": "Not what it would have guessed", "detail": "What you write on the open page differs from what the old flow would have recommended. If they match, the page bought nothing." },
+        { "key": "c", "label": "The brief needed no correcting", "detail": "What comes out needs no repair before a fresh session can act on it. An end-of-loop test rather than a check on the page." }
+      ]
+    },
+    {
+      "id": "Q4",
+      "section": "proof",
+      "slot": "verification",
+      "context": "The gate is the new thing: the scope phase ends, and design starts in a session holding only the hand-off. Whether it works is a question about the hand-off, and that can be tested for real.",
+      "breakdown": [
+        "A brief that draws a follow-up question has not crossed the gate.",
+        "The check this tool already ships tests the record, not the reading.",
+        "Testing it for real costs one fresh session every time."
+      ],
+      "technical": true,
+      "example": "The readiness check already ships: `megascope.mjs ready` on the scope folder exits zero only when all five slots hold up. It cannot tell whether a stranger could act on them.",
+      "question": "What proves the hand-off is enough to start from?",
+      "why": "It is the only one that fails when a brief is thin, and the published guidance sets the same bar: a brief a fresh session can act on with nothing else. The cost is one session per test.",
+      "switchIf": "Pick the second if you want the gate guarded by something that runs on its own, thin briefs included.",
+      "rec": "a",
+      "options": [
+        { "key": "a", "label": "A fresh session acts on it unaided", "detail": "Hand the brief to a session with nothing else and watch whether it starts, or comes back with questions." },
+        { "key": "b", "label": "The readiness check passes", "detail": "All five slots hold up: settled, evidenced, written as real sentences. Automatic, and it checks the record rather than the reading." },
+        { "key": "c", "label": "You read it and judge it", "detail": "You decide whether a stranger could act on it. Quick, and it leans on you knowing what the brief leaves out." }
+      ]
+    }
+  ]
+}
