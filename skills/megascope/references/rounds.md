@@ -115,8 +115,9 @@ Exit 1 names the first unmet condition and its slot. **That message is the spec 
 next** — it distinguishes a slot that was asked about and left unresolved from one no round has
 reached.
 
-It also reprints E1-E3, the posture rows from `env`: where the directory sits, whether the
-repository is public, and whether the artifacts are ignored, tracked or loose. Those are advisory
+It also reprints the rows from `env`: where the directory sits, whether the repository is public,
+whether the artifacts are ignored, tracked or loose, and whether this repository already scopes
+somewhere else. Those are advisory
 and never move the exit code — see `artifacts.md`. They are here because the close is the moment a
 scope stops being working notes and starts being something someone wants to share.
 

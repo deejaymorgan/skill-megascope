@@ -43,7 +43,7 @@
 // its slot — that message IS the spec for the next round.
 //
 // ── the posture check ───────────────────────────────────────────────────────
-// `env` (E1-E3) reports where the artifacts sit and who can see them. Scoping
+// `env` (E1-E4) reports where the artifacts sit and who can see them. Scoping
 // artifacts absorb whatever the scope touched — verbatim answers, real paths,
 // directory listings pasted in as evidence — so the default posture is
 // untracked, and committing is an opt-in that owes a sanitisation pass. See
@@ -821,6 +821,34 @@ function shell(cmd, args, { cwd, timeout = GIT_MS } = {}) {
   }
 }
 
+// Where a repository might already be keeping scopes. Deliberately a short fixed
+// list rather than a walk: the shapes megascope has ever told anyone to use, at
+// a cost of five failed stats.
+//
+// The signature is the HOME, not the round files. Requiring a round-N.data.json
+// looks more rigorous and is worse: a scope directory that was closed, or one
+// holding only a companion brief, has no round file and would read as "this repo
+// has never scoped here" — which is exactly the wrong answer, and exactly what a
+// real repo full of them turned out to look like. Nothing but megascope makes a
+// directory called `scoping`, so a non-empty subdirectory of one counts.
+const SCOPE_HOMES = ['docs/scoping', 'notes/scoping', '.notes/scoping', 'doc/scoping', 'scoping'];
+
+/** @returns {string[]} repo-relative scope directories that already exist. */
+function existingScopes(repo) {
+  const found = [];
+  for (const home of SCOPE_HOMES) {
+    let entries;
+    try { entries = readdirSync(resolve(repo, home), { withFileTypes: true }); } catch { continue; }
+    for (const e of entries) {
+      if (!e.isDirectory()) continue;
+      try {
+        if (readdirSync(resolve(repo, home, e.name)).length) found.push(`${home}/${e.name}`);
+      } catch { /* unreadable — not our business to say why */ }
+    }
+  }
+  return found;
+}
+
 /** The nearest ancestor that exists — at intake the scope directory has not been created yet. */
 const firstExisting = (p) => {
   let cur = resolve(p);
@@ -833,8 +861,9 @@ const firstExisting = (p) => {
 };
 
 /**
- * E1-E3 over a scope directory: where it sits, who can see it, and which
- * posture is actually in force. Advisory — the caller prints it and never
+ * E1-E4 over a scope directory: where it sits, who can see it, which posture is
+ * actually in force, and whether this repo already scopes somewhere else.
+ * Advisory — the caller prints it and never
  * gates on it. `opts.run` replaces the shell, so the classification is
  * testable without a network or a GitHub account.
  */
@@ -857,7 +886,7 @@ export function environment(dir, opts = {}) {
 
   if (!repo) {
     add('E1', 'info', `${path} is not inside a git repository — nothing here can be pushed, and nothing but a written pointer can find it`);
-    return { repo: null, rel: null, ignored: null, tracked: null, remotes: null, visibility: null, posture: 'no-repo', rows, warnings: [] };
+    return { repo: null, rel: null, ignored: null, tracked: null, declared: null, remotes: null, visibility: null, posture: 'no-repo', elsewhere: [], rows, warnings: [] };
   }
 
   const inside = relative(repo, path);
@@ -930,7 +959,18 @@ export function environment(dir, opts = {}) {
   }
   add('E3', level, detail);
 
-  return { repo, rel, ignored, tracked, declared, remotes, visibility, posture, rows, warnings: rows.filter((r) => r.level === 'warn') };
+  // E4 · a repository answers "where do scopes go" once. Answering it twice is
+  // how one repo ends up with two scope locations and a handoff session that
+  // finds the older one — so a location already in use outranks the canonical
+  // one. Only worth saying when it is somewhere else: siblings under the same
+  // parent are the same answer, not a second one.
+  const elsewhere = existingScopes(repo).filter((p) => dirname(p) !== dirname(rel));
+  if (elsewhere.length) {
+    const homes = [...new Set(elsewhere.map(dirname))];
+    add('E4', 'warn', `this repository already keeps ${elsewhere.length} scope(s) in ${homes.join(', ')} — write there rather than starting a second location, and don't move what is already there`);
+  }
+
+  return { repo, rel, ignored, tracked, declared, remotes, visibility, posture, elsewhere, rows, warnings: rows.filter((r) => r.level === 'warn') };
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -977,7 +1017,7 @@ function main(argv) {
   const reportEnv = (e) => {
     for (const row of e.rows) console.log(`  ${MARK[row.level]} ${row.id} · ${row.detail}`);
     if (e.warnings.length) {
-      console.log(`\n⚠ posture: ${e.warnings.length === 1 ? 'one thing' : `${e.warnings.length} things`} to look at above. Advisory — nothing here blocks the scope.`);
+      console.log(`\n⚠ env: ${e.warnings.length === 1 ? 'one thing' : `${e.warnings.length} things`} to look at above. Advisory — nothing here blocks the scope.`);
     }
   };
 

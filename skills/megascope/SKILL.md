@@ -61,8 +61,9 @@ See `references/rounds.md` for the slots, round sizing, and the close.
 Read the request. Name the subject, the goal as you understand it, and the facts already fixed.
 Ask **2–4** `AskUserQuestion` clarifications only where the answer changes what you would research.
 
-The working directory is `docs/scoping/<project>/` — canonical, not a per-repo choice. Check the
-posture it lands in **before writing anything into it**:
+The working directory is `docs/scoping/<project>/` — canonical, not a per-repo choice, unless E4
+below says this repository already keeps scopes elsewhere, in which case write there. Check what it
+lands in **before writing anything into it**:
 
 ```bash
 node assets/megascope.mjs env docs/scoping/<project>/
@@ -70,7 +71,8 @@ node assets/megascope.mjs env docs/scoping/<project>/
 
 Advisory rows, never a block. *Untracked but not ignored* is the one to fix now, while the directory
 is still empty: add it to `.git/info/exclude`. A public repository plus artifacts already tracked is
-the case to raise out loud.
+the case to raise out loud. E4 only appears when it applies, and when it does it decides where you
+write — an existing location outranks the canonical one, and nothing already there gets moved.
 
 ### 1 · Research, sized to the round
 Round 1 is capped at `research.mode` `none` or `light` (≤3 parallel readers, no dossier) — it must

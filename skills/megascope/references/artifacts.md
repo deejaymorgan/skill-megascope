@@ -8,7 +8,8 @@ go, what happens to them by default, and what a run owes the user before any of 
 **`docs/scoping/<project>/`, relative to the repository the work is about.** One directory per
 scope, named for the subject rather than the date. It is not negotiated per repo and not inferred
 from what a repo happens to do with `notes/` or `docs/` — a convention that has to be rediscovered
-is a convention that gets read differently every time.
+is a convention that gets read differently every time. One thing outranks it, and only one: a scope
+directory this repository already uses, below.
 
 | File | What it is |
 |---|---|
@@ -20,6 +21,27 @@ is a convention that gets read differently every time.
 
 Outside a repository — scoping something that has no code yet — use `docs/scoping/<project>/` under
 whatever directory the work will live in, and say where you put it.
+
+### A repository that already scopes somewhere else
+
+`docs/scoping/` is the answer for a repository that has never run one. A repository that has —
+under `notes/scoping/`, or anywhere else — has already answered the question, and answering it a
+second time is how one repository ends up with two scope locations and a handoff session that finds
+the older one. **Write where the existing scopes are.** `env` reports it as E4, which is the only
+row that fires on the *shape* of the repo rather than on its exposure:
+
+```
+⚠ E4 · this repository already keeps 2 scope(s) in notes/scoping — write there rather than
+       starting a second location, and don't move what is already there
+```
+
+Follow it, say in one line that you are matching the existing layout, and use that path everywhere
+the canonical one would have appeared — including the `CLAUDE.md` pointer, which is the thing a
+future session actually reads.
+
+**Do not migrate what is already there.** Moving a scope has consequences that belong to whoever
+owns the repository, not to a run that happened to open in it: a pointer to repoint, an ignore rule
+to update, and git history to think about if any of it was tracked. Offer it; never just do it.
 
 ## The default posture is untracked
 
@@ -133,6 +155,7 @@ node assets/megascope.mjs env docs/scoping/<project>/
 | **E1** | where the directory sits, and which repository it is in |
 | **E2** | whether that repository is published, and whether it is public |
 | **E3** | the posture actually in force — ignored, tracked, or loose |
+| **E4** | only when it applies: this repository already keeps scopes somewhere else |
 
 `ready` prints the same three rows at the close, so the last thing checked before a hand-over is
 the same thing checked at intake.

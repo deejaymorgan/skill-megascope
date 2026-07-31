@@ -172,6 +172,62 @@ for (const [posture, expected] of [['loose', 'loose'], ['ignored', 'ignored'], [
   } finally { rmSync(dir, { recursive: true, force: true }); }
 }
 
+{
+  // The split-brain case: a repo that already scoped under notes/, asked about
+  // the canonical location. Getting this wrong gives one repo two scope
+  // directories, and a handoff session that finds whichever it looks in first.
+  const { dir } = repoWith('loose');
+  try {
+    const old = join(dir, 'notes/scoping/media-renamer');
+    mkdirSync(old, { recursive: true });
+    writeFileSync(join(old, 'round-1.data.json'), '{}');
+    const e = environment(join(dir, 'docs/scoping/new-topic'));
+    const e4 = e.rows.find((r) => r.id === 'E4');
+    check(e4?.level === 'warn' && /notes\/scoping/.test(e4.detail),
+      'a scope directory already under notes/ is reported, and outranks the canonical one');
+    check(e.elsewhere.includes('notes/scoping/media-renamer'),
+      'E4 names the scope it found, not just its parent');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+}
+
+{
+  // Siblings under one parent are the same answer, not a second one.
+  const { dir } = repoWith('loose');
+  try {
+    const sib = join(dir, 'docs/scoping/older-topic');
+    mkdirSync(sib, { recursive: true });
+    writeFileSync(join(sib, 'round-1.data.json'), '{}');
+    const e = environment(join(dir, 'docs/scoping/new-topic'));
+    check(!e.rows.some((r) => r.id === 'E4'),
+      'a sibling scope in the same location is silent — E4 fires on divergence, not on company');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+}
+
+{
+  // A closed scope, or one holding only a companion brief, has no round file.
+  // Requiring one would report "this repo has never scoped here" about a
+  // directory full of scoping artifacts — which is what the repo behind this
+  // whole feature actually contains.
+  const { dir } = repoWith('loose');
+  try {
+    mkdirSync(join(dir, 'notes/scoping/brief-only'), { recursive: true });
+    writeFileSync(join(dir, 'notes/scoping/brief-only/KICKOFF.md'), '# a brief\n');
+    const e = environment(join(dir, 'docs/scoping/new-topic'));
+    check(e.elsewhere.includes('notes/scoping/brief-only'),
+      'a scope directory with no round file still counts — closed scopes and lone briefs are scopes');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+}
+
+{
+  // An empty directory is still not evidence of anything.
+  const { dir } = repoWith('loose');
+  try {
+    mkdirSync(join(dir, 'notes/scoping/abandoned'), { recursive: true });
+    const e = environment(join(dir, 'docs/scoping/new-topic'));
+    check(!e.rows.some((r) => r.id === 'E4'), 'an empty directory is not a scope');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+}
+
 function shellReal(cmd, args, { cwd } = {}) {
   try { return { code: 0, out: execFileSync(cmd, args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() }; }
   catch (e) { return { code: typeof e?.status === 'number' ? e.status : null, out: String(e?.stdout || '').trim() }; }
