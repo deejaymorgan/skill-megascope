@@ -96,14 +96,15 @@ After a release, users get it with:
 
 ## Testing
 
-`npm test` runs six suites, and covers the machinery only — not Claude's judgment about what makes a
-good question. That is what dogfooding is for.
+`npm test` runs seven suites, and covers the machinery only — not Claude's judgment about what makes
+a good question. That is what dogfooding is for.
 
 | Suite | What it asserts |
 |---|---|
 | `tests/schema.mjs` | the schema compiles, and stays inside the vocabulary its walker implements |
 | `tests/validate.mjs` | ~56 single-mutation invalid files each fail on their *intended* keyword or check id, and the shipped walker agrees with ajv case by case |
 | `tests/ready.mjs` | the six readiness conditions each fail for their own reason |
+| `tests/env.mjs` | every tracked/ignored/public combination classifies as intended, against a stubbed shell *and* a real temp repository — and the check never changes an exit code |
 | `tests/smoke.mjs` | the engine renders headless, isolates rounds by storage key, and writes an export the tool can parse back |
 | `tests/docs.mjs` | every command in the docs resolves, and no shipped command reaches outside the deployed plugin directory |
 | `tests/manifest.mjs` | the plugin ships, at the version it claims |

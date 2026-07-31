@@ -1,5 +1,8 @@
 # Reading log — agreed scope
 
+**Tracking:** committed deliberately — a shipped example, written from an invented scope. Public
+repository. A real run's artifacts are untracked by default; see `references/artifacts.md`.
+
 Settled over 2 rounds. Every line below is the slot's own text, verbatim, with the answers that
 earned it. `node ../../skills/megascope/assets/megascope.mjs ready .` exits 0 on this directory.
 

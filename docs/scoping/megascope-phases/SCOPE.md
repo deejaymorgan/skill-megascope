@@ -1,5 +1,8 @@
 # SCOPE — megascope's phase model
 
+**Tracking:** committed deliberately — a worked example of the tool on itself, sanitised 2026-07-31.
+Public repository.
+
 The agreed scope, as recorded. Three rounds, 16 questions, none rejected. Closed 2026-07-30.
 
 Readiness: `node skills/megascope/assets/megascope.mjs ready docs/scoping/megascope-phases/` — exit 0,

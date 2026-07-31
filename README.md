@@ -91,6 +91,23 @@ Every question looks like this — already answered, with the reasoning attached
 [`examples/reading-log/`](examples/reading-log/) is a complete worked scope — the user's original
 request, both rounds of data and answers, the settled scope, and the kick-off brief that came out.
 
+## What it writes, and where
+
+Everything a run produces lands in `docs/scoping/<project>/`: the rounds, your answers saved verbatim,
+the agreed scope, and the brief. **Those files are untracked by default.** A scope soaks up whatever it
+touched on the way to an answer — your own words, absolute paths, listings pasted in as evidence — so
+committing them is something you opt into, after a pass over what is actually in them. The tool
+reports the posture it finds and never enforces it; a private repo that tracks everything is a fine
+answer, it just has to be one somebody chose.
+
+```bash
+node skills/megascope/assets/megascope.mjs env docs/scoping/my-project/
+```
+
+Because untracked files are invisible to git, the close also drops a one-line pointer to the brief in
+your `CLAUDE.md`, so the next session can find it.
+[`references/artifacts.md`](skills/megascope/references/artifacts.md) is the whole contract.
+
 ## The idea: one engine, data per run
 
 The scoping document is produced by a **data-driven engine** — a single static, self-contained,
@@ -114,10 +131,11 @@ skill-megascope/
 │   ├── SKILL.md                       # the skill: trigger + the round loop
 │   ├── assets/
 │   │   ├── engine.html                # the static, data-driven shell (never edited per run)
-│   │   ├── megascope.mjs              # validate · build · ready — zero deps, ships with the plugin
+│   │   ├── megascope.mjs              # validate · build · ready · env — zero deps, ships with the plugin
 │   │   └── schema.json                # questions-JSON JSON Schema
 │   └── references/                    # playbook
 │       ├── rounds.md                  #   the five slots, round sizing, the close
+│       ├── artifacts.md               #   where artifacts live, and why they're untracked
 │       ├── engine-data.md             #   the exact data contract
 │       ├── writing-questions.md       #   what the schema can't enforce
 │       ├── research-fanout.md         #   per-round research patterns
@@ -149,6 +167,7 @@ invalid round:
 ```bash
 node skills/megascope/assets/megascope.mjs build path/to/round-1.data.json path/to/round-1.html
 node skills/megascope/assets/megascope.mjs ready docs/scoping/my-project/
+node skills/megascope/assets/megascope.mjs env   docs/scoping/my-project/
 ```
 
 Development, dogfooding and releases are covered in [CONTRIBUTING.md](CONTRIBUTING.md).

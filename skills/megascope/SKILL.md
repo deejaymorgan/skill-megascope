@@ -38,6 +38,10 @@ edited shell. That is the core efficiency win and the thing to protect.
   under a heading the engine supplies: *Already decided — not re-asked here*.
 - **Recommendation-first, always.** Every question ships pre-answered with a `rec`, a `why` and a
   `switchIf`. The user reviews; they do not author. A blank-looking question is a bug.
+- **Artifacts are local by default.** They live in `docs/scoping/<project>/` and are **untracked**
+  unless someone decides otherwise in writing. A scope absorbs verbatim answers, absolute paths and
+  pasted listings on its way to an answer, so committing is an opt-in that owes a sanitisation pass
+  — never a side effect of the directory it landed in. `references/artifacts.md` is the contract.
 
 ## The scope is five slots
 
@@ -56,7 +60,17 @@ See `references/rounds.md` for the slots, round sizing, and the close.
 ### 0 · Intake
 Read the request. Name the subject, the goal as you understand it, and the facts already fixed.
 Ask **2–4** `AskUserQuestion` clarifications only where the answer changes what you would research.
-Pick a working directory: `docs/scoping/<project>/`.
+
+The working directory is `docs/scoping/<project>/` — canonical, not a per-repo choice. Check the
+posture it lands in **before writing anything into it**:
+
+```bash
+node assets/megascope.mjs env docs/scoping/<project>/
+```
+
+Advisory rows, never a block. *Untracked but not ignored* is the one to fix now, while the directory
+is still empty: add it to `.git/info/exclude`. A public repository plus artifacts already tracked is
+the case to raise out loud.
 
 ### 1 · Research, sized to the round
 Round 1 is capped at `research.mode` `none` or `light` (≤3 parallel readers, no dossier) — it must
@@ -86,7 +100,7 @@ click "Copy answers for Claude" and paste it back.*
 
 ### 3 · Read the paste-back
 **Save it verbatim first**, as `round-<n>.answers.md`. Later rounds are checked against it — no
-saved paste-back, no next round.
+saved paste-back, no next round. It is evidence: never edited, and never committed.
 
 Check line 2's `scope-id:` matches the round you sent. If it doesn't, stop and ask; do not merge.
 No `scope-id:` line at all means a pre-v2 export.
@@ -127,13 +141,16 @@ node assets/megascope.mjs ready docs/scoping/<project>/
 ```
 
 Exit 0 means ready. Exit 1 names the first unmet condition and its slot — **that message is the
-spec for what to do next.** Do not hand-wave past it.
+spec for what to do next.** Do not hand-wave past it. `ready` also reprints the three posture rows,
+so the last check before a hand-over is the same one intake made; those never affect the exit code.
 
 When ready, present the scope summary: one short paragraph per slot, using each slot's `text`
 **verbatim**, so the user reads back exactly what was recorded — plus a section for anything
 settled by assumption.
 
-- **They approve** → write `SCOPE.md` and `KICKOFF.md`.
+- **They approve** → write `SCOPE.md` and `KICKOFF.md`. Each opens with a `**Tracking:**` line
+  stating its status, and the brief gets one pointer line under `## Active scoping briefs` in the
+  repository's `CLAUDE.md` — untracked files are invisible to git, so nothing else will find them.
 - **They question it** → make it simpler, give one concrete example and one analogy, patch that
   slot's `text`, and re-present. Only when a slot genuinely regresses do you set it back to `open`
   with a `reopened` reason and run another round.
@@ -145,9 +162,10 @@ it is done, and what was assumed rather than agreed. `references/rounds.md` has 
 ## Files
 
 - `assets/engine.html` — the static shell. **Never edited per run.**
-- `assets/megascope.mjs` — `validate` · `build` · `ready`. Zero dependencies.
+- `assets/megascope.mjs` — `validate` · `build` · `ready` · `env`. Zero dependencies.
 - `assets/schema.json` — the machine-checkable contract.
 - `references/rounds.md` — the five slots, round sizing, the close, the kick-off brief.
+- `references/artifacts.md` — where artifacts live, why they are untracked, and what committing costs.
 - `references/writing-questions.md` — what makes a question worth pre-answering.
 - `references/research-fanout.md` — per-round research patterns.
 - `references/engine-data.md` — every field, and how it renders.

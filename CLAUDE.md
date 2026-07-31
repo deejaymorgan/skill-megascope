@@ -39,6 +39,9 @@ makes a good question. That is what dogfooding is for. Run it before calling any
 - **`skills/megascope/references/rounds.md`**
   - The five scope slots, how a round is sized, and how the loop terminates.
   - Read it before changing anything about rounds, readiness, or the close.
+- **`skills/megascope/references/artifacts.md`**
+  - Where a run's artifacts live, why they are untracked by default, and what committing them costs.
+  - Read it before changing `env`, the status header, or anything about where files land.
 - **`examples/reading-log/round-1.data.json`**
   - A complete example data file.
   - Read it to see the shape and quality to aim for; its siblings show the whole loop.
@@ -73,3 +76,11 @@ makes a good question. That is what dogfooding is for. Run it before calling any
   tracked files, not in memory.
 - **Never repoint the deployed symlink by hand.** Use `bash scripts/mega.sh {dogfood|restore|status}`
   (or `npm run dogfood|restore|deployed`).
+
+## Active scoping briefs
+
+The pointer convention from `references/artifacts.md`, kept here because this repo runs the tool on
+itself. A real run's artifacts are untracked, which is exactly why the pointer to them is not.
+
+- [megascope's phase model](docs/scoping/megascope-phases/KICKOFF.md) — the discovery phase, grounded
+  suggestions, and the gate between scope and design. Release one. **Tracked** as a worked example.

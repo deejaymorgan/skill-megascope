@@ -4,6 +4,7 @@
 //   node megascope.mjs validate <round-N.data.json>
 //   node megascope.mjs build    <round-N.data.json> [out.html]
 //   node megascope.mjs ready    <scope-dir>/
+//   node megascope.mjs env      <scope-dir>/
 //
 // Zero dependencies: node built-ins only, so it runs from inside the deployed
 // skill, where there is no package.json and no node_modules.
@@ -40,10 +41,20 @@
 // settled, each on evidence that resolves against a saved paste-back or on a
 // written assumption. Its exit-1 message names the first unmet condition and
 // its slot — that message IS the spec for the next round.
+//
+// ── the posture check ───────────────────────────────────────────────────────
+// `env` (E1-E3) reports where the artifacts sit and who can see them. Scoping
+// artifacts absorb whatever the scope touched — verbatim answers, real paths,
+// directory listings pasted in as evidence — so the default posture is
+// untracked, and committing is an opt-in that owes a sanitisation pass. See
+// references/artifacts.md. This REPORTS that posture; it never enforces it, and
+// every fact degrades to unknown rather than throwing: a missing git, a missing
+// gh or no network must not stop a scope from closing.
 
 import { readFileSync, writeFileSync, existsSync, readdirSync, realpathSync } from 'node:fs';
-import { dirname, resolve, basename } from 'node:path';
+import { dirname, resolve, basename, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 
 // Siblings resolve against THIS file, not the process cwd: the skill is
 // deployed as a symlinked directory, so a path walked up from the repo root
@@ -787,6 +798,141 @@ export function ready(dir) {
   return { ok: problems.length === 0, rows, first: problems[0] || null, latestN, scope };
 }
 
+// ── env · the posture check ─────────────────────────────────────────────────
+
+const GIT_MS = 2000;
+const GH_MS = 6000;
+
+/**
+ * Ask the shell a question. `code` is null only when the question could not be
+ * asked at all — a missing binary, or a timeout. A non-zero exit is an *answer*
+ * (`git check-ignore` says "not ignored" with 1), and must not be confused with
+ * one, or every repo without a .gitignore reads as unknown.
+ * @returns {{code:number|null, out:string}}
+ */
+function shell(cmd, args, { cwd, timeout = GIT_MS } = {}) {
+  try {
+    const out = execFileSync(cmd, args, {
+      cwd, timeout, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'],
+    });
+    return { code: 0, out: out.trim() };
+  } catch (e) {
+    return { code: typeof e?.status === 'number' ? e.status : null, out: String(e?.stdout || '').trim() };
+  }
+}
+
+/** The nearest ancestor that exists — at intake the scope directory has not been created yet. */
+const firstExisting = (p) => {
+  let cur = resolve(p);
+  for (let i = 0; i < 64 && !existsSync(cur); i++) {
+    const up = dirname(cur);
+    if (up === cur) break;
+    cur = up;
+  }
+  return cur;
+};
+
+/**
+ * E1-E3 over a scope directory: where it sits, who can see it, and which
+ * posture is actually in force. Advisory — the caller prints it and never
+ * gates on it. `opts.run` replaces the shell, so the classification is
+ * testable without a network or a GitHub account.
+ */
+export function environment(dir, opts = {}) {
+  const run = opts.run || shell;
+  const rows = [];
+  const add = (id, level, detail) => rows.push({ id, level, detail });
+
+  // git reports its toplevel with symlinks resolved, so the caller's path has to
+  // be too or the two never subtract: /var/folders/… against /private/var/… gives
+  // a repo-relative path of "../../..". Resolve the part that exists and put the
+  // not-yet-created tail back on.
+  const asked = resolve(dir);
+  const base = firstExisting(asked);
+  let path = asked;
+  try { path = resolve(realpathSync(base), relative(base, asked)); } catch { /* keep what we were given */ }
+
+  const top = run('git', ['rev-parse', '--show-toplevel'], { cwd: base });
+  const repo = top.code === 0 && top.out ? top.out : null;
+
+  if (!repo) {
+    add('E1', 'info', `${path} is not inside a git repository — nothing here can be pushed, and nothing but a written pointer can find it`);
+    return { repo: null, rel: null, ignored: null, tracked: null, remotes: null, visibility: null, posture: 'no-repo', rows, warnings: [] };
+  }
+
+  const inside = relative(repo, path);
+  const rel = inside && !inside.startsWith('..') ? inside : path;
+  add('E1', 'info', `${rel}/ inside ${repo}`);
+
+  // check-ignore consults the index by default, so a tracked path correctly
+  // reads as NOT ignored even when a pattern would otherwise match it.
+  const ci = run('git', ['check-ignore', '-q', '--', path], { cwd: repo });
+  const ignored = ci.code === 0 ? true : ci.code === 1 ? false : null;
+
+  const ls = run('git', ['ls-files', '--', path], { cwd: repo });
+  const trackedFiles = ls.code === 0 && ls.out ? ls.out.split('\n').filter(Boolean) : [];
+  const tracked = ls.code === 0 ? trackedFiles.length : null;
+
+  // A posture that was decided and written down is not the thing to warn about.
+  // The warning is for a posture nobody chose — so an artifact whose status
+  // header says it is committed on purpose settles it. See references/artifacts.md.
+  const declared = trackedFiles.filter((f) => f.endsWith('.md')).find((f) => {
+    try {
+      const head = readFileSync(resolve(repo, f), 'utf8').split('\n', 15).join('\n');
+      return /^\*\*Tracking:\*\*\s*committed/im.test(head);
+    } catch { return false; }
+  }) || null;
+
+  const rm = run('git', ['remote'], { cwd: repo });
+  const remotes = rm.code === 0 ? (rm.out ? rm.out.split('\n').filter(Boolean) : []) : null;
+
+  // Only worth a network round-trip if there is somewhere for it to go.
+  let visibility = null; // 'public' | 'private' | null = unknown
+  if (remotes && remotes.length) {
+    const gh = run('gh', ['repo', 'view', '--json', 'isPrivate', '-q', '.isPrivate'], { cwd: repo, timeout: GH_MS });
+    if (gh.code === 0 && /^(true|false)$/.test(gh.out)) visibility = gh.out === 'true' ? 'private' : 'public';
+  }
+
+  // E2 is a fact, never a warning: a public repository is only a problem in
+  // combination with what is in it, and E3 is where that combination is judged.
+  // Warning here too would fire on every public repo whose artifacts are safely
+  // ignored, which is exactly how an advisory check teaches people to skim past it.
+  const published = remotes === null || remotes.length > 0;
+  add('E2', 'info',
+    remotes === null ? 'could not read this repository’s remotes — treat it as published'
+      : !remotes.length ? 'no remote — nothing here is published anywhere'
+      : visibility === 'private' ? 'the repository is private'
+      : visibility === 'public' ? 'the repository is PUBLIC — whatever is committed here is world-readable'
+      : `remote (${remotes.join(', ')}) but visibility is unknown — gh is missing, unauthenticated, or this is not a GitHub repository. Treat it as public`);
+
+  let posture, level, detail;
+  if (tracked === null) {
+    posture = 'unknown'; level = 'warn';
+    detail = 'could not ask git what it does with this path — check the posture by hand before committing anything';
+  } else if (tracked > 0) {
+    posture = 'tracked';
+    if (visibility === 'private' || !published) {
+      level = 'info';
+      detail = `${tracked} artifact file(s) tracked in a ${visibility === 'private' ? 'private repository' : 'repository with no remote'} — a deliberate override. Say so in each artifact’s status header`;
+    } else if (declared) {
+      level = 'info';
+      detail = `${tracked} artifact file(s) tracked on purpose — ${declared} declares it. Every commit here still owes a sanitisation pass`;
+    } else {
+      level = 'warn';
+      detail = `${tracked} artifact file(s) are TRACKED and ${visibility === 'public' ? 'this repository is public' : 'this repository’s visibility is unknown'} — verbatim answers, real paths and pasted listings are published with them. Sanitise them and record the decision in their status header, or move them out of git`;
+    }
+  } else if (ignored === true) {
+    posture = 'ignored'; level = 'ok';
+    detail = 'untracked and ignored — the default posture is in force';
+  } else {
+    posture = 'loose'; level = 'warn';
+    detail = `untracked but NOT ignored — git status lists these, so one \`git add -A\` sweeps them in. Add "${rel}/" to .gitignore, or decide to track them deliberately`;
+  }
+  add('E3', level, detail);
+
+  return { repo, rel, ignored, tracked, declared, remotes, visibility, posture, rows, warnings: rows.filter((r) => r.level === 'warn') };
+}
+
 // ════════════════════════════════════════════════════════════════════════════
 //  CLI
 // ════════════════════════════════════════════════════════════════════════════
@@ -794,7 +940,8 @@ export function ready(dir) {
 const USAGE = `usage:
   megascope.mjs validate <round-N.data.json>
   megascope.mjs build    <round-N.data.json> [out.html]
-  megascope.mjs ready    <scope-dir>/`;
+  megascope.mjs ready    <scope-dir>/
+  megascope.mjs env      <scope-dir>/`;
 
 function report(result) {
   for (const e of result.structural) console.error(`  ✗ ${e.message}`);
@@ -823,9 +970,28 @@ function main(argv) {
     return 0;
   }
 
+  // E-rows are advisory and never touch an exit code. They report a posture
+  // the caller chose; a private repo that tracks everything is a legitimate
+  // answer, and a gate that refused it would just be switched off.
+  const MARK = { ok: '✓', info: '·', warn: '⚠' };
+  const reportEnv = (e) => {
+    for (const row of e.rows) console.log(`  ${MARK[row.level]} ${row.id} · ${row.detail}`);
+    if (e.warnings.length) {
+      console.log(`\n⚠ posture: ${e.warnings.length === 1 ? 'one thing' : `${e.warnings.length} things`} to look at above. Advisory — nothing here blocks the scope.`);
+    }
+  };
+
+  if (mode === 'env') {
+    reportEnv(environment(arg1));
+    return 0;
+  }
+
   if (mode === 'ready') {
     const r = ready(arg1);
     for (const row of r.rows) console.log(`  ${row.ok ? '✓' : '✗'} ${row.id} · ${row.detail}`);
+    console.log('');
+    const e = environment(arg1);
+    reportEnv(e);
     if (!r.ok) { console.error(`\nnot ready: ${r.first.id} — ${r.first.detail}`); return 1; }
     console.log('\nready — write SCOPE.md and the kick-off prompt.');
     return 0;

@@ -1,8 +1,11 @@
 # Kick-off — megascope's phase model, release one
 
+**Tracking:** committed deliberately — a worked example of the tool on itself, sanitised 2026-07-31.
+Public repository.
+
 Everything needed to start is in this file. It assumes no prior conversation.
 
-You are working in `/Users/daniel/Dev/skill-megascope-dev` on branch `dev`. This repository **is** the
+You are working in the `skill-megascope` dev worktree, on branch `dev`. This repository **is** the
 `megascope` Claude Code plugin: a scoping tool that turns a vague request into an agreed scope by
 asking questions in rounds. Each round is a static HTML page (`skills/megascope/assets/engine.html`)
 fed a per-round JSON data file. The page is data-less and is never edited per run.

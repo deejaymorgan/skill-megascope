@@ -1,5 +1,8 @@
 # Build brief — a reading log
 
+**Tracking:** committed deliberately — a shipped example, written from an invented scope. Public
+repository. A real run's artifacts are untracked by default; see `references/artifacts.md`.
+
 Self-contained. You need nothing from the conversation that produced this.
 
 ## What to build

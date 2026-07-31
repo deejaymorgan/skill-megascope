@@ -1,5 +1,8 @@
 # megascope-phases — working notes
 
+**Tracking:** committed deliberately — a worked example of the tool on itself, sanitised 2026-07-31.
+Public repository.
+
 Running record for the scope of **megascope's own phase model**: a discovery phase of open
 questions, suggestions reframed as grounded rather than guessed, and a gate between scope and
 design. Written so a fresh session can continue with nothing but this directory.

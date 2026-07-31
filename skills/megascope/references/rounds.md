@@ -115,6 +115,11 @@ Exit 1 names the first unmet condition and its slot. **That message is the spec 
 next** — it distinguishes a slot that was asked about and left unresolved from one no round has
 reached.
 
+It also reprints E1-E3, the posture rows from `env`: where the directory sits, whether the
+repository is public, and whether the artifacts are ignored, tracked or loose. Those are advisory
+and never move the exit code — see `artifacts.md`. They are here because the close is the moment a
+scope stops being working notes and starts being something someone wants to share.
+
 Before running it, update the final round's data file in place: set the slots its answers settled,
 `evidence` citing that round. Don't bump `revision` — the questions didn't change, the scope did.
 
@@ -148,7 +153,14 @@ No "as we discussed", no references to this conversation. It holds:
 4. **How to verify it's done** — from the verification slot, concrete enough to check.
 5. **Decided by assumption, not agreement** — every `assumed: true` slot with its assumption. A
    fresh session needs to know which ground is firm and which is inferred.
-6. **Where this came from** — the scope directory, so the rounds and answers can be re-read.
+6. **Where this came from** — the scope directory, so the rounds and answers can be re-read. Give
+   the path as it exists on the machine that ran the scope; by default that directory is untracked,
+   so a reader who cloned the repository will not have it.
 
 Write it in the reader's language, not the scoping document's. If someone would have to open a
 round file to understand a line in it, that line isn't finished.
+
+Both files open with a title and then a `**Tracking:**` line, so a session that opens one learns
+its status from the file rather than from the directory. And because untracked files are invisible
+to git, the close adds one pointer line under `## Active scoping briefs` in the repository's
+`CLAUDE.md`. `artifacts.md` has both formats, and what a request to commit either file costs.
