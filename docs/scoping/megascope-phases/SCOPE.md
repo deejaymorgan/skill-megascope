@@ -217,7 +217,7 @@ of this needs redoing.
 - The engine is already testable unattended: `tests/smoke.mjs` injects a data file into the shell,
   renders it under `jsdom`, drives all four answer states and round-trips the export. So the export
   block is a check the existing suite can hold.
-- `npm test` is six node scripts, none touching a real browser. Layout still needs a served page —
+- `npm test` is seven node scripts, none touching a real browser. Layout still needs a served page —
   see [docs/testing-the-engine.md](../../testing-the-engine.md).
 - `ready` is the nearest thing to a done-test the repo has, and it checks the **record** — five slots
   settled, evidenced, real sentences — not whether a stranger could act on the brief. That gap is

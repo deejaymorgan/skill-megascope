@@ -269,7 +269,7 @@ Release one **finishes on its own** — it does not wait for release two.
 npm test
 ```
 
-That is the gate: six node scripts — schema, validate, ready, smoke, docs, manifest. It must be green
+That is the gate: seven node scripts — schema, validate, ready, env, smoke, docs, manifest. It must be green
 **with new assertions that hold the new behaviour**, not merely still green.
 
 The suite can hold nearly all of it without a browser: `tests/smoke.mjs:44` renders the real built

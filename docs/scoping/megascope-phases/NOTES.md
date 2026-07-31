@@ -7,7 +7,8 @@ Running record for the scope of **megascope's own phase model**: a discovery pha
 questions, suggestions reframed as grounded rather than guessed, and a gate between scope and
 design. Written so a fresh session can continue with nothing but this directory.
 
-Started 2026-07-30. Branch `dev`. Nothing committed yet.
+Started 2026-07-30, closed 2026-07-30. Branch `dev`, pushed to `origin/dev`. `main` is untouched —
+this is scoping work, not a release.
 
 ## Where this is up to
 
@@ -57,7 +58,9 @@ Authoritative version is `meta.scope` in `round-3.data.json`. Summarised:
   one tool: open page + suggestion change first, then the gate + design loop.
 - **boundary** — settled (`r2:Q1`, `r2:Q2`, `r2:Q3`). Design always produces an artifact; the page
   blocks its own export; chat questions stay but stay obvious.
-- **verification** — **open**, reopened. The only slot round 3 asks about.
+- **verification** — settled (`r3:Q1`, `r3:Q2`, `r3:Q3`, `r3:Q4`). Carried as an assumption through
+  rounds 1 and 2, then reopened and asked about properly in round 3 — the `reopened` reason is still
+  on the slot. Each release finishes on its own; the listening half has no explicit test.
 - **constraints** — settled (`r2:Q4`, `r2:Q5`, `r2:Q6`). Held-back work becomes the next scope; the
   done-test follows the kind of work; the hand-off names no model and no effort level.
 
@@ -114,8 +117,10 @@ interaction — picking an option (`:1323`), typing a note (`:1333`) or own word
 
 So a question left completely alone still exports as `[DEFAULT]`, which `skills/megascope/SKILL.md:98`
 defines as "took the recommendation → nothing — silent." **The tag vocabulary cannot distinguish
-agreement from silence, and doctrine says bank it silently.** Round 2 Q2 asks whether to fix this in
-release one; the recommendation is yes.
+agreement from silence, and doctrine says bank it silently.** Round 2 Q2 asked whether to fix this in
+release one. It does — and the answer went further than the recommendation: rather than teaching the
+export to distinguish untouched from agreed, the page refuses to release answers at all until every
+question is resolved, so the tag vocabulary never has to express silence.
 
 ## Research already done — do not redo it
 
@@ -147,7 +152,9 @@ implies for this design:
   given the complete task specification up front and left to run." Fable 5 (`claude-fable-5`,
   $10/$50) only when the problem is genuinely unsolved or the domain unfamiliar; its turns run
   minutes long. Effort: default `high`, `xhigh` for demanding implementation, and `low`/`medium` are
-  unusually strong on Opus 5 — sweep down. Round 2 Q6 asks whether the hand-off names any of this.
+  unusually strong on Opus 5 — sweep down. Round 2 Q6 asked whether the hand-off names any of this.
+  It does not: the hand-off says nothing about model or effort, so this research informs whoever does
+  the work and deliberately never reaches the brief.
 
 ## Round 3 research — local, and cheap to re-verify
 
@@ -157,7 +164,7 @@ implies for this design:
   and renders it under `jsdom`, then drives all four answer states and round-trips the export
   (`tests/smoke.mjs:190`, `:224`). So Q2's export block is a check the existing suite can hold — that
   is what makes round 3's Q2 an honest question rather than a wish.
-- **`npm test` is six node scripts**, none of which touch a real browser. A simulated browser is not
+- **`npm test` is seven node scripts**, none of which touch a real browser. A simulated browser is not
   a real one; layout still needs `docs/testing-the-engine.md`.
 - **`ready` is the nearest thing to a done-test the repo has**, and it checks the *record* — five
   slots settled, evidenced, real sentences — not whether a stranger could act on the brief. That gap
@@ -213,7 +220,9 @@ drop the `node` prefix when quoting one, or the extractor treats it as a command
 - **Never open a built page over `file://`** — the engine renders everything from its data block at
   run time, so the page looks broken when it is not. Serve it: `python3 -m http.server 8137`. See
   `docs/testing-the-engine.md`.
-- **`.claude/launch.json` was added this session** (a `docs` entry running that server, so the
-  Browser pane can manage it). Untracked, unrelated to the scope, delete freely.
-- Round 2 Q2's recommendation argues for *widening* release one. Worth a second look rather than a
-  reflex accept — its runner-up is deliberately the narrow option.
+- **`.claude/launch.json` is committed** — a `docs` entry running that same server on that same port,
+  so the Browser pane can manage it rather than each contributor re-deriving the command.
+  `.claude/settings.local.json` is gitignored: it is per-user, and this repository is public.
+- **Built pages are gitignored** (`docs/scoping/**/round-*.html`). They are output, not source —
+  `build` regenerates any of them from its data file in one command. The repository ships the engine
+  and the data that feeds it, never a built scoping document.

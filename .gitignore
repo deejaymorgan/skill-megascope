@@ -5,3 +5,6 @@ scratch/
 
 # Built scoping documents — regenerate with `megascope.mjs build` from the data file.
 docs/scoping/**/round-*.html
+
+# Per-user Claude Code settings — never shared, and this repo is public.
+.claude/settings.local.json
